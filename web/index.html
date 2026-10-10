@@ -3,310 +3,315 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PatchPilot AI — Patch the Bug. Prove the Fix.</title>
-  <meta name="description" content="Autonomous software debugging and verified code repair. PatchPilot investigates real issues, applies patches, tests for regressions, and produces evidence-backed proof.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <title>PatchPilot AI — The Code Forge</title>
+  <meta name="description" content="AI-powered code repair with a difference: every fix must survive real verification. Autonomous debugging, baseline reproduction, atomic rollback, and cryptographic evidence.">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-graphite">
+<body class="forge-body">
 
-  <!-- Desktop Signature Precision Cursor Elements -->
+  <!-- Subtle Film Grain Overlay -->
+  <div class="forge-grain" aria-hidden="true"></div>
+
+  <!-- Custom Precision Desktop Cursor -->
   <div id="cursor-halo" class="cursor-halo" aria-hidden="true"></div>
   <div id="cursor-point" class="cursor-point" aria-hidden="true"></div>
   <div id="cursor-badge" class="cursor-badge" aria-hidden="true">INSPECT</div>
 
-  <!-- Primary Site Navigation -->
-  <header class="nav-bar" id="nav-bar">
+  <!-- Navigation Bar -->
+  <header class="forge-nav" id="forge-nav">
     <div class="nav-container">
       <div class="nav-left">
-        <a href="#" class="nav-brand" aria-label="PatchPilot AI Home">
-          <svg class="brand-glyph" viewBox="0 0 28 28" width="24" height="24" fill="none" aria-hidden="true">
-            <path d="M7 6L3 14L7 22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M21 6L25 14L21 22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M11 14H17" stroke="#C8FF55" stroke-width="2.4" stroke-linecap="round"/>
-            <circle cx="14" cy="14" r="2" fill="#C8FF55"/>
+        <a href="#" class="brand-link" aria-label="PatchPilot AI Home">
+          <!-- Geometric repaired code mark -->
+          <svg class="brand-glyph" viewBox="0 0 28 28" width="22" height="22" fill="none" aria-hidden="true">
+            <path d="M6 6L2 14L6 22" stroke="#F3F1EA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 6L26 14L22 22" stroke="#F3F1EA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 14H18" stroke="#C7FF4A" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="14" cy="14" r="2.2" fill="#C7FF4A"/>
           </svg>
-          <span class="brand-text">PatchPilot<span class="brand-sub">.ai</span></span>
+          <span class="brand-title">PatchPilot<span class="brand-dim">/ai</span></span>
         </a>
-        <span class="badge-tag">Evidence-Gated</span>
+        <span class="forge-pill">The Code Forge</span>
       </div>
 
-      <nav class="nav-links" aria-label="Main Navigation">
-        <a href="#pipeline" class="nav-anchor">Pipeline</a>
-        <a href="#code-diff" class="nav-anchor">Diff Showcase</a>
-        <a href="#recovery" class="nav-anchor">Recovery</a>
-        <a href="#trace-explorer" class="nav-anchor">Verification Trace</a>
-        <a href="#architecture" class="nav-anchor">Architecture</a>
-        <a href="#workflow" class="nav-anchor">CLI</a>
+      <nav class="nav-links" aria-label="Site Navigation">
+        <a href="#narrative" class="nav-item">Transformation</a>
+        <a href="#problem" class="nav-item">The Problem</a>
+        <a href="#sequence" class="nav-item">Pipeline</a>
+        <a href="#diff" class="nav-item">Code Diff</a>
+        <a href="#evidence" class="nav-item">Evidence Trail</a>
+        <a href="#architecture" class="nav-item">Architecture</a>
       </nav>
 
       <div class="nav-right">
-        <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn-github magnetic" id="nav-gh-btn">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+        <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn-forge-secondary magnetic" id="nav-cta-btn">
+          <span>Explore on GitHub</span>
+          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M4 12L12 4M12 4H6M12 4V10"/>
           </svg>
-          <span>Explore GitHub</span>
         </a>
       </div>
     </div>
   </header>
 
   <!-- ======================================================================
-       SECTION 1 — HERO & "THE REPAIR CURRENT"
+       02 — THE SIGNATURE HERO: A LIVING CODE STRUCTURE
        ====================================================================== -->
-  <section class="hero-section" id="hero">
-    <!-- The Repair Current Interactive Canvas Background -->
-    <canvas id="repair-current-canvas" class="repair-current-canvas" aria-hidden="true"></canvas>
-
-    <div class="layout-container hero-layout">
-      <!-- Left Column: Editorial Headline & Actions -->
-      <div class="hero-copy">
-        <div class="hero-eyebrow">
-          <span class="eyebrow-accent"></span>
-          <span>AUTONOMOUS CODE REPAIR / EVIDENCE FIRST</span>
+  <section class="hero-forge-section" id="hero">
+    <div class="forge-container hero-forge-layout">
+      
+      <!-- Left side: Editorial Typography -->
+      <div class="hero-forge-left">
+        <div class="hero-forge-eyebrow">
+          <span class="eyebrow-light"></span>
+          <span>PATCHPILOT AI / AUTONOMOUS CODE REPAIR</span>
         </div>
 
-        <h1 class="hero-title">
-          Patch the bug.<br>
-          <span class="text-lime">Prove the fix.</span>
+        <h1 class="hero-forge-title">
+          CODE<br>
+          CAN BREAK.<br>
+          <span class="text-forge-lime">PROOF</span><br>
+          CANNOT.
         </h1>
 
-        <p class="hero-desc">
-          PatchPilot investigates software issues, generates real code changes, and runs tests to establish whether a repair actually works.
+        <p class="hero-forge-lead">
+          AI-powered code repair with a difference: every fix must survive real verification.
         </p>
 
-        <div class="hero-actions">
-          <a href="#pipeline" class="btn btn-primary magnetic" id="hero-cta-primary">
-            <span>Watch the repair</span>
+        <div class="hero-forge-actions">
+          <a href="#narrative" class="btn-forge-primary magnetic" id="hero-primary-btn">
+            <span>WATCH THE REPAIR</span>
             <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M6 12L10 8L6 4"/>
             </svg>
           </a>
-          <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn btn-secondary magnetic" id="hero-cta-secondary">
-            <span>Explore GitHub</span>
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn-forge-secondary magnetic" id="hero-secondary-btn">
+            <span>EXPLORE THE CODE</span>
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <path d="M4 12L12 4M12 4H6M12 4V10"/>
             </svg>
           </a>
         </div>
 
-        <div class="hero-note">
-          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="#76D7FF" stroke-width="1.8" aria-hidden="true">
-            <circle cx="8" cy="8" r="7"/>
-            <path d="M8 5V8.5L10 10.5"/>
-          </svg>
-          <span>The Repair Current: Interactive signal field responds to cursor proximity</span>
+        <div class="hero-forge-metadata">
+          <div class="meta-item">
+            <span class="meta-label">ARCHITECTURE</span>
+            <span class="meta-val">Deterministic State Machine</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">ISOLATION</span>
+            <span class="meta-val">Ephemeral Git Worktree</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">VERIFICATION</span>
+            <span class="meta-val text-forge-lime">Dual-Suite Pass Gate</span>
+          </div>
         </div>
       </div>
 
-      <!-- Right Column: Interactive Hero Visualization (Benchmark Case #3) -->
-      <div class="hero-composition" id="hero-workflow-board">
-        <div class="composition-header">
-          <div class="comp-title">
-            <span class="comp-dot"></span>
-            <span>The Repair Transformation · Case #3</span>
-          </div>
-          <span class="comp-tag">Click to lock inspection</span>
-        </div>
+      <!-- Right side: Original 3D Particle Sculpture (Living Code Mesh) -->
+      <div class="hero-forge-right">
+        <div class="sculpture-wrapper" id="sculpture-container">
+          <!-- 3D Particle Mesh Canvas -->
+          <canvas id="forge-sculpture-canvas" class="forge-sculpture-canvas" aria-label="Interactive 3D particle code structure"></canvas>
 
-        <div class="pipeline-board">
-          <!-- Stage 1: Defect Specification -->
-          <div class="board-stage is-inspectable" data-stage="1" id="stage-1" tabindex="0">
-            <div class="stage-top">
-              <span class="stage-num">01 / BUG DETECTED</span>
-              <span class="stage-badge badge-neutral">INTAKE</span>
+          <!-- Interactive Mesh Control Overlays -->
+          <div class="sculpture-telemetry-top">
+            <div class="telemetry-node-status">
+              <span class="pulse-indicator pulse-defect" id="defect-indicator"></span>
+              <span class="telemetry-label" id="defect-label">DEFECT DETECTED · NODE #103</span>
             </div>
-            <div class="stage-title">#103 Pricing Engine Defect</div>
-            <div class="stage-body">
-              Negative quantities accepted in <code>calculate_tiered_price</code>, violating discount rules.
-            </div>
+            <div class="telemetry-state-tag" id="mesh-state-tag">SYSTEM IDLE</div>
           </div>
 
-          <!-- Connector -->
-          <div class="board-connector">
-            <svg class="connector-svg" viewBox="0 0 24 24" fill="none">
-              <path d="M12 0V24" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
-              <path d="M12 0V24" stroke="#C8FF55" stroke-width="2" class="connector-active-line"/>
-            </svg>
-          </div>
-
-          <!-- Stage 2: Code Investigated & Reproduced -->
-          <div class="board-stage is-inspectable" data-stage="2" id="stage-2" tabindex="0">
-            <div class="stage-top">
-              <span class="stage-num">02 / CODE INVESTIGATED</span>
-              <span class="stage-badge badge-fail">EXIT CODE 1</span>
+          <div class="sculpture-prompt-bottom">
+            <div class="prompt-instruction">
+              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="#C7FF4A" stroke-width="2" aria-hidden="true">
+                <circle cx="8" cy="8" r="6"/>
+                <path d="M8 5V8L10 10"/>
+              </svg>
+              <span>Click damaged node to initiate live diagnostic reconstruction</span>
             </div>
-            <div class="stage-title">Reproduced: pricing.py:15</div>
-            <div class="stage-code">
-              <code>pytest -k test_negative_input</code> → <strong>ValueError unhandled</strong>
-            </div>
-          </div>
-
-          <!-- Connector -->
-          <div class="board-connector">
-            <svg class="connector-svg" viewBox="0 0 24 24" fill="none">
-              <path d="M12 0V24" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
-              <path d="M12 0V24" stroke="#C8FF55" stroke-width="2" class="connector-active-line"/>
-            </svg>
-          </div>
-
-          <!-- Stage 3: Patch Created & Test Failure -->
-          <div class="board-stage is-inspectable stage-fail-box" data-stage="3" id="stage-3" tabindex="0">
-            <div class="stage-top">
-              <span class="stage-num">03 / TEST FAILURE</span>
-              <span class="stage-badge badge-fail">REGRESSION</span>
-            </div>
-            <div class="stage-title">Naive Attempt Broke VIP Discounts</div>
-            <div class="stage-diff">
-              <span class="diff-del">- return base_price * volume * tier</span>
-              <span class="diff-add">+ return base_price * max(0, volume)</span>
-            </div>
-            <div class="stage-alert">
-              Acceptance passed, but <code>test_vip_discount</code> failed! Tier multiplier destroyed.
-            </div>
-          </div>
-
-          <!-- Connector -->
-          <div class="board-connector">
-            <svg class="connector-svg" viewBox="0 0 24 24" fill="none">
-              <path d="M12 0V24" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
-              <path d="M12 0V24" stroke="#E3B341" stroke-width="2" class="connector-active-line"/>
-            </svg>
-          </div>
-
-          <!-- Stage 4: Recovery Decision -->
-          <div class="board-stage is-inspectable stage-recovery-box" data-stage="4" id="stage-4" tabindex="0">
-            <div class="stage-top">
-              <span class="stage-num">04 / RECOVERY DECISION</span>
-              <span class="stage-badge badge-warn">ROLLBACK</span>
-            </div>
-            <div class="stage-title">Atomic Git Rollback &amp; Strategy Pivot</div>
-            <div class="stage-body">
-              Restored baseline SHA <code>e4f892a</code>. Hypothesis updated: preserve volume multiplier tier before applying zero bounds guard.
-            </div>
-          </div>
-
-          <!-- Connector -->
-          <div class="board-connector">
-            <svg class="connector-svg" viewBox="0 0 24 24" fill="none">
-              <path d="M12 0V24" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
-              <path d="M12 0V24" stroke="#C8FF55" stroke-width="2" class="connector-active-line"/>
-            </svg>
-          </div>
-
-          <!-- Stage 5: Verified Fix -->
-          <div class="board-stage is-inspectable stage-verified-box" data-stage="5" id="stage-5" tabindex="0">
-            <div class="stage-top">
-              <span class="stage-num">05 / VERIFIED FIX</span>
-              <span class="stage-badge badge-verified">VERIFIED GREEN</span>
-            </div>
-            <div class="stage-title">Dual-Suite Verified Fix</div>
-            <div class="stage-diff">
-              <span class="diff-add">+ if volume &lt; 0: raise ValueError(...)</span>
-              <span class="diff-ctx">&nbsp; multiplier = 0.80 if is_vip else 1.0</span>
-            </div>
-            <div class="stage-outcome">
-              Acceptance: 100% PASSED · Regressions: 3/3 PASSED · Trace: <code>16578e5e</code>
-            </div>
+            <button class="btn-inspect-mesh" id="trigger-investigate-btn">
+              <span>Trigger Investigation</span>
+            </button>
           </div>
         </div>
+      </div>
 
-        <!-- Dynamic Context Explainer Card -->
-        <div class="composition-explainer" id="stage-explainer-card">
-          <div class="explainer-header">
-            <span class="explainer-tag" id="explainer-tag">STAGE 04 / RECOVERY</span>
-            <span class="explainer-status" id="explainer-status">Failure-Driven Recovery</span>
-          </div>
-          <p class="explainer-text" id="explainer-text">
-            When Attempt #1 introduced a regression in existing VIP discounts, PatchPilot immediately executed an atomic rollback to the clean baseline. It injected the failure traceback into its hypothesis, allowing Attempt #2 to craft a precision patch without contaminated state.
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       04 — SCROLL TRANSFORMATION NARRATIVE: SCENE A TO SCENE F
+       ====================================================================== -->
+  <section class="narrative-section" id="narrative">
+    <div class="forge-container">
+      <div class="narrative-intro">
+        <span class="forge-eyebrow">CONTINUOUS SCROLL TRANSFORMATION</span>
+        <h2 class="forge-heading">The anatomy of verified code surgery.</h2>
+        <p class="forge-sub">
+          Observe how the Code Forge detects a broken connection, investigates the affected path, catches an unexpected regression, executes an atomic rollback, and reconstructs a verified repair.
+        </p>
+      </div>
+
+      <div class="narrative-scenes-deck">
+        <!-- Scene A: DETECT -->
+        <div class="scene-card" data-scene="A" id="scene-a">
+          <div class="scene-badge badge-red">SCENE A / DETECT</div>
+          <h3 class="scene-title">A patch is only a hypothesis.</h3>
+          <p class="scene-body">
+            A defect signal traverses the codebase and encounters an unhandled exception in <code>calculate_tiered_price</code>. Before touching source code, PatchPilot clones a disposable sandbox and executes reproduction commands.
           </p>
+          <div class="scene-callout">
+            <span>Reproduction Proof:</span> <code>pytest -k test_negative_input</code> exited with <strong>Exit Code 1</strong>.
+          </div>
+        </div>
+
+        <!-- Scene B: INVESTIGATE -->
+        <div class="scene-card" data-scene="B" id="scene-b">
+          <div class="scene-badge badge-cyan">SCENE B / INVESTIGATE</div>
+          <h3 class="scene-title">Mapping the damaged region.</h3>
+          <p class="scene-body">
+            The Code Forge isolates the AST parse tree for <code>pricing.py</code>. Connected references illuminate while unaffected modules fade into the background.
+          </p>
+          <div class="scene-callout">
+            <span>Target Resolved:</span> <code>pricing.py:15</code> · Context: volume &lt; 0 unhandled.
+          </div>
+        </div>
+
+        <!-- Scene C: PATCH -->
+        <div class="scene-card" data-scene="C" id="scene-c">
+          <div class="scene-badge badge-amber">SCENE C / PATCH</div>
+          <h3 class="scene-title">Candidate synthesis.</h3>
+          <p class="scene-body">
+            The model synthesizes Attempt #1 with a naive clamp: <code>volume = max(0, volume)</code>. The path is held provisional in a disposable worktree; PatchPilot never claims success prior to execution.
+          </p>
+          <div class="scene-callout">
+            <span>Status:</span> Provisional Attempt #1 · Awaiting full test execution.
+          </div>
+        </div>
+
+        <!-- Scene D: FAILURE -->
+        <div class="scene-card" data-scene="D" id="scene-d">
+          <div class="scene-badge badge-red">SCENE D / FAILURE</div>
+          <h3 class="scene-title">Diagnostic test pulse failure.</h3>
+          <p class="scene-body">
+            Acceptance passed, but the comprehensive regression test failed! The naive volume clamp inadvertently broke existing VIP discount calculations (<code>test_vip_discount</code> failed: <code>80.0 != 100.0</code>).
+          </p>
+          <div class="scene-callout text-forge-failure">
+            <span>Regression Interception:</span> Broken code caught before promotion.
+          </div>
+        </div>
+
+        <!-- Scene E: RECOVERY -->
+        <div class="scene-card" data-scene="E" id="scene-e">
+          <div class="scene-badge badge-amber">SCENE E / RECOVERY</div>
+          <h3 class="scene-title">Failure evidence informs recovery.</h3>
+          <p class="scene-body">
+            PatchPilot executes an atomic Git rollback to baseline commit <code>e4f892a</code>. It injects the failure traceback into its hypothesis and replans Attempt #2 with an explicit validation raise.
+          </p>
+          <div class="scene-callout">
+            <span>Atomic Rollback:</span> Clean baseline restored · Zero debris left behind.
+          </div>
+        </div>
+
+        <!-- Scene F: VERIFIED -->
+        <div class="scene-card" data-scene="F" id="scene-f">
+          <div class="scene-badge badge-lime">SCENE F / VERIFIED</div>
+          <h3 class="scene-title">Reconstructed &amp; proven green.</h3>
+          <p class="scene-body">
+            A new diagnostic signal travels through the precision fix. Both the reproduction test AND all regression test cases pass with 100% exit code 0.
+          </p>
+          <div class="scene-callout text-forge-lime">
+            <span>Evidence Dossier:</span> Trace ID <code>16578e5e</code> logged to Neatlogs · PR drafted.
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ======================================================================
-       SECTION 2 — WHY UNVERIFIED CODE IS DANGEROUS
+       06.1 — SECTION 1: THE ENGINEERING PROBLEM
        ====================================================================== -->
-  <section class="section-wrapper" id="why-dangerous">
-    <div class="layout-container">
-      <div class="section-intro">
-        <span class="section-kicker">THE PROBLEM</span>
-        <h2 class="section-heading">A generated patch is only a hypothesis.</h2>
-        <p class="section-sub">
-          Current AI coding assistants generate code based on syntax probability, not execution proof. Without automated testing and rollback, generated code introduces silent liabilities.
+  <section class="forge-section" id="problem">
+    <div class="forge-container">
+      <div class="forge-intro">
+        <span class="forge-eyebrow">THE PROBLEM</span>
+        <h2 class="forge-heading">Code generation is easy.<br>Verified repair is harder.</h2>
+        <p class="forge-sub">
+          Unverified code generation produces convincing syntax without behavioral guarantees. The Forge bridges the chasm between plausible text and verified production software.
         </p>
       </div>
 
-      <div class="hypothesis-comparison-grid">
-        <!-- Card A: Unverified Patch -->
-        <div class="hypothesis-card unverified">
-          <div class="hypo-badge badge-fail">UNVERIFIED HYPOTHESIS</div>
-          <h3 class="hypo-title">Plausible Code Without Proof</h3>
-          <p class="hypo-desc">
-            A generated patch can look clean to human eyes, pass syntax validation, and still destroy edge-case logic elsewhere in your codebase.
+      <div class="problem-editorial-grid">
+        <div class="editorial-card unverified-side">
+          <div class="card-kicker text-forge-failure">THE UNVERIFIED HYPOTHESIS</div>
+          <h3 class="card-head">Plausible Code Without Proof</h3>
+          <p class="card-p">
+            Generated code often reads smoothly to human reviewers while silently violating edge-case assumptions, breaking dependencies, or destroying business logic.
           </p>
 
-          <div class="hypo-code-block">
-            <div class="hypo-code-header">
-              <span>Naive Clamp Proposal (Attempt #1)</span>
-              <span class="tag-status text-red">FAILED REGRESSION</span>
+          <div class="editorial-code-box">
+            <div class="code-box-meta">
+              <span>pricing.py (Attempt #1 Naive Patch)</span>
+              <span class="tag-err">REGRESSION</span>
             </div>
-            <pre><code><span class="c-dim"># Looks plausible, but destroys VIP discount multiplier</span>
+            <pre><code><span class="c-dim"># Naive clamp proposal</span>
 <span class="c-del">- return base_price * volume * (0.80 if is_vip else 1.0)</span>
 <span class="c-add">+ return base_price * max(0, volume)</span></code></pre>
           </div>
 
-          <div class="hypo-diagnostic-list">
-            <div class="diag-item">
-              <span class="diag-dot dot-red"></span>
-              <span><strong>Silent Regression:</strong> Broke VIP discount assertion (<code>80.0 != 100.0</code>).</span>
+          <div class="editorial-consequences">
+            <div class="cq-item">
+              <span class="cq-cross">✕</span>
+              <span><strong>VIP Tier Destroyed:</strong> Broke existing discount multiplier calculation.</span>
             </div>
-            <div class="diag-item">
-              <span class="diag-dot dot-red"></span>
-              <span><strong>Dirty Worktree:</strong> Without rollback, broken code contaminates the repo.</span>
+            <div class="cq-item">
+              <span class="cq-cross">✕</span>
+              <span><strong>Dirty Worktree:</strong> Unchecked agent leaves contaminated edits in Git.</span>
             </div>
-            <div class="diag-item">
-              <span class="diag-dot dot-red"></span>
-              <span><strong>Hallucinated Completion:</strong> Agent claims success solely because code was emitted.</span>
+            <div class="cq-item">
+              <span class="cq-cross">✕</span>
+              <span><strong>False Completion:</strong> Declares success solely because LLM emitted tokens.</span>
             </div>
           </div>
         </div>
 
-        <!-- Card B: Verified Fix -->
-        <div class="hypothesis-card verified">
-          <div class="hypo-badge badge-verified">EVIDENCE-BACKED REPAIR</div>
-          <h3 class="hypo-title">Tested &amp; Proven Precision Fix</h3>
-          <p class="hypo-desc">
-            PatchPilot runs actual tests, detects regression, restores clean Git state, and only promotes the fix when 100% of test suites pass with code 0.
+        <div class="editorial-card verified-side">
+          <div class="card-kicker text-forge-lime">THE FORGE STANDARD</div>
+          <h3 class="card-head">Evidence-Gated Verified Fix</h3>
+          <p class="card-p">
+            PatchPilot runs actual tests in an isolated sandbox, catches the regression, rolls back to clean baseline Git state, and crafts a precision fix that passes 100% of checks.
           </p>
 
-          <div class="hypo-code-block">
-            <div class="hypo-code-header">
-              <span>Precision Adaptive Fix (Attempt #2)</span>
-              <span class="tag-status text-lime">100% PASSING</span>
+          <div class="editorial-code-box">
+            <div class="code-box-meta">
+              <span>pricing.py (Attempt #2 Precision Fix)</span>
+              <span class="tag-ok">VERIFIED 100%</span>
             </div>
-            <pre><code><span class="c-dim"># Preserves tier multipliers while strictly validating volume</span>
+            <pre><code><span class="c-dim"># Preserves tier while strictly validating volume</span>
 <span class="c-add">+ if volume &lt; 0:</span>
 <span class="c-add">+     raise ValueError("Volume must be non-negative")</span>
 <span class="c-ctx">  multiplier = 0.80 if is_vip else 1.0</span>
 <span class="c-ctx">  return base_price * volume * multiplier</span></code></pre>
           </div>
 
-          <div class="hypo-diagnostic-list">
-            <div class="diag-item">
-              <span class="diag-dot dot-lime"></span>
+          <div class="editorial-consequences">
+            <div class="cq-item">
+              <span class="cq-check">✓</span>
               <span><strong>Baseline Reproduction:</strong> Proven with initial non-zero exit code.</span>
             </div>
-            <div class="diag-item">
-              <span class="diag-dot dot-lime"></span>
+            <div class="cq-item">
+              <span class="cq-check">✓</span>
               <span><strong>Dual-Suite Verification:</strong> Acceptance and regression tests both pass.</span>
             </div>
-            <div class="diag-item">
-              <span class="diag-dot dot-lime"></span>
-              <span><strong>Cryptographic Trace:</strong> Neatlogs trace ID guarantees auditability.</span>
+            <div class="cq-item">
+              <span class="cq-check">✓</span>
+              <span><strong>Immutable Trace:</strong> Neatlogs trace ID guarantees auditability.</span>
             </div>
           </div>
         </div>
@@ -315,242 +320,179 @@
   </section>
 
   <!-- ======================================================================
-       SECTION 3 — THE REPAIR PIPELINE (SCROLL-DRIVEN SEQUENCE)
+       06.2 — SECTION 2: THE REPAIR SEQUENCE
        ====================================================================== -->
-  <section class="section-wrapper bg-elevated" id="pipeline">
-    <div class="layout-container">
-      <div class="section-intro">
-        <span class="section-kicker">THE REPAIR CURRENT PIPELINE</span>
-        <h2 class="section-heading">Seven stages of verifiable repair.</h2>
-        <p class="section-sub">
-          A persistent deterministic pipeline. Every stage is bounded by timeout budgets, subprocess isolation, and automated rollback handlers.
+  <section class="forge-section bg-surface" id="sequence">
+    <div class="forge-container">
+      <div class="forge-intro">
+        <span class="forge-eyebrow">DETERMINISTIC PIPELINE</span>
+        <h2 class="forge-heading">The six-stage repair sequence.</h2>
+        <p class="forge-sub">
+          PatchPilot replaces uncontrolled hallucination loops with a finite state machine backed by SQLite checkpointing.
         </p>
       </div>
 
-      <div class="pipeline-story-container">
-        <!-- Interactive Stage Nodes -->
-        <div class="pipeline-steps-grid">
-          <div class="pipeline-card" data-step="1">
-            <div class="pipe-num">01 / STAGE</div>
-            <h3 class="pipe-title">Inspect</h3>
-            <p class="pipe-desc">Parses issue specification, resolves candidate source files, and maps abstract syntax trees in a disposable worktree.</p>
-            <div class="pipe-tag">Tool: Entire Graph AST map</div>
-          </div>
+      <div class="sequence-deck">
+        <div class="seq-step-card" data-stage="1">
+          <div class="seq-index">01 / STAGE</div>
+          <h3 class="seq-title">Inspect</h3>
+          <p class="seq-desc">Parses the issue specification, resolves candidate files, and clones an isolated ephemeral Git worktree.</p>
+          <div class="seq-meta">Entire Graph AST Map · Sandboxed Path</div>
+        </div>
 
-          <div class="pipeline-card" data-step="2">
-            <div class="pipe-num">02 / STAGE</div>
-            <h3 class="pipe-title">Reproduce</h3>
-            <p class="pipe-desc">Executes targeted reproduction test in isolated subprocess. Proves baseline failure exit code != 0 before editing code.</p>
-            <div class="pipe-tag">Gate: Non-zero exit code confirmation</div>
-          </div>
+        <div class="seq-step-card" data-stage="2">
+          <div class="seq-index">02 / STAGE</div>
+          <h3 class="seq-title">Reproduce</h3>
+          <p class="seq-desc">Executes the targeted reproduction command. Proves the baseline failure exits with code != 0 before editing any code.</p>
+          <div class="seq-meta">Subprocess Runner · Scrubbed Env</div>
+        </div>
 
-          <div class="pipeline-card" data-step="3">
-            <div class="pipe-num">03 / STAGE</div>
-            <h3 class="pipe-title">Diagnose</h3>
-            <p class="pipe-desc">Analyzes stack traces and candidate snippets. Classifies error pattern (SyntaxError, LogicError, BoundaryError).</p>
-            <div class="pipe-tag">Module: Failure Classifier</div>
-          </div>
+        <div class="seq-step-card" data-stage="3">
+          <div class="seq-index">03 / STAGE</div>
+          <h3 class="seq-title">Patch</h3>
+          <p class="seq-desc">Synthesizes a minimal surgical replacement diff via configured LLM provider. Validates path traversal boundaries.</p>
+          <div class="seq-meta">PatchTool · Path Traversal Guard</div>
+        </div>
 
-          <div class="pipeline-card" data-step="4">
-            <div class="pipe-num">04 / STAGE</div>
-            <h3 class="pipe-title">Patch</h3>
-            <p class="pipe-desc">Synthesizes minimal surgical replacement diff via configured LLM provider. Validates path traversal boundaries.</p>
-            <div class="pipe-tag">Tool: PatchTool (Memory Mirror)</div>
-          </div>
+        <div class="seq-step-card" data-stage="4">
+          <div class="seq-index">04 / STAGE</div>
+          <h3 class="seq-title">Test</h3>
+          <p class="seq-desc">Executes acceptance tests first, then triggers the entire test suite in an isolated sandbox with a 60-second budget.</p>
+          <div class="seq-meta">Acceptance &amp; Regression Test Suites</div>
+        </div>
 
-          <div class="pipeline-card" data-step="5">
-            <div class="pipe-num">05 / STAGE</div>
-            <h3 class="pipe-title">Test</h3>
-            <p class="pipe-desc">Executes acceptance tests first, then triggers the entire test suite in an isolated subprocess with scrubbed secrets.</p>
-            <div class="pipe-tag">Subprocess: 60s timeout budget</div>
-          </div>
+        <div class="seq-step-card highlight-recovery" data-stage="5">
+          <div class="seq-index text-forge-amber">05 / RECOVERY</div>
+          <h3 class="seq-title">Recover</h3>
+          <p class="seq-desc">On test regression, auto-restores clean baseline SHA, injects error traceback into context, and replans strategy.</p>
+          <div class="seq-meta text-forge-amber">RetryPolicy · Max 3 Recovery Attempts</div>
+        </div>
 
-          <div class="pipeline-card highlight-recovery" data-step="6">
-            <div class="pipe-num text-amber">06 / RECOVERY</div>
-            <h3 class="pipe-title">Recover</h3>
-            <p class="pipe-desc">On test regression, auto-restores clean baseline SHA, injects error traceback into context, and pivots strategy.</p>
-            <div class="pipe-tag text-amber">Budget: Max 3 recovery cycles</div>
-          </div>
-
-          <div class="pipeline-card highlight-verified" data-step="7">
-            <div class="pipe-num text-lime">07 / VERIFY</div>
-            <h3 class="pipe-title">Verify</h3>
-            <p class="pipe-desc">Requires 100% exit code 0 across acceptance and regression suites. Exports Neatlogs trace and drafts unmerged PR.</p>
-            <div class="pipe-tag text-lime">Outcome: State labeled VERIFIED</div>
-          </div>
+        <div class="seq-step-card highlight-verified" data-stage="6">
+          <div class="seq-index text-forge-lime">06 / VERIFY</div>
+          <h3 class="seq-title">Verify</h3>
+          <p class="seq-desc">Requires 100% exit code 0 across both suites. Exports Neatlogs telemetry trace and drafts an unmerged PR.</p>
+          <div class="seq-meta text-forge-lime">Dual-Suite Pass Gate · Draft PR Dossier</div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ======================================================================
-       SECTION 4 — ACTUAL CODE-DIFF SHOWCASE
+       06.3 — SECTION 3: INTERACTIVE CODE DIFF SHOWCASE
        ====================================================================== -->
-  <section class="section-wrapper" id="code-diff">
-    <div class="layout-container">
-      <div class="section-intro">
-        <span class="section-kicker">CODE SURGERY SHOWCASE</span>
-        <h2 class="section-heading">Surgical diff inspection.</h2>
-        <p class="section-sub">
-          Toggle between the original defect, the naive broken patch that caused a regression, and the final verified precision fix.
+  <section class="forge-section" id="diff">
+    <div class="forge-container">
+      <div class="forge-intro">
+        <span class="forge-eyebrow">CODE SURGERY SHOWCASE</span>
+        <h2 class="forge-heading">Interactive code diff.</h2>
+        <p class="forge-sub">
+          Toggle between Before, Patch (Attempt #1 regression), and Result (Attempt #2 verified fix). Inspect the exact line surgery.
         </p>
       </div>
 
-      <div class="diff-showcase-card">
-        <div class="diff-showcase-nav">
-          <div class="diff-nav-tabs">
-            <button class="diff-view-btn" data-view="before" id="btn-diff-before">
+      <div class="diff-forge-card">
+        <div class="diff-forge-bar">
+          <div class="diff-tab-group">
+            <button class="diff-tab-btn" data-view="before" id="tab-diff-before">
               <span>Before (Defective)</span>
             </button>
-            <button class="diff-view-btn" data-view="patch1" id="btn-diff-patch1">
-              <span>Attempt #1 (Naive Clamp - Broke VIP)</span>
+            <button class="diff-tab-btn" data-view="patch1" id="tab-diff-patch1">
+              <span>Patch (Attempt #1 Regression)</span>
             </button>
-            <button class="diff-view-btn active" data-view="patch2" id="btn-diff-patch2">
-              <span>Attempt #2 (Precision Fix - Verified Green)</span>
+            <button class="diff-tab-btn active" data-view="patch2" id="tab-diff-patch2">
+              <span>Result (Attempt #2 Verified Green)</span>
             </button>
           </div>
 
-          <div class="diff-file-meta">
-            <span class="meta-path">benchmarks/case_3_regression_recovery/pricing.py</span>
-            <span class="meta-stats" id="diff-stats-label">+3 -1 lines</span>
+          <div class="diff-meta-tag">
+            <span class="tag-file">pricing.py:15</span>
+            <span class="tag-stat" id="diff-stat-text">+3 -1 lines</span>
           </div>
         </div>
 
-        <div class="diff-screen-container" id="diff-screen">
-          <!-- Populated by JavaScript according to active view -->
+        <div class="diff-code-body" id="diff-code-body">
+          <!-- Dynamically populated by JS according to active view -->
         </div>
       </div>
     </div>
   </section>
 
   <!-- ======================================================================
-       SECTION 5 — FAILURE-DRIVEN RECOVERY
+       06.4 — SECTION 4: THE EVIDENCE TRAIL (TRACE TIMELINE)
        ====================================================================== -->
-  <section class="section-wrapper bg-elevated" id="recovery">
-    <div class="layout-container">
-      <div class="section-intro">
-        <span class="section-kicker">RECOVERY CAUSALITY</span>
-        <h2 class="section-heading">How failure informs recovery.</h2>
-        <p class="section-sub">
-          The defining differentiator of PatchPilot AI. The agent does not blindly regenerate; it uses the exact failure traceback to adjust its hypothesis.
+  <section class="forge-section bg-surface" id="evidence">
+    <div class="forge-container">
+      <div class="forge-intro">
+        <span class="forge-eyebrow">TELEMETRY TIMELINE</span>
+        <h2 class="forge-heading">The evidence trail.</h2>
+        <p class="forge-sub">
+          Real execution events from benchmark runs. Select an event to inspect its duration, attempt number, subprocess command, and test outcome.
         </p>
       </div>
 
-      <div class="recovery-flow-sequence">
-        <div class="flow-step-box step-failed">
-          <div class="flow-tag">01 / FAILURE DETECTED</div>
-          <h4 class="flow-step-title">Regression in VIP Discounts</h4>
-          <p class="flow-step-body">Attempt #1 passed <code>test_negative_input</code>, but failed existing <code>test_vip_discount</code> (<code>80.0 != 100.0</code>).</p>
-          <div class="flow-badge text-red">FAILURE: REGRESSION_INTRODUCED</div>
-        </div>
-
-        <div class="flow-arrow-node">➔</div>
-
-        <div class="flow-step-box step-evidence">
-          <div class="flow-tag">02 / EVIDENCE PARSED</div>
-          <h4 class="flow-step-title">Traceback Injected</h4>
-          <p class="flow-step-body">TestRunner extracts the exact assertion failure. RetryPolicy classifies the regression and instructs the LLM.</p>
-          <div class="flow-badge text-cyan">ACTION: ROLLBACK &amp; ADAPT</div>
-        </div>
-
-        <div class="flow-arrow-node">➔</div>
-
-        <div class="flow-step-box step-rollback">
-          <div class="flow-tag">03 / ATOMIC ROLLBACK</div>
-          <h4 class="flow-step-title">Git Reset to Baseline</h4>
-          <p class="flow-step-body">Working tree restored cleanly to commit SHA <code>e4f892a</code>. Zero contaminated file state remains.</p>
-          <div class="flow-badge text-amber">STATE: CLEAN BASELINE</div>
-        </div>
-
-        <div class="flow-arrow-node">➔</div>
-
-        <div class="flow-step-box step-verified">
-          <div class="flow-tag">04 / VERIFIED RETEST</div>
-          <h4 class="flow-step-title">Dual-Suite Pass</h4>
-          <p class="flow-step-body">Attempt #2 preserves tier multiplier before bounds check. 100% exit code 0 across all suites.</p>
-          <div class="flow-badge text-lime">OUTCOME: VERIFIED GREEN</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================================================================
-       SECTION 6 — VERIFICATION TRACE
-       ====================================================================== -->
-  <section class="section-wrapper" id="trace-explorer">
-    <div class="layout-container">
-      <div class="section-intro">
-        <span class="section-kicker">OBSERVABILITY AUDIT</span>
-        <h2 class="section-heading">Verification event trace.</h2>
-        <p class="section-sub">
-          Inspect genuine redacted execution traces. Select an event to inspect its timestamp, attempt number, duration, and subprocess output.
-        </p>
-      </div>
-
-      <div class="trace-terminal-window">
-        <div class="trace-header-bar">
+      <div class="trace-forge-box">
+        <div class="trace-forge-top">
           <div class="trace-dots">
             <span></span><span></span><span></span>
           </div>
-          <div class="trace-title">Run: run-648ab230 · Case 3 Multi-Attempt Recovery</div>
-          <div class="trace-actions">
-            <button class="btn-trace-copy" id="copy-trace-btn" title="Copy Trace ID">
-              <span>Copy Trace ID</span>
-            </button>
-          </div>
+          <div class="trace-run-id">RUN ID: run-648ab230 · Case 3 Multi-Attempt Recovery</div>
+          <button class="btn-copy-trace" id="copy-trace-btn" title="Copy Trace ID">
+            <span>Copy Trace ID</span>
+          </button>
         </div>
 
-        <div class="trace-body-layout">
-          <!-- Event Selector List -->
-          <div class="trace-events-list" id="trace-events-list">
-            <div class="trace-event-row is-active" data-event="0">
-              <span class="event-time">19:48:50</span>
-              <span class="event-badge badge-neutral">INTAKE</span>
-              <span class="event-desc">Parsed Issue #103</span>
+        <div class="trace-forge-split">
+          <!-- Event Timeline -->
+          <div class="trace-events-deck" id="trace-events-deck">
+            <div class="trace-node-item is-active" data-idx="0">
+              <span class="node-time">19:48:50</span>
+              <span class="node-pill pill-neutral">INTAKE</span>
+              <span class="node-summary">Parsed Issue #103</span>
             </div>
-            <div class="trace-event-row" data-event="1">
-              <span class="event-time">19:48:51</span>
-              <span class="event-badge badge-fail">REPRO</span>
-              <span class="event-desc">Baseline failure confirmed (Code 1)</span>
+            <div class="trace-node-item" data-idx="1">
+              <span class="node-time">19:48:51</span>
+              <span class="node-pill pill-red">REPRO</span>
+              <span class="node-summary">Baseline failure confirmed (Code 1)</span>
             </div>
-            <div class="trace-event-row" data-event="2">
-              <span class="event-time">19:48:53</span>
-              <span class="event-badge badge-fail">TEST-1</span>
-              <span class="event-desc">Regression in test_vip_discount</span>
+            <div class="trace-node-item" data-idx="2">
+              <span class="node-time">19:48:53</span>
+              <span class="node-pill pill-red">TEST-1</span>
+              <span class="node-summary">Regression in test_vip_discount</span>
             </div>
-            <div class="trace-event-row" data-event="3">
-              <span class="event-time">19:48:54</span>
-              <span class="event-badge badge-warn">ROLLBACK</span>
-              <span class="event-desc">Clean baseline restored</span>
+            <div class="trace-node-item" data-idx="3">
+              <span class="node-time">19:48:54</span>
+              <span class="node-pill pill-amber">ROLLBACK</span>
+              <span class="node-summary">Clean baseline restored</span>
             </div>
-            <div class="trace-event-row" data-event="4">
-              <span class="event-time">19:48:56</span>
-              <span class="event-badge badge-verified">VERIFY</span>
-              <span class="event-desc">Dual test suites passed 100%</span>
+            <div class="trace-node-item" data-idx="4">
+              <span class="node-time">19:48:56</span>
+              <span class="node-pill pill-lime">VERIFY</span>
+              <span class="node-summary">Dual test suites passed 100%</span>
             </div>
           </div>
 
           <!-- Event Detail Panel -->
-          <div class="trace-detail-view" id="trace-detail-view">
-            <div class="detail-item">
+          <div class="trace-detail-panel" id="trace-detail-panel">
+            <div class="detail-row">
               <span class="detail-label">EVENT TYPE</span>
               <span class="detail-val" id="det-type">INTAKE &amp; BASELINE DISCOVERY</span>
             </div>
-            <div class="detail-item">
+            <div class="detail-row">
               <span class="detail-label">TIMESTAMP</span>
               <span class="detail-val mono" id="det-time">2026-10-10T19:48:50.412Z</span>
             </div>
-            <div class="detail-item">
+            <div class="detail-row">
               <span class="detail-label">NEATLOGS TRACE ID</span>
-              <span class="detail-val mono text-cyan" id="det-trace">16578e5ee3829a5a6f053c7cbeabd88f</span>
+              <span class="detail-val mono text-forge-cyan" id="det-trace">16578e5ee3829a5a6f053c7cbeabd88f</span>
             </div>
-            <div class="detail-item">
+            <div class="detail-row">
               <span class="detail-label">COMMAND EXECUTED</span>
               <span class="detail-val mono" id="det-cmd">git clone --no-hardlinks . .worktrees/patchpilot_sandbox_916d</span>
             </div>
-            <div class="detail-item">
+            <div class="detail-row">
               <span class="detail-label">EXECUTION EVIDENCE</span>
-              <pre class="detail-log" id="det-log">Cloned clean worktree at commit e4f892a. Mapped abstract syntax tree for pricing.py. Discovered 1 candidate defect and 3 associated regression test cases.</pre>
+              <pre class="detail-output" id="det-log">Cloned clean worktree at commit e4f892a. Mapped abstract syntax tree for pricing.py. Discovered 1 candidate defect and 3 associated regression test cases.</pre>
             </div>
           </div>
         </div>
@@ -559,133 +501,103 @@
   </section>
 
   <!-- ======================================================================
-       SECTION 7 — ARCHITECTURE
+       06.5 — SECTION 5: ARCHITECTURE
        ====================================================================== -->
-  <section class="section-wrapper" id="architecture">
-    <div class="layout-container">
-      <div class="section-intro">
-        <span class="section-kicker">SYSTEM DESIGN</span>
-        <h2 class="section-heading">High-level architecture.</h2>
-        <p class="section-sub">
+  <section class="forge-section" id="architecture">
+    <div class="forge-container">
+      <div class="forge-intro">
+        <span class="forge-eyebrow">SYSTEM BLUEPRINT</span>
+        <h2 class="forge-heading">High-level architecture.</h2>
+        <p class="forge-sub">
           A modular pipeline separating LLM hypothesis generation from deterministic test execution and filesystem rollback.
         </p>
       </div>
 
-      <div class="architecture-flow-grid">
-        <div class="arch-node">
-          <div class="arch-step-index">STEP 1</div>
-          <h3 class="arch-node-title">Issue Intake</h3>
-          <p class="arch-node-desc">Parses GitHub issue URL or markdown spec. Resolves candidate files and stack trace lines.</p>
+      <div class="arch-flow-deck">
+        <div class="arch-box">
+          <div class="arch-step-tag">01 / INTAKE</div>
+          <h3 class="arch-box-title">Issue Parser</h3>
+          <p class="arch-box-body">Parses GitHub issue URL or local Markdown spec. Resolves candidate files and stack trace lines.</p>
         </div>
 
-        <div class="arch-arrow" aria-hidden="true">→</div>
+        <div class="arch-arrow">→</div>
 
-        <div class="arch-node">
-          <div class="arch-step-index">STEP 2</div>
-          <h3 class="arch-node-title">Disposable Sandbox</h3>
-          <p class="arch-node-desc">Isolated ephemeral git worktree. Target files guarded against symlink and path traversal attacks.</p>
+        <div class="arch-box">
+          <div class="arch-step-tag">02 / SANDBOX</div>
+          <h3 class="arch-box-title">Worktree Isolation</h3>
+          <p class="arch-box-body">Creates an ephemeral Git worktree. Target files guarded against symlink and path traversal attacks.</p>
         </div>
 
-        <div class="arch-arrow" aria-hidden="true">→</div>
+        <div class="arch-arrow">→</div>
 
-        <div class="arch-node">
-          <div class="arch-step-index">STEP 3</div>
-          <h3 class="arch-node-title">Baseline Reproduction</h3>
-          <p class="arch-node-desc">Executes targeted reproduction command. Verifies baseline exit code != 0 in isolated subprocess.</p>
+        <div class="arch-box">
+          <div class="arch-step-tag">03 / TESTRUNNER</div>
+          <h3 class="arch-box-title">Baseline Repro</h3>
+          <p class="arch-box-body">Executes reproduction command in isolated subprocess with scrubbed secrets. Confirms exit code != 0.</p>
         </div>
 
-        <div class="arch-arrow" aria-hidden="true">→</div>
+        <div class="arch-arrow">→</div>
 
-        <div class="arch-node">
-          <div class="arch-step-index">STEP 4</div>
-          <h3 class="arch-node-title">Failure-Driven Recovery</h3>
-          <p class="arch-node-desc">Detects regressions, triggers atomic rollback, and replans strategy using real failure tracebacks.</p>
+        <div class="arch-box">
+          <div class="arch-step-tag">04 / RECOVERY</div>
+          <h3 class="arch-box-title">Failure Policy</h3>
+          <p class="arch-box-body">Detects regressions, triggers atomic rollback, and replans strategy using real failure tracebacks.</p>
         </div>
 
-        <div class="arch-arrow" aria-hidden="true">→</div>
+        <div class="arch-arrow">→</div>
 
-        <div class="arch-node arch-node-verified">
-          <div class="arch-step-index">STEP 5</div>
-          <h3 class="arch-node-title">Independent Verification</h3>
-          <p class="arch-node-desc">Dual test suites must exit with code 0. Generates audit report and publishes trace to Neatlogs.</p>
+        <div class="arch-box arch-box-verified">
+          <div class="arch-step-tag text-forge-lime">05 / VERIFY</div>
+          <h3 class="arch-box-title">Dual Gate</h3>
+          <p class="arch-box-body">Dual test suites must exit with code 0. Generates audit report and publishes trace to Neatlogs.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ======================================================================
-       SECTION 8 — DEVELOPER WORKFLOW
+       06.6 — SECTION 6: FINAL CTA
        ====================================================================== -->
-  <section class="section-wrapper bg-elevated" id="workflow">
-    <div class="layout-container">
-      <div class="section-intro">
-        <span class="section-kicker">DEVELOPER EXPERIENCE</span>
-        <h2 class="section-heading">Install and run in seconds.</h2>
-        <p class="section-sub">
-          Execute reproducible benchmarks, verify telemetry integrations, and launch this interactive workbench locally.
-        </p>
-      </div>
-
-      <div class="cli-box">
-        <div class="cli-bar">
-          <div class="cli-label">Terminal — PowerShell / Bash</div>
-          <button class="btn-copy-cli" id="btn-copy-cli">Copy commands</button>
-        </div>
-        <pre class="cli-code"><code><span class="c-comment"># 1. Clone repository and install in virtual environment</span>
-<span class="c-cmd">git clone</span> https://github.com/Quantum-Ark/patchai.git &amp;&amp; <span class="c-cmd">cd</span> patchai
-<span class="c-cmd">pip install</span> -e ".[dev]"
-
-<span class="c-comment"># 2. Check system status &amp; verify live integrations (Neatlogs, Entire, LLM)</span>
-<span class="c-cmd">patchpilot doctor</span>
-<span class="c-cmd">patchpilot verify-integrations</span>
-
-<span class="c-comment"># 3. Execute 3 reproducible benchmark evaluation cases</span>
-<span class="c-cmd">patchpilot evaluate</span>
-
-<span class="c-comment"># 4. Serve this interactive landing page locally</span>
-<span class="c-cmd">patchpilot serve</span> --port 3000</code></pre>
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================================================================
-       SECTION 9 — FINAL CTA & FOOTER
-       ====================================================================== -->
-  <section class="section-wrapper cta-section" id="cta">
-    <div class="layout-container cta-container">
-      <h2 class="cta-heading">Make every fix earn your trust.</h2>
-      <p class="cta-sub">
+  <section class="forge-section cta-forge-section" id="cta">
+    <div class="forge-container cta-forge-container">
+      <h2 class="cta-forge-title">
+        MAKE EVERY FIX<br>
+        <span class="text-forge-lime">EARN YOUR TRUST.</span>
+      </h2>
+      
+      <p class="cta-forge-sub">
         Inspect the patch. Run the tests. Trust the evidence.
       </p>
 
-      <div class="cta-actions">
-        <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn btn-primary magnetic" id="cta-gh-link">
+      <div class="cta-forge-actions">
+        <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn-forge-primary magnetic" id="final-gh-btn">
           <span>Explore GitHub</span>
           <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M4 12L12 4M12 4H6M12 4V10"/>
           </svg>
         </a>
-        <a href="#pipeline" class="btn btn-secondary magnetic" id="cta-workflow-link">
-          <span>See the workflow</span>
+        <a href="#hero" class="btn-forge-secondary magnetic" id="final-back-btn">
+          <span>Back to Top</span>
           <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M6 12L10 8L6 4"/>
+            <path d="M12 10L8 6L4 10"/>
           </svg>
         </a>
       </div>
     </div>
   </section>
 
-  <!-- Minimalist Clean Footer -->
-  <footer class="site-footer">
-    <div class="layout-container footer-layout">
-      <div class="footer-left">
-        <div class="footer-brand">
+  <!-- Minimalist Clean Developer Footer -->
+  <footer class="forge-footer">
+    <div class="forge-container footer-forge-grid">
+      <div class="footer-forge-brand">
+        <div class="brand-row">
           <svg class="brand-glyph" viewBox="0 0 28 28" width="20" height="20" fill="none" aria-hidden="true">
-            <path d="M7 6L3 14L7 22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M21 6L25 14L21 22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M11 14H17" stroke="#C8FF55" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M6 6L2 14L6 22" stroke="#F3F1EA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 6L26 14L22 22" stroke="#F3F1EA" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 14H18" stroke="#C7FF4A" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="14" cy="14" r="2.2" fill="#C7FF4A"/>
           </svg>
-          <span class="brand-text">PatchPilot<span class="brand-sub">.ai</span></span>
+          <span class="brand-title">PatchPilot<span class="brand-dim">/ai</span></span>
         </div>
         <p class="footer-note">
           Autonomous code repair engine built for verifiable software engineering.<br>
@@ -693,15 +605,15 @@
         </p>
       </div>
 
-      <div class="footer-nav">
-        <div class="footer-col">
-          <span class="footer-col-head">Project</span>
+      <div class="footer-forge-links">
+        <div class="f-col">
+          <span class="f-head">Repository</span>
           <a href="https://github.com/Quantum-Ark/patchai" target="_blank">Quantum-Ark/patchai</a>
           <a href="https://github.com/Quantum-Ark/patchai/blob/main/README.md" target="_blank">README.md</a>
           <a href="https://github.com/Quantum-Ark/patchai/blob/main/SUBMISSION_EVIDENCE.md" target="_blank">Submission Dossier</a>
         </div>
-        <div class="footer-col">
-          <span class="footer-col-head">Documentation</span>
+        <div class="f-col">
+          <span class="f-head">Documentation</span>
           <a href="https://github.com/Quantum-Ark/patchai/blob/main/docs/architecture.md" target="_blank">Architecture Spec</a>
           <a href="https://github.com/Quantum-Ark/patchai/blob/main/docs/security.md" target="_blank">Security Policy</a>
           <a href="https://github.com/Quantum-Ark/patchai/blob/main/BUSINESS_PLAN.md" target="_blank">Business Plan (cfo.ai)</a>
@@ -709,10 +621,10 @@
       </div>
     </div>
 
-    <div class="footer-bar">
-      <div class="layout-container footer-bar-container">
-        <span>Git SHA: <code>4b6dd2a</code> · Pytest: 26/26 Passing (100%)</span>
-        <span>Telemetry: Neatlogs HTTP Ingest · Memory: Entire CLI 0.11.4</span>
+    <div class="footer-forge-bottom">
+      <div class="forge-container bottom-row">
+        <span>Git Commit SHA: <code>21f595d</code> · Pytest: 26/26 Passing (100%)</span>
+        <span>Neatlogs HTTP 200 · Entire CLI 0.11.4 · Crustdata 2025-11-01</span>
       </div>
     </div>
   </footer>
