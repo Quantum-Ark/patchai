@@ -1,10 +1,12 @@
 """
-Interchangeable LLM Provider Adapter.
-Supports real LLM providers (OpenAI, Anthropic, Gemini) with strict authentication verification.
+Interchangeable LLM Provider Adapter for PatchPilot AI.
+Supports real LLM providers (OpenAI, Gemini, Anthropic, Groq, OpenRouter) with strict authentication verification.
 Deterministic Mock provider is restricted to isolated unit tests and explicit offline flags.
+Never silently falls back to Mock in a live repair run.
 """
 
 import os
+import time
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from patchpilot.config import config
@@ -19,23 +21,54 @@ class BaseLLMProvider(ABC):
         """Generate a response from the LLM provider."""
         pass
 
+    def health_check(self) -> Dict[str, Any]:
+        """
+        Executes a minimal test request to verify genuine connectivity and credentials.
+        Returns latency and confirmation without leaking secrets.
+        """
+        t0 = time.time()
+        try:
+            resp = self.generate(
+                prompt="Respond with exact single word: PONG",
+                system_prompt="You are a health check agent."
+            )
+            elapsed = time.time() - t0
+            return {
+                "ok": True,
+                "provider": self.provider_name,
+                "model": self.model_name,
+                "latency_seconds": round(elapsed, 3),
+                "response_sample": resp.strip()[:60]
+            }
+        except Exception as e:
+            elapsed = time.time() - t0
+            return {
+                "ok": False,
+                "provider": self.provider_name,
+                "model": self.model_name,
+                "latency_seconds": round(elapsed, 3),
+                "error": str(e)
+            }
+
 
 class OpenAIProvider(BaseLLMProvider):
     provider_name: str = "OpenAI"
 
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_key = api_key or config.openai_api_key
-        self.model_name = model or config.model or "gpt-4o"
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None, base_url: Optional[str] = None):
+        self.api_key = api_key or config.openai_api_key or os.getenv("OPENAI_API_KEY", "")
+        self.base_url = base_url or os.getenv("OPENAI_BASE_URL")
+        self.model_name = model or os.getenv("OPENAI_MODEL") or config.model or "gpt-4o"
 
-        if not self.api_key or self.api_key == "your_openai_api_key_here":
+        if not self.api_key or self.api_key in ("your_openai_api_key_here", "<your-key>"):
             raise ValueError(
-                "OPENAI_API_KEY is not configured. Please set OPENAI_API_KEY in your .env file."
+                "OPENAI_API_KEY is not configured or contains placeholder.\n"
+                "Please configure OPENAI_API_KEY in your local .env file."
             )
 
     def generate(self, prompt: str, system_prompt: str = "") -> str:
         from openai import OpenAI
 
-        client = OpenAI(api_key=self.api_key)
+        client = OpenAI(api_key=self.api_key, base_url=self.base_url)
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
@@ -49,43 +82,22 @@ class OpenAIProvider(BaseLLMProvider):
         return response.choices[0].message.content or ""
 
 
-class AnthropicProvider(BaseLLMProvider):
-    provider_name: str = "Anthropic"
-
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_key = api_key or config.anthropic_api_key
-        self.model_name = model or config.model or "claude-3-5-sonnet-20241022"
-
-        if not self.api_key or self.api_key == "your_anthropic_api_key_here":
-            raise ValueError(
-                "ANTHROPIC_API_KEY is not configured. Please set ANTHROPIC_API_KEY in your .env file."
-            )
-
-    def generate(self, prompt: str, system_prompt: str = "") -> str:
-        import anthropic
-
-        client = anthropic.Anthropic(api_key=self.api_key)
-        response = client.messages.create(
-            model=self.model_name,
-            max_tokens=4096,
-            system=system_prompt or "You are PatchPilot AI, an autonomous software repair engineer.",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-        )
-        # Concatenate text blocks
-        return "".join(b.text for b in response.content if hasattr(b, "text"))
-
-
 class GeminiProvider(BaseLLMProvider):
     provider_name: str = "Gemini"
 
     def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
-        self.api_key = api_key or config.gemini_api_key
-        self.model_name = model or config.model or "gemini-2.0-flash"
+        self.api_key = (
+            api_key
+            or config.gemini_api_key
+            or os.getenv("GEMINI_API_KEY", "")
+            or os.getenv("GOOGLE_API_KEY", "")
+        )
+        self.model_name = model or os.getenv("GEMINI_MODEL") or config.model or "gemini-2.0-flash"
 
-        if not self.api_key or self.api_key == "your_gemini_api_key_here":
+        if not self.api_key or self.api_key in ("your_gemini_api_key_here", "<your-key>"):
             raise ValueError(
-                "GEMINI_API_KEY is not configured. Please set GEMINI_API_KEY in your .env file."
+                "GEMINI_API_KEY is not configured or contains placeholder.\n"
+                "Please configure GEMINI_API_KEY in your local .env file."
             )
 
     def generate(self, prompt: str, system_prompt: str = "") -> str:
@@ -98,6 +110,103 @@ class GeminiProvider(BaseLLMProvider):
             contents=full_prompt,
         )
         return response.text or ""
+
+
+class AnthropicProvider(BaseLLMProvider):
+    provider_name: str = "Anthropic"
+
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None, base_url: Optional[str] = None):
+        self.api_key = (
+            api_key
+            or config.anthropic_api_key
+            or os.getenv("ANTHROPIC_API_KEY", "")
+            or os.getenv("ANTHROPIC_AUTH_TOKEN", "")
+        )
+        self.base_url = base_url or os.getenv("ANTHROPIC_BASE_URL")
+        self.model_name = model or os.getenv("ANTHROPIC_MODEL") or config.model or "claude-3-5-sonnet-20241022"
+
+        if not self.api_key or self.api_key in ("your_anthropic_api_key_here", "<your-key>"):
+            raise ValueError(
+                "ANTHROPIC_API_KEY is not configured or contains placeholder.\n"
+                "Please configure ANTHROPIC_API_KEY in your local .env file."
+            )
+
+    def generate(self, prompt: str, system_prompt: str = "") -> str:
+        import anthropic
+
+        client = anthropic.Anthropic(api_key=self.api_key, base_url=self.base_url)
+        response = client.messages.create(
+            model=self.model_name,
+            max_tokens=4096,
+            system=system_prompt or "You are PatchPilot AI, an autonomous software repair engineer.",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+        )
+        return "".join(b.text for b in response.content if hasattr(b, "text"))
+
+
+class GroqProvider(BaseLLMProvider):
+    provider_name: str = "Groq"
+
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+        self.api_key = api_key or os.getenv("GROQ_API_KEY", "")
+        self.model_name = model or os.getenv("GROQ_MODEL") or "llama-3.3-70b-versatile"
+
+        if not self.api_key or self.api_key in ("your_groq_api_key_here", "<your-key>"):
+            raise ValueError(
+                "GROQ_API_KEY is not configured. Please configure GROQ_API_KEY in your local .env file."
+            )
+
+    def generate(self, prompt: str, system_prompt: str = "") -> str:
+        from openai import OpenAI
+
+        client = OpenAI(
+            api_key=self.api_key,
+            base_url="https://api.groq.com/openai/v1"
+        )
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
+        response = client.chat.completions.create(
+            model=self.model_name,
+            messages=messages,
+            temperature=0.2,
+        )
+        return response.choices[0].message.content or ""
+
+
+class OpenRouterProvider(BaseLLMProvider):
+    provider_name: str = "OpenRouter"
+
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+        self.api_key = api_key or os.getenv("OPENROUTER_API_KEY", "")
+        self.model_name = model or os.getenv("OPENROUTER_MODEL") or "openai/gpt-4o-mini"
+
+        if not self.api_key or self.api_key in ("your_openrouter_api_key_here", "<your-key>"):
+            raise ValueError(
+                "OPENROUTER_API_KEY is not configured. Please configure OPENROUTER_API_KEY in your local .env file."
+            )
+
+    def generate(self, prompt: str, system_prompt: str = "") -> str:
+        from openai import OpenAI
+
+        client = OpenAI(
+            api_key=self.api_key,
+            base_url="https://openrouter.ai/api/v1"
+        )
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
+        response = client.chat.completions.create(
+            model=self.model_name,
+            messages=messages,
+            temperature=0.2,
+        )
+        return response.choices[0].message.content or ""
 
 
 class MockLLMProvider(BaseLLMProvider):
@@ -167,28 +276,47 @@ def get_llm_provider(name: Optional[str] = None) -> BaseLLMProvider:
     if target == "openai":
         return OpenAIProvider()
 
-    if target == "anthropic":
-        return AnthropicProvider()
-
     if target == "gemini":
         return GeminiProvider()
 
-    # If no provider explicitly specified, auto-detect configured live credentials
-    if config.openai_api_key and config.openai_api_key != "your_openai_api_key_here":
-        return OpenAIProvider()
-
-    if config.anthropic_api_key and config.anthropic_api_key != "your_anthropic_api_key_here":
+    if target == "anthropic":
         return AnthropicProvider()
 
-    if config.gemini_api_key and config.gemini_api_key != "your_gemini_api_key_here":
+    if target == "groq":
+        return GroqProvider()
+
+    if target == "openrouter":
+        return OpenRouterProvider()
+
+    # If no provider explicitly specified, auto-detect configured live credentials
+    openai_key = os.getenv("OPENAI_API_KEY", "") or config.openai_api_key
+    if openai_key and openai_key not in ("your_openai_api_key_here", "<your-key>"):
+        return OpenAIProvider()
+
+    gemini_key = os.getenv("GEMINI_API_KEY", "") or os.getenv("GOOGLE_API_KEY", "") or config.gemini_api_key
+    if gemini_key and gemini_key not in ("your_gemini_api_key_here", "<your-key>"):
         return GeminiProvider()
+
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY", "") or config.anthropic_api_key
+    if anthropic_key and anthropic_key not in ("your_anthropic_api_key_here", "<your-key>"):
+        return AnthropicProvider()
+
+    groq_key = os.getenv("GROQ_API_KEY", "")
+    if groq_key and groq_key not in ("your_groq_api_key_here", "<your-key>"):
+        return GroqProvider()
+
+    openrouter_key = os.getenv("OPENROUTER_API_KEY", "")
+    if openrouter_key and openrouter_key not in ("your_openrouter_api_key_here", "<your-key>"):
+        return OpenRouterProvider()
 
     # Fail explicitly with actionable instructions
     raise RuntimeError(
         "No live LLM provider credentials configured.\n"
-        "Please set one of the following in your local .env file:\n"
-        "  - OPENAI_API_KEY=<your-key>\n"
-        "  - ANTHROPIC_API_KEY=<your-key>\n"
-        "  - GEMINI_API_KEY=<your-key>\n"
+        "Please configure one of the following in your local .env file:\n"
+        "  - OPENAI_API_KEY=<your-api-key>\n"
+        "  - GEMINI_API_KEY=<your-api-key>\n"
+        "  - ANTHROPIC_API_KEY=<your-api-key>\n"
+        "  - GROQ_API_KEY=<your-api-key>\n"
+        "  - OPENROUTER_API_KEY=<your-api-key>\n\n"
         "To explicitly run in offline unit-test mode, pass --provider mock."
     )
