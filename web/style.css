@@ -1,44 +1,47 @@
 /* ==========================================================================
-   PatchPilot AI — The Code Forge Design System
-   Art Direction: MotionSites × Dribbble × Developer-Tool Craftsmanship
+   PatchPilot AI — Built Under the Surface
+   Design Philosophy inspired by metic.studio
    ========================================================================== */
 
 :root {
-  /* The Code Forge Color Tokens */
-  --bg-forge: #070809;
-  --bg-forge-secondary: #0D1012;
-  --bg-surface: #121518;
-  --bg-surface-elevated: #171C20;
-  --bg-surface-hover: #1E2328;
-  --bg-code: #0A0D0F;
+  /* Warm Editorial Canvas Tokens */
+  --bg-canvas: #F4F1E9;
+  --bg-surface: #EDE9DF;
+  --bg-surface-elevated: #E5E1D5;
+  --bg-dark-inspection: #171816;
 
-  --border-forge: rgba(243, 241, 234, 0.13);
-  --border-forge-subtle: rgba(243, 241, 234, 0.07);
-  --border-forge-active: rgba(243, 241, 234, 0.28);
-  --border-lime: rgba(199, 255, 74, 0.45);
+  /* Typography Colors */
+  --text-primary: #151515;
+  --text-secondary: #77766F;
+  --text-dim: #9E9D95;
+  --text-on-dark: #F4F1E9;
+  --text-on-dark-dim: #9E9D95;
 
-  --text-forge-primary: #F3F1EA;
-  --text-forge-muted: #898E91;
-  --text-forge-dim: #5C6266;
+  /* Technical Hairlines & Rules */
+  --rule-fine: #D4D0C5;
+  --rule-active: #151515;
+  --rule-blueprint: rgba(44, 130, 201, 0.45);
 
   /* Semantic State Accents */
-  --accent-forge-lime: #C7FF4A;       /* PROOF / VERIFIED */
-  --accent-forge-cyan: #82DFFF;       /* DIAGNOSTIC / TELEMETRY */
-  --accent-forge-failure: #FF665B;    /* DEFECT / FAILURE */
-  --accent-forge-amber: #E8B931;      /* RECOVERY / PENDING */
+  --signal-accent: #F04438;       /* Defect / Point of attention */
+  --signal-subtle: rgba(240, 68, 56, 0.12);
+  --verified-state: #1E5631;      /* Restrained deep green */
+  --verified-subtle: rgba(30, 86, 49, 0.12);
+  --blueprint-accent: #2C82C9;    /* Architectural measurements */
 
+  /* Typography Scales */
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Newsreader', Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  --ease-forge: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
-
-  --radius-xs: 3px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  /* Transitions */
+  --ease-precise: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+/* ==========================================================================
+   Base & Reset
+   ========================================================================== */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -47,24 +50,26 @@
 
 html {
   font-size: 16px;
-  background-color: var(--bg-forge);
-  color: var(--text-forge-primary);
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
   font-family: var(--font-sans);
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body.forge-body {
+body.metic-body {
   position: relative;
   min-height: 100vh;
-  line-height: 1.55;
-  background-color: var(--bg-forge);
+  line-height: 1.6;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
   overflow-x: hidden;
+  user-select: text;
 }
 
-/* Technical Hairline Grid */
-body.forge-body::before {
+/* Subtle Measured Background Grid Lines */
+body.metic-body::before {
   content: '';
   position: fixed;
   top: 0;
@@ -72,1212 +77,1328 @@ body.forge-body::before {
   width: 100vw;
   height: 100vh;
   background-image: 
-    linear-gradient(to right, rgba(243, 241, 234, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(243, 241, 234, 0.035) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(ellipse at 50% 15%, black 30%, transparent 80%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 15%, black 30%, transparent 80%);
+    linear-gradient(to right, rgba(212, 208, 197, 0.35) 1px, transparent 1px);
+  background-size: calc(100vw / 12) 100%;
   pointer-events: none;
   z-index: 0;
+  opacity: 0.7;
 }
 
-/* Subtle Film Grain */
-.forge-grain {
+/* Container */
+.metic-grid-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Text Utilities */
+.text-signal {
+  color: var(--signal-accent) !important;
+}
+
+.text-verified {
+  color: var(--verified-state) !important;
+}
+
+.text-dim {
+  color: var(--text-dim) !important;
+}
+
+.mono-dim {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.heading-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ==========================================================================
+   03 — SIGNATURE INTERACTION: THE INSPECTION LENS
+   ========================================================================== */
+.inspection-lens-layer {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%3E%3C/svg%3E");
   pointer-events: none;
-  z-index: 999;
-}
-
-/* ==========================================================================
-   03 — Custom Precision Desktop Cursor
-   ========================================================================== */
-.cursor-point {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 5px;
-  height: 5px;
-  background-color: var(--accent-forge-lime);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: transform 0.04s linear, opacity 0.2s ease;
-}
-
-.cursor-halo {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 32px;
-  height: 32px;
-  border: 1px solid rgba(199, 255, 74, 0.35);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9998;
-  transform: translate(-50%, -50%);
-  transition: width 0.22s var(--ease-forge), height 0.22s var(--ease-forge), border-color 0.2s ease, background 0.2s ease;
-}
-
-.cursor-badge {
-  position: fixed;
-  top: 0;
-  left: 0;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--bg-forge);
-  background: var(--accent-forge-lime);
-  padding: 2px 6px;
-  border-radius: var(--radius-xs);
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(20px, -50%);
+  z-index: 900;
   opacity: 0;
-  transition: opacity 0.15s ease, transform 0.15s var(--ease-forge);
+  transition: opacity 0.25s var(--ease-precise);
 }
 
-body.cursor-inspecting .cursor-badge {
+.inspection-lens-layer.is-active {
   opacity: 1;
-  transform: translate(24px, -50%);
 }
 
-body.cursor-hover .cursor-halo {
-  width: 48px;
-  height: 48px;
-  border-color: var(--accent-forge-lime);
-  background: rgba(199, 255, 74, 0.05);
+.lens-circle {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  border: 1px solid var(--rule-active);
+  background: radial-gradient(circle at center, rgba(23, 24, 22, 0.88) 0%, rgba(23, 24, 22, 0.94) 100%);
+  color: var(--text-on-dark);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  overflow: hidden;
+  will-change: transform, left, top;
 }
 
-@media (max-width: 1024px), (pointer: coarse) {
-  .cursor-point, .cursor-halo, .cursor-badge {
-    display: none !important;
-  }
+.lens-crosshair-h {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.lens-crosshair-v {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.lens-readout {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.25;
+  color: var(--text-on-dark-dim);
+}
+
+.readout-coord {
+  color: var(--text-on-dark);
+  font-weight: 500;
+}
+
+.readout-target {
+  color: var(--signal-accent);
+}
+
+.readout-dim {
+  color: #82DFFF;
+}
+
+.readout-token {
+  color: #B5E853;
+  opacity: 0.85;
+}
+
+/* Blueprint Construction Overlay Layer */
+.blueprint-guide-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 850;
+  opacity: 0;
+  transition: opacity 0.2s var(--ease-precise);
+}
+
+.blueprint-guide-layer.is-visible {
+  opacity: 1;
+}
+
+.blueprint-svg-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Inspection Control Bar (Bottom Floating HUD) */
+.inspection-control-bar {
+  position: fixed;
+  bottom: 24px;
+  right: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  z-index: 800;
+}
+
+.btn-inspect-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #171816;
+  color: #F4F1E9;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s var(--ease-precise);
+}
+
+.btn-inspect-toggle:hover {
+  background-color: #242622;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.btn-inspect-toggle.is-active {
+  background-color: var(--signal-accent);
+  color: #FFFFFF;
+  border-color: var(--signal-accent);
+}
+
+.inspect-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #82DFFF;
+  transition: transform 0.2s ease;
+}
+
+.btn-inspect-toggle.is-active .inspect-dot {
+  background-color: #FFFFFF;
+}
+
+.inspect-hint {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  background-color: rgba(244, 241, 233, 0.9);
+  padding: 3px 8px;
+  border: 1px solid var(--rule-fine);
+  border-radius: 3px;
+  backdrop-filter: blur(4px);
 }
 
 /* ==========================================================================
-   Navigation Bar
+   02 — MINIMAL PRINTED HEADER
    ========================================================================== */
-.forge-nav {
-  position: sticky;
-  top: 0;
-  z-index: 500;
-  background: rgba(7, 8, 9, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border-forge);
-  transition: background 0.25s ease, border-color 0.25s ease;
+.metic-header {
+  width: 100%;
+  padding: 32px 0 24px 0;
+  border-bottom: 1px solid var(--rule-fine);
+  position: relative;
+  z-index: 10;
+  background-color: var(--bg-canvas);
 }
 
-.forge-nav.scrolled {
-  background: rgba(7, 8, 9, 0.96);
-  border-color: var(--border-forge-active);
-}
-
-.nav-container {
-  max-width: 1320px;
+.header-container {
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0.95rem 2rem;
+  padding: 0 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.nav-left {
+.header-identity {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  align-items: baseline;
+  gap: 16px;
 }
 
-.brand-link {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
+.brand-anchor {
   text-decoration: none;
-  color: var(--text-forge-primary);
-}
-
-.brand-title {
-  font-size: 1.05rem;
-  font-weight: 700;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.15rem;
   letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
 }
 
-.brand-dim {
-  color: var(--text-forge-muted);
-  font-weight: 500;
+.brand-symbol {
+  color: var(--signal-accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  margin-right: 2px;
 }
 
-.forge-pill {
+.brand-sub {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-left: 2px;
+}
+
+.build-stamp {
   font-family: var(--font-mono);
   font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--accent-forge-lime);
-  background: rgba(199, 255, 74, 0.08);
-  border: 1px solid rgba(199, 255, 74, 0.25);
-  padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  border: 1px solid var(--rule-fine);
+  border-radius: 2px;
+  letter-spacing: 0.04em;
 }
 
-.nav-links {
+.header-nav {
   display: flex;
   align-items: center;
-  gap: 1.85rem;
+  gap: 32px;
 }
 
-.nav-item {
-  color: var(--text-forge-muted);
+.nav-anchor {
   text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 450;
+  letter-spacing: -0.01em;
+  transition: color 0.15s ease;
+}
+
+.nav-anchor:hover {
+  color: var(--text-primary);
+}
+
+.btn-understated {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--text-primary);
   font-size: 0.88rem;
   font-weight: 500;
-  transition: color 0.18s ease;
+  padding: 6px 14px;
+  border: 1px solid var(--rule-fine);
+  border-radius: 2px;
+  transition: all 0.18s var(--ease-precise);
 }
 
-.nav-item:hover {
-  color: var(--text-forge-primary);
+.btn-understated:hover {
+  border-color: var(--rule-active);
+  background-color: var(--bg-surface);
+}
+
+.arrow-glyph {
+  font-family: var(--font-mono);
+  transition: transform 0.15s ease;
+}
+
+.btn-understated:hover .arrow-glyph {
+  transform: translateX(3px);
 }
 
 /* ==========================================================================
-   Shared Typography & Buttons
+   02 — HERO SECTION
    ========================================================================== */
-.forge-container {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 0 2rem;
+.metic-hero-section {
+  padding: 64px 0 96px 0;
   position: relative;
   z-index: 1;
 }
 
-.forge-section {
-  padding: 6.5rem 0;
-  position: relative;
-}
-
-.bg-surface {
-  background-color: var(--bg-forge-secondary);
-  border-top: 1px solid var(--border-forge);
-  border-bottom: 1px solid var(--border-forge);
-}
-
-.forge-intro {
-  max-width: 780px;
-  margin-bottom: 3.5rem;
-}
-
-.forge-eyebrow {
-  display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--accent-forge-lime);
-  margin-bottom: 0.65rem;
-}
-
-.forge-heading {
-  font-size: clamp(2rem, 3.8vw, 3rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  color: var(--text-forge-primary);
-  line-height: 1.15;
-  margin-bottom: 0.85rem;
-}
-
-.forge-sub {
-  font-size: 1.1rem;
-  color: var(--text-forge-muted);
-  line-height: 1.6;
-}
-
-.text-forge-lime { color: var(--accent-forge-lime); }
-.text-forge-cyan { color: var(--accent-forge-cyan); }
-.text-forge-failure { color: var(--accent-forge-failure); }
-.text-forge-amber { color: var(--accent-forge-amber); }
-
-/* Buttons */
-.btn-forge-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: var(--accent-forge-lime);
-  color: #070809;
-  padding: 0.85rem 1.65rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-decoration: none;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.22s var(--ease-forge);
-}
-
-.btn-forge-primary:hover {
-  background: #dbff82;
-  box-shadow: 0 0 28px rgba(199, 255, 74, 0.45);
-  transform: translateY(-2px);
-}
-
-.btn-forge-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-forge);
-  color: var(--text-forge-primary);
-  padding: 0.85rem 1.65rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.92rem;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.22s var(--ease-forge);
-}
-
-.btn-forge-secondary:hover {
-  background: var(--bg-surface-elevated);
-  border-color: var(--border-forge-active);
-  transform: translateY(-2px);
-}
-
-/* ==========================================================================
-   02 — THE SIGNATURE HERO
-   ========================================================================== */
-.hero-forge-section {
-  position: relative;
-  padding: 5.5rem 0 5rem;
-  min-height: calc(100vh - 65px);
+.hero-calibration-line {
   display: flex;
   align-items: center;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--rule-fine);
+  margin-bottom: 48px;
 }
 
-.hero-forge-layout {
+.cal-rule {
+  flex: 1;
+  height: 1px;
+  background-color: var(--rule-fine);
+}
+
+.hero-split-layout {
   display: grid;
-  grid-template-columns: 1fr 1.25fr;
-  gap: 3.5rem;
-  align-items: center;
-  width: 100%;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 64px;
+  align-items: flex-start;
 }
 
-.hero-forge-left {
-  max-width: 580px;
+.hero-editorial-col {
+  display: flex;
+  flex-direction: column;
 }
 
-.hero-forge-eyebrow {
-  display: inline-flex;
+.editorial-eyebrow {
+  display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 10px;
+  margin-bottom: 20px;
   font-family: var(--font-mono);
   font-size: 0.75rem;
-  font-weight: 600;
   letter-spacing: 0.08em;
-  color: var(--text-forge-muted);
-  background: rgba(243, 241, 234, 0.04);
-  border: 1px solid var(--border-forge);
-  padding: 0.35rem 0.85rem;
-  border-radius: 999px;
-  margin-bottom: 2rem;
+  color: var(--text-secondary);
 }
 
-.eyebrow-light {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: var(--accent-forge-lime);
-  box-shadow: 0 0 8px var(--accent-forge-lime);
-}
-
-.hero-forge-title {
-  font-size: clamp(3rem, 6.2vw, 5rem);
-  font-weight: 800;
-  line-height: 0.98;
-  letter-spacing: -0.045em;
-  color: var(--text-forge-primary);
-  margin-bottom: 1.65rem;
-}
-
-.hero-forge-lead {
-  font-size: 1.15rem;
-  line-height: 1.65;
-  color: var(--text-forge-muted);
-  margin-bottom: 2.5rem;
-}
-
-.hero-forge-actions {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  margin-bottom: 3rem;
-  flex-wrap: wrap;
-}
-
-.hero-forge-metadata {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
-  padding-top: 1.75rem;
-  border-top: 1px solid var(--border-forge);
-}
-
-.meta-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.meta-label {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--text-forge-dim);
-  letter-spacing: 0.06em;
-}
-
-.meta-val {
-  font-size: 0.86rem;
+.eyebrow-index {
+  color: var(--signal-accent);
   font-weight: 600;
-  color: var(--text-forge-primary);
 }
 
-/* 3D Particle Sculpture Right Column */
-.hero-forge-right {
-  position: relative;
-  width: 100%;
-  height: 580px;
+.hero-editorial-heading {
+  font-size: 4rem;
+  line-height: 1.05;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  color: var(--text-primary);
+  margin-bottom: 28px;
 }
 
-.sculpture-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-forge);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+.hero-editorial-lead {
+  font-size: 1.25rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  font-weight: 400;
+  max-width: 540px;
+  margin-bottom: 40px;
 }
 
-.forge-sculpture-canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.sculpture-telemetry-top {
-  position: absolute;
-  top: 1.25rem;
-  left: 1.5rem;
-  right: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  pointer-events: none;
-}
-
-.telemetry-node-status {
+.hero-action-row {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  background: rgba(7, 8, 9, 0.85);
-  border: 1px solid var(--border-forge);
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-xs);
+  gap: 20px;
+  margin-bottom: 48px;
+}
+
+.btn-editorial-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  background-color: var(--text-primary);
+  color: var(--bg-canvas);
+  font-size: 0.92rem;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 2px;
+  transition: all 0.2s var(--ease-precise);
+}
+
+.btn-editorial-primary:hover {
+  background-color: #2C2C2B;
+}
+
+.btn-editorial-ghost {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  font-weight: 500;
+  padding: 12px 18px;
+  border: 1px solid var(--rule-fine);
+  border-radius: 2px;
+  transition: all 0.2s var(--ease-precise);
+}
+
+.btn-editorial-ghost:hover {
+  color: var(--text-primary);
+  border-color: var(--rule-active);
+  background-color: var(--bg-surface);
+}
+
+.detail-note-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  color: var(--accent-forge-failure);
-}
-
-.pulse-indicator {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent-forge-failure);
-  box-shadow: 0 0 8px var(--accent-forge-failure);
-  animation: pulseBlink 1.4s infinite;
-}
-
-@keyframes pulseBlink {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
-}
-
-.telemetry-state-tag {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--text-forge-dim);
-  background: rgba(7, 8, 9, 0.85);
-  border: 1px solid var(--border-forge);
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-xs);
-}
-
-.sculpture-prompt-bottom {
-  position: absolute;
-  bottom: 1.25rem;
-  left: 1.5rem;
-  right: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(7, 8, 9, 0.88);
-  border: 1px solid var(--border-forge);
-  padding: 0.65rem 1rem;
-  border-radius: var(--radius-sm);
-  backdrop-filter: blur(10px);
-}
-
-.prompt-instruction {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  font-size: 0.8rem;
-  color: var(--text-forge-muted);
-}
-
-.btn-inspect-mesh {
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-forge);
-  color: var(--accent-forge-lime);
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  font-weight: 600;
-  padding: 0.35rem 0.85rem;
-  border-radius: var(--radius-xs);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-inspect-mesh:hover {
-  background: var(--accent-forge-lime);
-  color: #070809;
-}
-
-/* ==========================================================================
-   04 — SCROLL TRANSFORMATION NARRATIVE (SCENE A TO SCENE F)
-   ========================================================================== */
-.narrative-section {
-  padding: 6.5rem 0;
-  border-top: 1px solid var(--border-forge);
-}
-
-.narrative-intro {
-  max-width: 780px;
-  margin-bottom: 3.5rem;
-}
-
-.narrative-scenes-deck {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: 1.5rem;
-}
-
-.scene-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-forge);
-  border-radius: var(--radius-md);
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.22s var(--ease-forge);
-}
-
-.scene-card:hover {
-  border-color: var(--border-forge-active);
-  transform: translateY(-2px);
-}
-
-.scene-badge {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 700;
-  display: inline-block;
-  margin-bottom: 1rem;
-  padding: 0.2rem 0.55rem;
-  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  background-color: var(--bg-surface);
+  padding: 6px 12px;
+  border: 1px solid var(--rule-fine);
+  border-radius: 2px;
   width: fit-content;
 }
 
-.badge-red { background: rgba(255, 102, 91, 0.18); color: var(--accent-forge-failure); border: 1px solid rgba(255, 102, 91, 0.35); }
-.badge-cyan { background: rgba(130, 223, 255, 0.18); color: var(--accent-forge-cyan); border: 1px solid rgba(130, 223, 255, 0.35); }
-.badge-amber { background: rgba(232, 185, 49, 0.18); color: var(--accent-forge-amber); border: 1px solid rgba(232, 185, 49, 0.35); }
-.badge-lime { background: rgba(199, 255, 74, 0.18); color: var(--accent-forge-lime); border: 1px solid rgba(199, 255, 74, 0.35); }
-
-.scene-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-forge-primary);
-  margin-bottom: 0.65rem;
+.note-bullet {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--signal-accent);
 }
 
-.scene-body {
-  font-size: 0.9rem;
-  color: var(--text-forge-muted);
-  line-height: 1.6;
-  margin-bottom: 1.25rem;
-  flex: 1;
+/* Schematic Graphic Board */
+.hero-schematic-col {
+  position: relative;
 }
 
-.scene-callout {
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-forge-subtle);
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-forge-dim);
+.schematic-board {
+  border: 1px solid var(--rule-fine);
+  background-color: var(--bg-surface);
+  padding: 24px;
+  position: relative;
 }
 
-.scene-callout strong {
-  color: var(--accent-forge-failure);
-}
-
-/* ==========================================================================
-   06.1 — THE ENGINEERING PROBLEM
-   ========================================================================== */
-.problem-editorial-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: 2rem;
-}
-
-.editorial-card {
-  border-radius: var(--radius-lg);
-  padding: 2.5rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.unverified-side {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-forge);
-}
-
-.verified-side {
-  background: #0e1317;
-  border: 1px solid var(--border-lime);
-  box-shadow: 0 10px 40px rgba(199, 255, 74, 0.06);
-}
-
-.card-kicker {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.85rem;
-}
-
-.card-head {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--text-forge-primary);
-  margin-bottom: 0.65rem;
-}
-
-.card-p {
-  font-size: 0.9rem;
-  color: var(--text-forge-muted);
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-}
-
-.editorial-code-box {
-  background: var(--bg-code);
-  border: 1px solid var(--border-forge);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  margin-bottom: 1.5rem;
-}
-
-.code-box-meta {
-  background: #090c0e;
-  padding: 0.5rem 0.85rem;
+.schematic-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-family: var(--font-mono);
-  font-size: 0.74rem;
-  color: var(--text-forge-dim);
-  border-bottom: 1px solid var(--border-forge);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--rule-fine);
+  padding-bottom: 14px;
+  margin-bottom: 24px;
 }
 
-.tag-err { font-weight: 700; font-size: 0.65rem; color: var(--accent-forge-failure); }
-.tag-ok { font-weight: 700; font-size: 0.65rem; color: var(--accent-forge-lime); }
-
-.editorial-code-box pre {
-  padding: 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  line-height: 1.6;
-}
-
-.c-dim { color: var(--text-forge-dim); display: block; }
-.c-del { color: var(--accent-forge-failure); display: block; }
-.c-add { color: var(--accent-forge-lime); display: block; }
-.c-ctx { color: var(--text-forge-muted); display: block; }
-
-.editorial-consequences {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--border-forge-subtle);
-}
-
-.cq-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  font-size: 0.86rem;
-  color: var(--text-forge-muted);
-  line-height: 1.5;
-}
-
-.cq-cross { color: var(--accent-forge-failure); font-weight: 700; }
-.cq-check { color: var(--accent-forge-lime); font-weight: 700; }
-
-/* ==========================================================================
-   06.2 — THE REPAIR SEQUENCE
-   ========================================================================== */
-.sequence-deck {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-}
-
-.seq-step-card {
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-forge);
-  border-radius: var(--radius-md);
-  padding: 1.75rem;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.2s var(--ease-forge);
-}
-
-.seq-step-card:hover {
-  border-color: var(--border-forge-active);
-  transform: translateY(-2px);
-}
-
-.seq-step-card.highlight-recovery {
-  border-color: rgba(232, 185, 49, 0.4);
-  background: rgba(232, 185, 49, 0.035);
-}
-
-.seq-step-card.highlight-verified {
-  border-color: var(--border-lime);
-  background: rgba(199, 255, 74, 0.035);
-}
-
-.seq-index {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--text-forge-dim);
-  font-weight: 700;
-  margin-bottom: 0.85rem;
-}
-
-.seq-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-forge-primary);
-  margin-bottom: 0.45rem;
-}
-
-.seq-desc {
-  font-size: 0.86rem;
-  color: var(--text-forge-muted);
-  line-height: 1.55;
-  margin-bottom: 1.25rem;
-  flex: 1;
-}
-
-.seq-meta {
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  color: var(--text-forge-dim);
-  padding-top: 0.65rem;
-  border-top: 1px solid var(--border-forge-subtle);
-}
-
-/* ==========================================================================
-   06.3 — INTERACTIVE CODE DIFF SHOWCASE
-   ========================================================================== */
-.diff-forge-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-forge);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-}
-
-.diff-forge-bar {
-  background: #0b0e11;
-  padding: 0.85rem 1.35rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border-forge);
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.diff-tab-group {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.diff-tab-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-forge-muted);
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  padding: 0.4rem 0.85rem;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.diff-tab-btn:hover {
-  color: var(--text-forge-primary);
-  background: var(--bg-surface-elevated);
-}
-
-.diff-tab-btn.active {
-  background: var(--bg-surface-elevated);
-  border-color: var(--border-forge-active);
-  color: var(--accent-forge-lime);
+.sch-lens-prompt {
+  color: var(--signal-accent);
   font-weight: 600;
 }
 
-.diff-meta-tag {
+.sch-surface-spec {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.sch-line-row {
+  display: flex;
+  gap: 12px;
+}
+
+.sch-token {
+  color: var(--text-secondary);
+  width: 90px;
+}
+
+.sch-val {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.sch-diagram-mock {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
+  gap: 12px;
+  padding: 24px 16px;
+  border: 1px dashed var(--rule-fine);
+  background-color: var(--bg-canvas);
+  margin-bottom: 20px;
 }
 
-.tag-file { color: var(--text-forge-dim); }
-.tag-stat { color: var(--accent-forge-lime); }
-
-.diff-code-body {
-  padding: 1.25rem 1.5rem;
-  background: var(--bg-code);
+.sch-node {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
-  line-height: 1.7;
-  overflow-x: auto;
-}
-
-.diff-line-row {
-  display: flex;
-  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+  padding: 6px 12px;
+  border: 1px solid var(--rule-fine);
   border-radius: 2px;
+  background-color: var(--bg-surface);
 }
 
-.diff-line-row.add {
-  background: rgba(199, 255, 74, 0.1);
-  color: #d8ff80;
-  border-left: 2px solid var(--accent-forge-lime);
+.sch-node-defect {
+  border-color: var(--signal-accent);
+  color: var(--signal-accent);
+  font-weight: 600;
 }
 
-.diff-line-row.del {
-  background: rgba(255, 102, 91, 0.12);
-  color: #ffa8a8;
-  border-left: 2px solid var(--accent-forge-failure);
+.sch-node-verified {
+  border-color: var(--verified-state);
+  color: var(--verified-state);
+  font-weight: 600;
 }
 
-.diff-line-row.ctx { color: var(--text-forge-muted); }
-.diff-line-row.comment { color: var(--text-forge-dim); font-style: italic; }
+.sch-connector {
+  flex: 1;
+  height: 1px;
+  background-color: var(--rule-fine);
+}
 
-.diff-gutter-num {
-  width: 32px;
-  color: var(--text-forge-dim);
-  user-select: none;
-  text-align: right;
-  margin-right: 1.25rem;
-  flex-shrink: 0;
+.sch-layer-blueprint {
+  display: none;
+}
+
+.schematic-footer {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--rule-fine);
+  padding-top: 14px;
 }
 
 /* ==========================================================================
-   06.4 — THE EVIDENCE TRAIL
+   04 — THE SCROLL STORY: 8 ASSEMBLY STAGES
    ========================================================================== */
-.trace-forge-box {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-forge);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+.metic-assembly-stream {
+  position: relative;
+  z-index: 1;
 }
 
-.trace-forge-top {
-  background: #090c0e;
-  padding: 0.85rem 1.35rem;
+.assembly-stage {
+  padding: 96px 0;
+  border-top: 1px solid var(--rule-fine);
+  position: relative;
+}
+
+.stage-guide-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border-forge);
-}
-
-.trace-dots {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.trace-dots span {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--border-forge-active);
-}
-
-.trace-run-id {
+  gap: 16px;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-forge-muted);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  margin-bottom: 40px;
 }
 
-.btn-copy-trace {
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-forge);
-  color: var(--text-forge-primary);
+.stage-num {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stage-bracket {
+  color: var(--text-dim);
+}
+
+.stage-rule {
+  flex: 1;
+  height: 1px;
+  background-color: var(--rule-fine);
+}
+
+.stage-tag {
+  letter-spacing: 0.08em;
+}
+
+.stage-layout-split {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 64px;
+  align-items: flex-start;
+}
+
+.stage-copy-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.stage-heading {
+  font-size: 2.25rem;
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.stage-p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.stage-stat-row {
+  display: flex;
+  gap: 32px;
+  margin-top: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--rule-fine);
+}
+
+.stat-unit {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-num {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-lbl {
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   STAGE 01 ARTIFACT: Defect Line
+   -------------------------------------------------------------------------- */
+.defect-line-assembly {
+  border: 1px solid var(--rule-fine);
+  background-color: var(--bg-surface);
+  padding: 24px;
+}
+
+.line-meta-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.defect-wire {
+  position: relative;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.wire-track {
+  width: 100%;
+  height: 2px;
+  background-color: var(--rule-fine);
+}
+
+.defect-node-marker {
+  position: absolute;
+  left: 45%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background-color: var(--bg-canvas);
+  border: 1px solid var(--signal-accent);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.marker-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--signal-accent);
+}
+
+.marker-label {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--signal-accent);
+}
+
+.defect-card-body {
+  border: 1px solid var(--rule-fine);
+  background-color: var(--bg-canvas);
+  padding: 16px;
+}
+
+.dcb-header {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  margin-bottom: 12px;
+}
+
+.dcb-code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   STAGE 02 ARTIFACT: Codebase Tree Grid
+   -------------------------------------------------------------------------- */
+.codebase-grid-box {
+  border: 1px solid var(--rule-fine);
+  background-color: var(--bg-surface);
+  padding: 24px;
+}
+
+.tree-header {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--rule-fine);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.tree-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.tree-item {
+  display: grid;
+  grid-template-columns: 20px 180px 1fr;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
-.btn-copy-trace:hover {
-  background: var(--bg-surface-hover);
-  border-color: var(--border-forge-active);
+.tree-item:hover, .tree-item.is-selected {
+  background-color: var(--bg-canvas);
+  border-color: var(--rule-fine);
 }
 
-.trace-forge-split {
-  display: grid;
-  grid-template-columns: 1fr 1.6fr;
+.tree-name {
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
-.trace-events-deck {
-  background: #060809;
-  border-right: 1px solid var(--border-forge);
+.tree-role {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.tree-detail-callout {
+  border-top: 1px solid var(--rule-fine);
+  padding-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.td-label {
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   STAGE 03 ARTIFACT: Investigation Matrix
+   -------------------------------------------------------------------------- */
+.investigation-matrix-box {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
-.trace-node-item {
-  padding: 0.85rem 1.15rem;
-  border-bottom: 1px solid var(--border-forge-subtle);
-  cursor: pointer;
+.matrix-card {
+  border: 1px solid var(--rule-fine);
+  background-color: var(--bg-surface);
+  padding: 20px;
+}
+
+.mc-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.mc-val {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.mc-sub {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   STAGE 04 ARTIFACT: Hypothesis Sheet
+   -------------------------------------------------------------------------- */
+.hypothesis-editorial-sheet {
+  border: 1px solid var(--rule-fine);
+  background-color: var(--bg-surface);
+  padding: 28px;
+}
+
+.sheet-top {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  transition: background 0.15s ease;
-}
-
-.trace-node-item:hover {
-  background: #0d1013;
-}
-
-.trace-node-item.is-active {
-  background: #11151a;
-  border-left: 2px solid var(--accent-forge-lime);
-}
-
-.node-time {
+  justify-content: space-between;
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  color: var(--text-forge-dim);
+  border-bottom: 1px solid var(--rule-fine);
+  padding-bottom: 14px;
+  margin-bottom: 20px;
 }
 
-.node-pill {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.1rem 0.4rem;
-  border-radius: var(--radius-xs);
-}
-
-.pill-neutral { background: rgba(243, 241, 234, 0.1); color: var(--text-forge-muted); }
-.pill-red { background: rgba(255, 102, 91, 0.2); color: var(--accent-forge-failure); }
-.pill-amber { background: rgba(232, 185, 49, 0.2); color: var(--accent-forge-amber); }
-.pill-lime { background: rgba(199, 255, 74, 0.2); color: var(--accent-forge-lime); }
-
-.node-summary {
-  font-size: 0.8rem;
-  color: var(--text-forge-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.trace-detail-panel {
-  background: var(--bg-code);
-  padding: 1.5rem;
+.sheet-body {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: 18px;
 }
 
-.detail-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.detail-label {
+.sf-label {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--text-forge-dim);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.sf-content {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   STAGE 05 ARTIFACT: Failure Alert Box
+   -------------------------------------------------------------------------- */
+.failure-alert-box {
+  border: 1px solid var(--signal-accent);
+  background-color: var(--bg-surface);
+  padding: 24px;
+}
+
+.fab-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  border-bottom: 1px solid var(--signal-subtle);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.fab-pill {
+  color: var(--signal-accent);
+  font-weight: 600;
   letter-spacing: 0.05em;
 }
 
-.detail-val {
-  font-size: 0.88rem;
-  color: #fff;
-}
-
-.detail-val.mono {
-  font-family: var(--font-mono);
-}
-
-.detail-output {
-  background: #050708;
-  border: 1px solid var(--border-forge);
-  border-radius: var(--radius-xs);
-  padding: 0.85rem;
+.fab-trace {
+  background-color: #171816;
+  color: #F4F1E9;
+  padding: 16px;
   font-family: var(--font-mono);
   font-size: 0.8rem;
-  color: var(--text-forge-muted);
-  line-height: 1.6;
-  white-space: pre-wrap;
+  line-height: 1.45;
+  margin-bottom: 16px;
 }
 
-/* ==========================================================================
-   06.5 — ARCHITECTURE
-   ========================================================================== */
-.arch-flow-deck {
+.trace-cmd {
+  color: #9E9D95;
+  margin-bottom: 8px;
+}
+
+.trace-err {
+  color: var(--signal-accent);
+}
+
+.fab-footer {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  overflow-x: auto;
-  padding-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
 }
 
-.arch-box {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-forge);
-  border-radius: var(--radius-md);
-  padding: 1.5rem 1.25rem;
-  min-width: 200px;
-  flex: 1;
+/* --------------------------------------------------------------------------
+   STAGE 06 ARTIFACT: Code Surgery Diff
+   -------------------------------------------------------------------------- */
+.diff-toggle-bar {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.diff-toggle-btn {
+  background: none;
+  border: 1px solid var(--rule-fine);
+  padding: 8px 16px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.diff-toggle-btn:hover {
+  border-color: var(--rule-active);
+  color: var(--text-primary);
+}
+
+.diff-toggle-btn.active {
+  background-color: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--bg-canvas);
+}
+
+.editorial-diff-card {
+  border: 1px solid var(--rule-fine);
+  background-color: var(--bg-surface);
+  padding: 24px;
+}
+
+.edc-header {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--rule-fine);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.edc-content {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.diff-row {
+  display: grid;
+  grid-template-columns: 32px 20px 1fr;
+  padding: 2px 4px;
+}
+
+.diff-row-del {
+  background-color: var(--signal-subtle);
+  color: var(--signal-accent);
+}
+
+.diff-row-add {
+  background-color: var(--verified-subtle);
+  color: var(--verified-state);
+}
+
+.diff-num {
+  color: var(--text-dim);
+  user-select: none;
+}
+
+.diff-sign {
+  font-weight: 600;
+  user-select: none;
+}
+
+/* --------------------------------------------------------------------------
+   STAGE 07 ARTIFACT: Verification Proof
+   -------------------------------------------------------------------------- */
+.verification-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.vp-item {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  background-color: var(--verified-subtle);
+  border: 1px solid var(--verified-state);
+  border-radius: 2px;
+}
+
+.verification-proof-box {
+  border: 1px solid var(--verified-state);
+  background-color: var(--bg-surface);
+  padding: 24px;
+}
+
+.vpb-head {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  border-bottom: 1px solid var(--rule-fine);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.vpb-row {
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s var(--ease-forge), border-color 0.2s ease;
-}
-
-.arch-box:hover {
-  transform: translateY(-2px);
-  border-color: var(--border-forge-active);
-}
-
-.arch-box.arch-box-verified {
-  border-color: var(--border-lime);
-  background: #0d1216;
-}
-
-.arch-step-tag {
+  gap: 4px;
+  margin-bottom: 14px;
   font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.vpb-lbl {
   font-size: 0.68rem;
-  color: var(--text-forge-dim);
-  margin-bottom: 0.45rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
 }
 
-.arch-box-title {
-  font-size: 0.98rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.45rem;
+.vpb-copy-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.arch-box-body {
+.vpb-code {
+  background-color: var(--bg-canvas);
+  padding: 4px 8px;
+  border: 1px solid var(--rule-fine);
   font-size: 0.78rem;
-  color: var(--text-forge-muted);
-  line-height: 1.45;
+  color: var(--text-primary);
 }
 
-.arch-arrow {
-  color: var(--border-forge-active);
-  font-size: 1.25rem;
-  flex-shrink: 0;
+.btn-copy-sm {
+  background: none;
+  border: 1px solid var(--rule-fine);
+  padding: 3px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
 }
 
-/* ==========================================================================
-   06.6 — FINAL CTA & FOOTER
-   ========================================================================== */
-.cta-forge-section {
+.btn-copy-sm:hover {
+  border-color: var(--rule-active);
+  color: var(--text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   STAGE 08: Final Convergence
+   -------------------------------------------------------------------------- */
+.stage-final-action {
+  padding: 120px 0;
   text-align: center;
-  padding: 8rem 0;
-  border-top: 1px solid var(--border-forge);
 }
 
-.cta-forge-container {
-  max-width: 720px;
+.final-convergence-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.cta-forge-title {
-  font-size: clamp(2.4rem, 4.8vw, 3.8rem);
-  font-weight: 800;
+.convergence-rules-top, .convergence-rules-bottom {
+  width: 100%;
+  max-width: 480px;
+  margin: 32px 0;
+}
+
+.conv-line {
+  width: 100%;
+  height: 1px;
+  background-color: var(--rule-fine);
+}
+
+.final-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.final-headline {
+  font-size: 3.5rem;
+  line-height: 1.1;
+  font-weight: 500;
   letter-spacing: -0.04em;
-  color: var(--text-forge-primary);
-  line-height: 1.05;
-  margin-bottom: 1.25rem;
+  color: var(--text-primary);
+  margin-bottom: 24px;
 }
 
-.cta-forge-sub {
-  font-size: 1.15rem;
-  color: var(--text-forge-muted);
-  margin-bottom: 2.5rem;
+.final-sub {
+  font-size: 1.2rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  max-width: 580px;
+  margin: 0 auto 40px auto;
 }
 
-.cta-forge-actions {
+.final-cta-cluster {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1.25rem;
-  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 40px;
 }
 
-.forge-footer {
-  background: #050607;
-  border-top: 1px solid var(--border-forge);
-  padding-top: 4.5rem;
+.btn-converge-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  background-color: var(--text-primary);
+  color: var(--bg-canvas);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 14px 28px;
+  border-radius: 2px;
+  transition: all 0.2s var(--ease-precise);
 }
 
-.footer-forge-grid {
+.btn-converge-primary:hover {
+  background-color: #2C2C2B;
+}
+
+.btn-converge-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 14px 22px;
+  border: 1px solid var(--rule-fine);
+  border-radius: 2px;
+  transition: all 0.2s var(--ease-precise);
+}
+
+.btn-converge-ghost:hover {
+  color: var(--text-primary);
+  border-color: var(--rule-active);
+  background-color: var(--bg-surface);
+}
+
+.cli-quick-install {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background-color: var(--bg-surface);
+  padding: 8px 16px;
+  border: 1px solid var(--rule-fine);
+  border-radius: 2px;
+}
+
+.cli-code {
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   09 — FOOTER
+   ========================================================================== */
+.metic-footer {
+  padding: 40px 0;
+  border-top: 1px solid var(--rule-fine);
+  font-size: 0.82rem;
+}
+
+.footer-flex-row {
   display: flex;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 3rem;
-  padding-bottom: 3.5rem;
+  align-items: center;
 }
 
-.brand-row {
+.footer-left {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  margin-bottom: 0.85rem;
+  gap: 16px;
 }
 
-.footer-note {
-  font-size: 0.84rem;
-  color: var(--text-forge-dim);
-  line-height: 1.6;
+.footer-dim {
+  color: var(--text-secondary);
 }
 
-.footer-forge-links {
+.footer-right {
   display: flex;
-  gap: 4.5rem;
+  align-items: center;
+  gap: 20px;
 }
 
-.f-col {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.f-head {
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  color: var(--text-forge-primary);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.35rem;
-}
-
-.f-col a {
-  color: var(--text-forge-muted);
+.footer-link {
+  color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.86rem;
   transition: color 0.15s ease;
 }
 
-.f-col a:hover {
-  color: var(--accent-forge-lime);
+.footer-link:hover {
+  color: var(--text-primary);
 }
 
-.footer-forge-bottom {
-  border-top: 1px solid var(--border-forge-subtle);
-  padding: 1.5rem 0;
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  color: var(--text-forge-dim);
-}
-
-.bottom-row {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-/* Responsive Adaptations */
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
 @media (max-width: 1024px) {
-  .hero-forge-layout {
+  .hero-editorial-heading {
+    font-size: 3.2rem;
+  }
+  
+  .hero-split-layout {
     grid-template-columns: 1fr;
-    gap: 3rem;
+    gap: 48px;
   }
-  .hero-forge-left {
-    max-width: 100%;
-  }
-  .hero-forge-right {
-    height: 480px;
-  }
-  .trace-forge-split {
+
+  .stage-layout-split {
     grid-template-columns: 1fr;
-  }
-  .trace-events-deck {
-    border-right: none;
-    border-bottom: 1px solid var(--border-forge);
+    gap: 40px;
   }
 }
 
 @media (max-width: 768px) {
-  .nav-links {
+  .hero-editorial-heading {
+    font-size: 2.6rem;
+  }
+
+  .final-headline {
+    font-size: 2.5rem;
+  }
+
+  .header-nav {
     display: none;
   }
-  .hero-forge-section {
-    padding-top: 3.5rem;
+
+  .stage-stat-row {
+    flex-wrap: wrap;
+    gap: 20px;
   }
-  .hero-forge-metadata {
-    grid-template-columns: 1fr;
+
+  .inspection-control-bar {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    align-items: stretch;
   }
-  .forge-section {
-    padding: 4.5rem 0;
+
+  .btn-inspect-toggle {
+    justify-content: center;
   }
-  .footer-forge-links {
-    gap: 2rem;
+
+  .inspect-hint {
+    text-align: center;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+@media (max-width: 480px) {
+  .metic-grid-container {
+    padding: 0 20px;
   }
-  .cursor-point, .cursor-halo, .cursor-badge {
-    display: none !important;
+
+  .hero-editorial-heading {
+    font-size: 2.15rem;
+  }
+
+  .hero-action-row, .final-cta-cluster {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .footer-flex-row {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
   }
 }
