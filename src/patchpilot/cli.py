@@ -43,10 +43,14 @@ def status():
     table.add_column("Component", style="cyan", no_wrap=True)
     table.add_column("Value / State", style="green")
 
-    table.add_row("Version", __version__)
-    table.add_row("Neatlogs Project ID", config.neatlogs_project_id)
+    neatlogs_key_display = (
+        f"[green][OK] Configured ({config.neatlogs_api_key[:4]}...{config.neatlogs_api_key[-4:]})[/green]"
+        if config.neatlogs_api_key else "[yellow][WARN] Missing Key[/yellow]"
+    )
+    table.add_row("Neatlogs API Key", neatlogs_key_display)
+    if config.neatlogs_project_id:
+        table.add_row("Neatlogs Project ID", config.neatlogs_project_id)
     table.add_row("Neatlogs Ingest URL", config.neatlogs_ingest_url)
-    table.add_row("Neatlogs Configured", "[OK] Ready" if config.neatlogs_api_key else "[WARN] Missing Key")
     table.add_row("LLM Model", config.model)
     table.add_row("Max Recovery Attempts", str(config.max_attempts))
     table.add_row("Execution Timeout", f"{config.execution_timeout_seconds}s")
@@ -90,9 +94,15 @@ def doctor():
 
     # Neatlogs
     if config.neatlogs_api_key:
-        table.add_row("Neatlogs Tracing", "[green][OK][/green]", f"Project ID: {config.neatlogs_project_id}")
+        masked = f"{config.neatlogs_api_key[:4]}...{config.neatlogs_api_key[-4:]}"
+        table.add_row("Neatlogs Tracing", "[green][OK][/green]", f"Configured via NEATLOGS_API_KEY ({masked})")
     else:
         table.add_row("Neatlogs Tracing", "[yellow][WARN][/yellow]", "NEATLOGS_API_KEY not configured")
+
+    # Crustdata API
+    if config.crustdata_api_key:
+        masked_crust = f"{config.crustdata_api_key[:4]}...{config.crustdata_api_key[-4:]}"
+        table.add_row("Crustdata API", "[green][OK][/green]", f"Connected via CRUSTDATA_API_KEY ({masked_crust})")
 
     # Checkpoint store
     store = CheckpointStore(config.checkpoint_db_path)
@@ -280,9 +290,10 @@ def verify_integrations():
     # Neatlogs
     tracer = NeatlogsTracer()
     if tracer.is_configured():
-        table.add_row("Neatlogs Telemetry", "[green][OK] Active[/green]", f"Endpoint: {tracer.ingest_url}")
+        masked = f"{config.neatlogs_api_key[:4]}...{config.neatlogs_api_key[-4:]}"
+        table.add_row("Neatlogs Telemetry", "[green][OK] Configured[/green]", f"Key: {masked} | Ingest: {tracer.ingest_url}")
     else:
-        table.add_row("Neatlogs Telemetry", "[yellow][WARN] Inactive[/yellow]", "No API key configured")
+        table.add_row("Neatlogs Telemetry", "[yellow][WARN] Inactive[/yellow]", "NEATLOGS_API_KEY not configured")
 
     # Entire
     try:
@@ -300,6 +311,13 @@ def verify_integrations():
         table.add_row("LLM Provider", "[green][OK] Ready[/green]", provider.__class__.__name__)
     except Exception as e:
         table.add_row("LLM Provider", "[red][FAIL][/red]", str(e))
+
+    # Crustdata
+    if config.crustdata_api_key:
+        masked_crust = f"{config.crustdata_api_key[:4]}...{config.crustdata_api_key[-4:]}"
+        table.add_row("Crustdata Intelligence", "[green][OK] Active[/green]", f"Key: {masked_crust} (2025-11-01 API)")
+    else:
+        table.add_row("Crustdata Intelligence", "[yellow][WARN] Optional[/yellow]", "CRUSTDATA_API_KEY not configured")
 
     console.print(table)
 

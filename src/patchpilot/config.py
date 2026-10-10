@@ -13,17 +13,17 @@ load_dotenv()
 
 class PatchPilotConfig(BaseModel):
     # Observability (Neatlogs)
-    neatlogs_project_id: str = Field(
-        default="b0860223-3c80-445d-a3f1-3002c0643197",
-        description="Neatlogs project UUID"
-    )
     neatlogs_api_key: str = Field(
         default_factory=lambda: os.getenv("NEATLOGS_API_KEY", ""),
-        description="Neatlogs write API key"
+        description="Neatlogs Project API key from NEATLOGS_API_KEY"
+    )
+    neatlogs_project_id: str = Field(
+        default_factory=lambda: os.getenv("NEATLOGS_PROJECT_ID", ""),
+        description="Optional Neatlogs project UUID"
     )
     neatlogs_ingest_url: str = Field(
-        default="https://ingest.neatlogs.com/v1/trace",
-        description="Regional ingest endpoint"
+        default=os.getenv("NEATLOGS_INGEST_URL", "https://ingest.neatlogs.com/v1/trace"),
+        description="Ingest endpoint"
     )
 
     # LLM Settings
@@ -44,6 +44,12 @@ class PatchPilotConfig(BaseModel):
     github_token: str = Field(
         default_factory=lambda: os.getenv("GITHUB_TOKEN", ""),
         description="GitHub personal access token"
+    )
+
+    # Crustdata Settings
+    crustdata_api_key: str = Field(
+        default_factory=lambda: os.getenv("CRUSTDATA_API_KEY", ""),
+        description="Crustdata API token"
     )
 
     # Execution & Recovery Budgets

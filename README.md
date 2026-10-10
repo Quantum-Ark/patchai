@@ -162,16 +162,23 @@ python benchmarks/run_benchmarks.py
 ```bash
 pytest -v --cov=patchpilot
 ```
-**Results:** `18 passed in 7.69s` (100% pass rate, 71% code coverage, 0 warnings).
+**Results:** `21 passed in 22.11s` (100% pass rate, 0 warnings).
 
 ---
 
 ## 🔭 Neatlogs Observability
 
 PatchPilot AI is instrumented with the official Neatlogs Python HTTP ingestion protocol:
-- **Project ID:** `b0860223-3c80-445d-a3f1-3002c0643197`
+- **Authentication:** Configured via `NEATLOGS_API_KEY` (Project API key).
 - **Workflow Spans:** Issue intake, root cause analysis, patch generations, test runs, automated rollbacks, and dual-suite verification.
 - **Trace IDs:** Every execution produces an immutable Neatlogs trace ID (e.g. `1fd1807e23cac2b5d2c81c9fbb12faf3`).
+
+---
+
+## ⚡ Crustdata Intelligence Integration
+
+- **Authentication:** Configured via `CRUSTDATA_API_KEY` (`2025-11-01` API).
+- **Functionality:** Provides developer and repository intelligence for enriched issue context.
 
 ---
 
@@ -194,9 +201,11 @@ entire status
 
 ## 💼 Business Model & Pitch Materials
 
-- **Business Plan & Unit Economics:** [BUSINESS_PLAN.md](file:///c:/Users/Abhishek/Downloads/patchpilotai/BUSINESS_PLAN.md)
-- **3-Minute Hackathon Demo Script:** [DEMO_SCRIPT.md](file:///c:/Users/Abhishek/Downloads/patchpilotai/DEMO_SCRIPT.md)
-- **Submission Evidence & Trace Verification:** [SUBMISSION_EVIDENCE.md](file:///c:/Users/Abhishek/Downloads/patchpilotai/SUBMISSION_EVIDENCE.md)
+- **Business Plan & Unit Economics:** [BUSINESS_PLAN.md](BUSINESS_PLAN.md) / [docs/business-plan.md](docs/business-plan.md)
+- **3-Minute Hackathon Demo Script:** [DEMO_SCRIPT.md](DEMO_SCRIPT.md) / [demo/demo-script.md](demo/demo-script.md)
+- **Submission Evidence & Trace Verification:** [SUBMISSION_EVIDENCE.md](SUBMISSION_EVIDENCE.md)
+- **Architecture Documentation:** [docs/architecture.md](docs/architecture.md)
+- **Security Policy & Threat Model:** [docs/security.md](docs/security.md)
 
 ---
 

@@ -1,5 +1,6 @@
-# PatchPilot AI — Business Plan & Unit Economics
-*neatHacks 2026 Submission Document*
+# PatchPilot AI — Business Plan & Unit Economics (Locally Prepared)
+*neatHacks 2026 Submission Document (All Projections are Planning Assumptions)*
+*External cfo.ai live workflow bypassed due to commercial payment requirements; structured using hackathon guidelines.*
 
 ---
 
