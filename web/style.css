@@ -1612,6 +1612,279 @@ section, header, footer {
 }
 
 /* ==========================================================================
+   MOTION GRAPHICS & INTERACTIVE ARCHITECTURAL CURSOR
+   ========================================================================== */
+
+/* 1. Custom Architectural Cursor */
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+}
+
+@media (pointer: fine) {
+  .custom-cursor {
+    display: block;
+  }
+}
+
+.cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background-color: var(--accent-primary);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: transform 0.1s ease, background-color 0.2s ease;
+  z-index: 10001;
+}
+
+.cursor-ring {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--text-primary);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: width 0.22s var(--ease-lens), height 0.22s var(--ease-lens), border-color 0.2s ease, background-color 0.2s ease, border-radius 0.22s ease;
+  z-index: 10000;
+  opacity: 0.85;
+}
+
+.cursor-cross-h, .cursor-cross-v {
+  position: absolute;
+  background-color: var(--border-default);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.cursor-cross-h {
+  top: 50%;
+  left: -6px;
+  right: -6px;
+  height: 1px;
+}
+
+.cursor-cross-v {
+  left: 50%;
+  top: -6px;
+  bottom: -6px;
+  width: 1px;
+}
+
+.cursor-badge {
+  position: fixed;
+  transform: translate(20px, 16px);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  background-color: var(--surface-inverse);
+  color: var(--text-inverse);
+  padding: 3px 6px;
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Cursor Interactive States */
+.cursor-hover .cursor-ring {
+  width: 48px;
+  height: 48px;
+  border-color: var(--accent-primary);
+  background-color: var(--accent-subtle);
+}
+
+.cursor-hover .cursor-cross-h,
+.cursor-hover .cursor-cross-v {
+  opacity: 0.6;
+}
+
+.cursor-inspect .cursor-ring {
+  width: 60px;
+  height: 60px;
+  border-color: #2C82C9;
+  background-color: rgba(44, 130, 201, 0.1);
+  border-style: dashed;
+}
+
+.cursor-inspect .cursor-badge,
+.cursor-hover .cursor-badge {
+  opacity: 1;
+}
+
+/* 2. Kinetic Text & Typography */
+.kinetic-line {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.kinetic-word {
+  display: inline-block;
+  transform: translateY(115%);
+  opacity: 0;
+  transition: transform 0.8s var(--ease-lens), opacity 0.8s ease;
+  transition-delay: calc(var(--w-idx, 0) * 0.04s);
+  will-change: transform, opacity;
+}
+
+.hero-headline.is-revealed .kinetic-word {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Scroll reveal card items */
+.reveal-card {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s var(--ease-lens), transform 0.7s var(--ease-lens);
+  will-change: opacity, transform;
+}
+
+.reveal-card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 3. 3D Interactive Card Perspective Tilt */
+.tilt-card {
+  transition: transform 0.22s var(--ease-soft), box-shadow 0.25s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tilt-card:hover {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.06);
+}
+
+/* 4. Motion Graphic Elements */
+
+/* Wire Track Traveling Pulse */
+.board-diagram-wire {
+  position: relative;
+}
+
+.wire-pulse-track {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  pointer-events: none;
+  transform: translateY(-50%);
+  overflow: hidden;
+}
+
+.wire-pulse-node {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 16px;
+  height: 6px;
+  background: linear-gradient(90deg, transparent, var(--accent-primary), #FFFFFF);
+  border-radius: 3px;
+  animation: pulseTravel 3.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes pulseTravel {
+  0% { left: 0%; opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+/* Radar Oscilloscope in Stage 05 */
+.fail-oscilloscope {
+  width: 100%;
+  height: 24px;
+  margin: 10px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.oscilloscope-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.oscilloscope-path {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: 1.8;
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: waveScan 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes waveScan {
+  0% { stroke-dashoffset: 400; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* Gyroscope in Stage 07 */
+.seal-gyro-wrap {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 12px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.seal-gyro-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  animation: gyroSpin 20s linear infinite;
+}
+
+.gyro-ring-outer {
+  fill: none;
+  stroke: var(--status-verified);
+  stroke-width: 1.2;
+}
+
+.gyro-ring-inner {
+  fill: none;
+  stroke: var(--status-verified);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+@keyframes gyroSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Magnetic Button Glow */
+.btn-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+
+.btn:hover .btn-glow {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ==========================================================================
    ACCESSIBILITY & REDUCED MOTION
    ========================================================================== */
 :focus-visible {

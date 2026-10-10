@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initLiveDraftBrief();
   initDiffShowcase();
   initTraceCopy();
+  initCustomCursor();
+  initKineticTypography();
+  initTiltEffect();
+  initScrollReveal();
 });
 
 /* ==========================================================================
@@ -660,4 +664,146 @@ function initTraceCopy() {
       }
     });
   }
+}
+
+/* ==========================================================================
+   09 — ARCHITECTURAL PRECISION CURSOR SYSTEM
+   ========================================================================== */
+function initCustomCursor() {
+  const cursor = document.getElementById('custom-cursor');
+  const dot = document.getElementById('cursor-dot');
+  const ring = document.getElementById('cursor-ring');
+  const badge = document.getElementById('cursor-badge');
+
+  if (!cursor || !dot || !ring || window.matchMedia('(pointer: coarse)').matches) {
+    return;
+  }
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let ringX = mouseX;
+  let ringY = mouseY;
+
+  window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    dot.style.left = `${mouseX}px`;
+    dot.style.top = `${mouseY}px`;
+  }, { passive: true });
+
+  function renderCursor() {
+    ringX += (mouseX - ringX) * 0.18;
+    ringY += (mouseY - ringY) * 0.18;
+
+    ring.style.left = `${ringX}px`;
+    ring.style.top = `${ringY}px`;
+
+    if (badge) {
+      badge.style.left = `${ringX}px`;
+      badge.style.top = `${ringY}px`;
+    }
+
+    requestAnimationFrame(renderCursor);
+  }
+  requestAnimationFrame(renderCursor);
+
+  // Contextual hover triggers and badge text
+  const interactiveSelectors = [
+    { selector: '.btn-primary', label: '[ACTION]' },
+    { selector: '.btn-secondary', label: '[BRIEF]' },
+    { selector: '#btn-nav-xray, #btn-hero-inspect-prompt', label: '[X-RAY]' },
+    { selector: '.btn-diff-tab', label: '[DIFF]' },
+    { selector: '.cap-nav-item', label: '[CAPABILITY]' },
+    { selector: '.btn-copy-sm, #btn-copy-cli-command', label: '[COPY]' },
+    { selector: '.brand-link', label: '[TOP]' },
+    { selector: '#btn-sound-toggle', label: '[AUDIO]' },
+    { selector: '#btn-theme-toggle', label: '[THEME]' }
+  ];
+
+  interactiveSelectors.forEach(({ selector, label }) => {
+    document.querySelectorAll(selector).forEach((el) => {
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('cursor-hover');
+        if (badge) {
+          badge.textContent = label;
+          badge.style.opacity = '1';
+        }
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('cursor-hover');
+        if (badge) {
+          badge.style.opacity = '0';
+        }
+      });
+    });
+  });
+
+  // Click pulse
+  window.addEventListener('mousedown', () => {
+    ring.style.transform = 'translate(-50%, -50%) scale(0.85)';
+  });
+  window.addEventListener('mouseup', () => {
+    ring.style.transform = 'translate(-50%, -50%) scale(1)';
+  });
+}
+
+/* ==========================================================================
+   10 — KINETIC TYPOGRAPHY STAGGER REVEAL
+   ========================================================================== */
+function initKineticTypography() {
+  const headline = document.getElementById('hero-headline');
+  if (!headline) return;
+
+  setTimeout(() => {
+    headline.classList.add('is-revealed');
+  }, 120);
+}
+
+/* ==========================================================================
+   11 — 3D INTERACTIVE CARD PERSPECTIVE TILT
+   ========================================================================== */
+function initTiltEffect() {
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+
+  const tiltCards = document.querySelectorAll('.tilt-card');
+  tiltCards.forEach((card) => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotateX = ((y - centerY) / centerY) * -4.5;
+      const rotateY = ((x - centerX) / centerX) * 4.5;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.008, 1.008, 1.008)`;
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+    });
+  });
+}
+
+/* ==========================================================================
+   12 — SCROLL REVEAL OBSERVER
+   ========================================================================== */
+function initScrollReveal() {
+  const revealCards = document.querySelectorAll('.reveal-card, .principle-item');
+  if (!revealCards.length || !('IntersectionObserver' in window)) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  revealCards.forEach((card) => {
+    card.classList.add('reveal-card');
+    observer.observe(card);
+  });
 }
