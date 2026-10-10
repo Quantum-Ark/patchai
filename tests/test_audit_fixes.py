@@ -2,14 +2,14 @@
 
 import pytest
 from pathlib import Path
-from patchpilot.tools.test_runner import TestRunnerTool
+from patchpilot.tools.test_runner import TestRunnerTool as _TestRunnerTool
 from patchpilot.tools.patch import PatchTool
 from patchpilot.tools.github import GitHubIssueTool
 from patchpilot.config import PatchPilotConfig
 
 
 def test_runner_blocks_shell_injection(tmp_path: Path):
-    runner = TestRunnerTool(tmp_path)
+    runner = _TestRunnerTool(tmp_path)
     for evil in ("rm -rf /", "pytest tests/ && rm -rf /", "python -c \"import os; os.system('x')\""):
         result = runner.run_command(evil)
         assert result.passed is False

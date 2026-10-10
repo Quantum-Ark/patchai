@@ -19,6 +19,7 @@ stateDiagram-v2
     [*] --> IDLE
     IDLE --> INTAKE: Issue Intake
     INTAKE --> INVESTIGATING: Repository Scan
+    INVESTIGATING --> REPRODUCING: Baseline Test Run
     REPRODUCING --> PATCHING: Bug Confirmed
     PATCHING --> TESTING: Sandboxed Execution
     TESTING --> EVALUATING: Inspect Test Results

@@ -252,9 +252,13 @@ class PatchPilotOrchestrator:
                     _syn_fail = _TER2(
                         command="patch-syntax-check", exit_code=1, stdout="",
                         stderr=_syn_err, duration_seconds=0.0, passed=False,
-                        summary="Patch syntax check failed.",
+                        summary="Patch pre-check failed.",
                     )
-                    _fc2 = FailureCategory.SYNTAX_ERROR
+                    _fc2 = (
+                        FailureCategory.SYNTAX_ERROR
+                        if "invalid" in _syn_err.lower()
+                        else FailureCategory.INCOMPLETE_PATCH
+                    )
                     _act2, _guide2 = self.retry_policy.evaluate_recovery(current_attempt, _fc2, _syn_fail)
                     attempts_list.append(PatchAttempt(
                         attempt_number=current_attempt, strategy_description=attempt_strategy,
