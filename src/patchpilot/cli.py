@@ -3,6 +3,7 @@ PatchPilot AI Command Line Interface.
 Built with Typer and Rich for neatHacks 2026.
 """
 
+import os
 import sys
 import shutil
 import subprocess
@@ -398,37 +399,51 @@ def entire_sync():
 
 @app.command()
 def serve(
-    port: int = typer.Option(3000, "--port", "-p", help="Port to serve the interactive homepage"),
-    host: str = typer.Option("127.0.0.1", "--host", "-h", help="Host address to bind")
+    port: int = typer.Option(
+        int(os.getenv("PORT", "3000")),
+        "--port",
+        "-p",
+        help="Port to serve the interactive homepage"
+    ),
+    host: str = typer.Option(
+        os.getenv("HOST", "127.0.0.1"),
+        "--host",
+        "-h",
+        help="Host address to bind"
+    ),
+    no_browser: bool = typer.Option(
+        False,
+        "--no-browser",
+        help="Do not automatically launch browser on start"
+    )
 ):
-    """Serve the interactive animated web homepage locally."""
-    import http.server
+    """Serve the interactive animated web homepage and health probes."""
     import socketserver
     import webbrowser
-    from functools import partial
+    from patchpilot.server import PatchPilotRequestHandler
 
     web_dir = Path(__file__).parent.parent.parent / "web"
     if not web_dir.is_dir():
         console.print(f"[bold red]Error:[/bold red] Web directory not found at {web_dir}")
         raise typer.Exit(code=1)
 
-    handler = partial(http.server.SimpleHTTPRequestHandler, directory=str(web_dir))
-    
     console.print(Panel.fit(
-        f"[bold cyan]PatchPilot AI — Web Experience[/bold cyan]\n"
+        f"[bold cyan]PatchPilot AI — Web Workbench & API Server[/bold cyan]\n"
         f"Serving directory: [yellow]{web_dir.resolve()}[/yellow]\n"
         f"URL: [bold green]http://{host}:{port}[/bold green]\n"
+        f"Health Probe: [cyan]http://{host}:{port}/health[/cyan]\n"
         f"Press [dim]Ctrl+C[/dim] to stop server.",
         border_style="cyan"
     ))
 
     try:
-        with socketserver.TCPServer((host, port), handler) as httpd:
-            console.print(f"[dim]Opening browser at http://{host}:{port} ...[/dim]")
-            try:
-                webbrowser.open(f"http://{host}:{port}")
-            except Exception:
-                pass
+        with socketserver.TCPServer((host, port), PatchPilotRequestHandler) as httpd:
+            if not no_browser and host in ("127.0.0.1", "localhost"):
+                console.print(f"[dim]Opening browser at http://{host}:{port} ...[/dim]")
+                try:
+                    webbrowser.open(f"http://{host}:{port}")
+                except Exception:
+                    pass
             httpd.serve_forever()
     except KeyboardInterrupt:
         console.print("\n[yellow]Server stopped.[/yellow]")

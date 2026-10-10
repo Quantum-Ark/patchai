@@ -243,5 +243,24 @@ entire status
 
 ---
 
+---
+
+## ☁️ AWS Production Deployment
+
+PatchPilot AI is containerized and ready for production deployment on **AWS App Runner** or **AWS ECS Fargate**:
+
+- **Production Dockerfile:** Multi-stage image running as non-root user `patchpilot` on port `8080`.
+- **Health Probes:** `/health` and `/healthz` endpoints responding with HTTP 200 for ALB and App Runner health checkers.
+- **Automated CI/CD:** Continuous deployment via [`.github/workflows/deploy-aws.yml`](.github/workflows/deploy-aws.yml) on push to `main`.
+- **Infrastructure as Code:** Ready-to-use CloudFormation template in [`aws/cloudformation.yaml`](aws/cloudformation.yaml) and task definition in [`aws/ecs-task-definition.json`](aws/ecs-task-definition.json).
+- **Deployment Guide:** Comprehensive step-by-step instructions in [docs/AWS_DEPLOYMENT.md](docs/AWS_DEPLOYMENT.md).
+
+```bash
+# Run locally with Docker Compose:
+docker compose up --build
+```
+
+---
+
 ## ⚖️ License
 MIT License. Built for **neatHacks 2026**.

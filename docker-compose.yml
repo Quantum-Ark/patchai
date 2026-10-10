@@ -1,0 +1,37 @@
+# ==============================================================================
+# PatchPilot AI — Local & Staging Docker Compose
+# ==============================================================================
+
+version: "3.8"
+
+services:
+  patchpilot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: patchpilot-ai:latest
+    container_name: patchpilot-ai
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - HOST=0.0.0.0
+      - MODEL=${MODEL:-gpt-4o-mini}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - NEATLOGS_API_KEY=${NEATLOGS_API_KEY}
+      - NEATLOGS_PROJECT_ID=${NEATLOGS_PROJECT_ID}
+      - CRUSTDATA_API_KEY=${CRUSTDATA_API_KEY}
+    volumes:
+      - ./artifacts:/app/artifacts
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

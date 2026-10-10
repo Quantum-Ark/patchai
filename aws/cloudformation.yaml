@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "PatchPilot AI — Production AWS Infrastructure (ECR, ECS Fargate, ALB, CloudWatch)"
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: "production"
+    Description: "Environment tag (production, staging)"
+
+  ContainerPort:
+    Type: Number
+    Default: 8080
+    Description: "Container port exposed by PatchPilot AI"
+
+  DesiredCount:
+    Type: Number
+    Default: 1
+    Description: "Number of ECS task instances to run"
+
+Resources:
+  # 1. Amazon ECR Repository
+  PatchPilotECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: patchpilot-ai
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep last 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+  # 2. CloudWatch Log Group
+  PatchPilotLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/patchpilot-ai-${EnvironmentName}"
+      RetentionInDays: 30
+
+  # 3. ECS Cluster
+  PatchPilotECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "patchpilot-cluster-${EnvironmentName}"
+
+  # 4. IAM Execution Role for ECS Fargate
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "patchpilot-ecs-execution-role-${EnvironmentName}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+Outputs:
+  ECRRepositoryUri:
+    Description: "Amazon ECR Repository URI for pushing Docker images"
+    Value: !GetAtt PatchPilotECRRepository.RepositoryUri
+    Export:
+      Name: !Sub "${AWS::StackName}-ECRUri"
+
+  ECSClusterName:
+    Description: "Name of the created ECS Cluster"
+    Value: !Ref PatchPilotECSCluster
+    Export:
+      Name: !Sub "${AWS::StackName}-ClusterName"
