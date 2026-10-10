@@ -1,22 +1,202 @@
 /**
- * PatchPilot AI — Master Creative Interaction Engine
- * Features: High-precision desktop cursor with magnetic pulling,
- * inspectable repair composition, trace explorer, and accessible keyboard controls.
+ * PatchPilot AI — Master Creative Interaction & Motion Engine
+ * Features:
+ * - "The Repair Current": High-performance technical circuit canvas simulation with cursor displacement
+ * - Precision desktop cursor with magnetic pulling and contextual "INSPECT" badge
+ * - Interactive Code Diff Showcase (Before / Patch #1 / Patch #2)
+ * - Hero Workflow Composition stage lock & preview
+ * - Trace Explorer with working copy utilities
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  initRepairCurrentCanvas();
   initPrecisionCursor();
   initRepairWorkflowComposition();
+  initDiffShowcase();
   initTraceExplorer();
   initCliCopy();
   initNavScroll();
 });
 
 /* ==========================================================================
-   1. Signature Desktop Precision Cursor & Magnetic Interactions
+   1. "The Repair Current" Interactive Technical Canvas Simulation
+   ========================================================================== */
+function initRepairCurrentCanvas() {
+  const canvas = document.getElementById('repair-current-canvas');
+  if (!canvas) return;
+
+  // Honor prefers-reduced-motion
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return;
+  }
+
+  const ctx = canvas.getContext('2d');
+  let width = (canvas.width = canvas.offsetWidth);
+  let height = (canvas.height = canvas.offsetHeight);
+
+  window.addEventListener('resize', () => {
+    width = canvas.width = canvas.offsetWidth;
+    height = canvas.height = canvas.offsetHeight;
+  });
+
+  const mouse = { x: -1000, y: -1000, active: false };
+
+  window.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+    mouse.active = true;
+  });
+
+  window.addEventListener('mouseleave', () => {
+    mouse.active = false;
+  });
+
+  // Grid points with spring displacement
+  const cols = 28;
+  const rows = 14;
+  const grid = [];
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      grid.push({
+        baseX: (c / (cols - 1)) * width,
+        baseY: (r / (rows - 1)) * height,
+        x: (c / (cols - 1)) * width,
+        y: (r / (rows - 1)) * height,
+        vx: 0,
+        vy: 0
+      });
+    }
+  }
+
+  // Diagnostic signal pulses traveling along technical paths toward defect
+  const pulses = [];
+  const maxPulses = 16;
+
+  class SignalPulse {
+    constructor() {
+      this.reset();
+    }
+
+    reset() {
+      this.progress = 0;
+      this.speed = 0.004 + Math.random() * 0.006;
+      this.startX = Math.random() * width * 0.4;
+      this.startY = Math.random() * height;
+      this.targetX = width * 0.75;
+      this.targetY = height * 0.45;
+      this.color = Math.random() > 0.3 ? 'rgba(200, 255, 85, 0.65)' : 'rgba(118, 215, 255, 0.5)';
+      this.size = Math.random() * 1.6 + 1.2;
+    }
+
+    update() {
+      this.progress += this.speed;
+      if (this.progress >= 1) {
+        this.reset();
+      }
+    }
+
+    draw() {
+      // Curved circuit bezier path
+      const cx = this.startX + (this.targetX - this.startX) * 0.5;
+      const cy = this.startY;
+
+      const t = this.progress;
+      const inv = 1 - t;
+      const px = inv * inv * this.startX + 2 * inv * t * cx + t * t * this.targetX;
+      const py = inv * inv * this.startY + 2 * inv * t * cy + t * t * this.targetY;
+
+      ctx.beginPath();
+      ctx.arc(px, py, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < maxPulses; i++) {
+    pulses.push(new SignalPulse());
+  }
+
+  // Defect pulse coordinates
+  let defectPulseTime = 0;
+  let isRunning = true;
+
+  // Pause when out of viewport
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      isRunning = entry.isIntersecting;
+      if (isRunning) requestAnimationFrame(render);
+    });
+  });
+  observer.observe(canvas);
+
+  function render() {
+    if (!isRunning) return;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // 1. Draw delicate grid with spring displacement
+    ctx.fillStyle = 'rgba(37, 43, 53, 0.45)';
+    for (let i = 0; i < grid.length; i++) {
+      const p = grid[i];
+
+      // Mouse displacement
+      if (mouse.active) {
+        const dx = mouse.x - p.baseX;
+        const dy = mouse.y - p.baseY;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 120) {
+          const force = (120 - dist) / 120;
+          p.vx -= (dx / dist) * force * 1.5;
+          p.vy -= (dy / dist) * force * 1.5;
+        }
+      }
+
+      // Spring back to base position
+      p.vx += (p.baseX - p.x) * 0.08;
+      p.vy += (p.baseY - p.y) * 0.08;
+      p.vx *= 0.82;
+      p.vy *= 0.82;
+      p.x += p.vx;
+      p.y += p.vy;
+
+      ctx.fillRect(p.x - 1, p.y - 1, 2, 2);
+    }
+
+    // 2. Draw signal pulses traveling toward defect
+    for (let i = 0; i < pulses.length; i++) {
+      pulses[i].update();
+      pulses[i].draw();
+    }
+
+    // 3. Defect node pulse indicator
+    defectPulseTime += 0.035;
+    const defX = width * 0.75;
+    const defY = height * 0.45;
+    const rad = 6 + Math.sin(defectPulseTime) * 3;
+
+    ctx.beginPath();
+    ctx.arc(defX, defY, rad, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(200, 255, 85, 0.5)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(defX, defY, 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#C8FF55';
+    ctx.fill();
+
+    requestAnimationFrame(render);
+  }
+
+  render();
+}
+
+/* ==========================================================================
+   2. Desktop Signature Precision Cursor & Magnetic Interactions
    ========================================================================== */
 function initPrecisionCursor() {
-  // Respect user preference or touch devices
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || 
       window.matchMedia('(pointer: coarse)').matches) {
     return;
@@ -42,7 +222,6 @@ function initPrecisionCursor() {
     }
   });
 
-  // 60fps smooth positional lag for halo
   function renderCursor() {
     haloX += (mouseX - haloX) * 0.18;
     haloY += (mouseY - haloY) * 0.18;
@@ -51,14 +230,12 @@ function initPrecisionCursor() {
   }
   renderCursor();
 
-  // Hover states for links & buttons
-  const interactiveTargets = document.querySelectorAll('a, button, .board-stage, .trace-event-row, .arch-node');
+  const interactiveTargets = document.querySelectorAll('a, button, .board-stage, .trace-event-row, .pipeline-card, .diff-view-btn');
   interactiveTargets.forEach((target) => {
     target.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
     target.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
   });
 
-  // Magnetic button pull effect
   const magneticButtons = document.querySelectorAll('.magnetic');
   magneticButtons.forEach((btn) => {
     btn.addEventListener('mousemove', (e) => {
@@ -73,7 +250,6 @@ function initPrecisionCursor() {
     });
   });
 
-  // Inspect badge when hovering over workflow stages
   const inspectableStages = document.querySelectorAll('.is-inspectable');
   inspectableStages.forEach((stage) => {
     stage.addEventListener('mouseenter', () => document.body.classList.add('cursor-inspecting'));
@@ -82,7 +258,7 @@ function initPrecisionCursor() {
 }
 
 /* ==========================================================================
-   2. Interactive Signature Repair Workflow Composition
+   3. Interactive Signature Repair Workflow Composition
    ========================================================================== */
 const STAGE_EXPLANATIONS = {
   1: {
@@ -118,7 +294,7 @@ function initRepairWorkflowComposition() {
   const explainerStatus = document.getElementById('explainer-status');
   const explainerText = document.getElementById('explainer-text');
 
-  let lockedStage = 4; // Default to recovery stage
+  let lockedStage = 4; // Default to recovery
 
   function updateExplainer(stageNum) {
     const data = STAGE_EXPLANATIONS[stageNum];
@@ -140,23 +316,13 @@ function initRepairWorkflowComposition() {
   stages.forEach((stage) => {
     const num = parseInt(stage.dataset.stage, 10);
 
-    // Hover previews stage
-    stage.addEventListener('mouseenter', () => {
-      updateExplainer(num);
-    });
-
-    // Mouseleave returns to locked stage
-    stage.addEventListener('mouseleave', () => {
-      updateExplainer(lockedStage);
-    });
-
-    // Click locks selection
+    stage.addEventListener('mouseenter', () => updateExplainer(num));
+    stage.addEventListener('mouseleave', () => updateExplainer(lockedStage));
     stage.addEventListener('click', () => {
       lockedStage = num;
       setStageActive(lockedStage);
     });
 
-    // Accessible keyboard navigation
     stage.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
@@ -170,7 +336,78 @@ function initRepairWorkflowComposition() {
 }
 
 /* ==========================================================================
-   3. Interactive Trace Explorer
+   4. Interactive Code-Diff Showcase (Before / Patch #1 / Patch #2)
+   ========================================================================== */
+const DIFF_VIEWS = {
+  before: {
+    stats: 'Baseline Defect (calc_tiered_price unhandled)',
+    rows: [
+      { type: 'comment', num: '14', text: '# Original baseline code in pricing.py' },
+      { type: 'ctx',     num: '15', text: 'def calculate_tiered_price(base_price: float, volume: int, is_vip: bool) -> float:' },
+      { type: 'del',     num: '16', text: '    return base_price * volume * (0.80 if is_vip else 1.0)  # Defect: negative volume unhandled' }
+    ]
+  },
+  patch1: {
+    stats: '+1 -1 lines (Caused VIP Regression)',
+    rows: [
+      { type: 'comment', num: '14', text: '# Attempt #1: Naive Blind Clamp (Failed regression suite)' },
+      { type: 'ctx',     num: '15', text: 'def calculate_tiered_price(base_price: float, volume: int, is_vip: bool) -> float:' },
+      { type: 'del',     num: '16', text: '-    return base_price * volume * (0.80 if is_vip else 1.0)' },
+      { type: 'add',     num: '16', text: '+    return base_price * max(0, volume)  # BROKE VIP DISCOUNT RULE (80.0 != 100.0)' }
+    ]
+  },
+  patch2: {
+    stats: '+3 -1 lines (Verified Precision Fix)',
+    rows: [
+      { type: 'comment', num: '14', text: '# Attempt #2: Precision Adaptive Patch (Verified 100% exit code 0)' },
+      { type: 'ctx',     num: '15', text: 'def calculate_tiered_price(base_price: float, volume: int, is_vip: bool) -> float:' },
+      { type: 'del',     num: '16', text: '-    if volume < 0: volume = 0  # Replaced naive volume clamp' },
+      { type: 'add',     num: '16', text: '+    if volume < 0:' },
+      { type: 'add',     num: '17', text: '+        raise ValueError("Volume must be non-negative")' },
+      { type: 'ctx',     num: '18', text: '    multiplier = 0.80 if is_vip else 1.0' },
+      { type: 'ctx',     num: '19', text: '    return base_price * volume * multiplier' }
+    ]
+  }
+};
+
+function initDiffShowcase() {
+  const screen = document.getElementById('diff-screen');
+  const tabs = document.querySelectorAll('.diff-view-btn');
+  const statsLabel = document.getElementById('diff-stats-label');
+
+  if (!screen) return;
+
+  function renderView(viewKey) {
+    const data = DIFF_VIEWS[viewKey];
+    if (!data) return;
+
+    if (statsLabel) statsLabel.textContent = data.stats;
+    screen.innerHTML = '';
+
+    data.rows.forEach((row) => {
+      const lineEl = document.createElement('div');
+      lineEl.className = `diff-row ${row.type}`;
+      lineEl.innerHTML = `
+        <span class="diff-num">${row.num}</span>
+        <span class="diff-text">${escapeHtml(row.text)}</span>
+      `;
+      screen.appendChild(lineEl);
+    });
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderView(tab.dataset.view);
+    });
+  });
+
+  renderView('patch2');
+}
+
+/* ==========================================================================
+   5. Interactive Trace Explorer
    ========================================================================== */
 const TRACE_EVENTS_DATA = [
   {
@@ -263,7 +500,7 @@ function initTraceExplorer() {
 }
 
 /* ==========================================================================
-   4. CLI Quick Copy
+   6. CLI Quick Copy
    ========================================================================== */
 function initCliCopy() {
   const btn = document.getElementById('btn-copy-cli');
@@ -283,7 +520,7 @@ patchpilot serve --port 3000`;
       btn.style.color = '#090B0F';
 
       setTimeout(() => {
-        btn.textContent = 'Copy all';
+        btn.textContent = 'Copy commands';
         btn.style.background = '';
         btn.style.color = '';
       }, 2000);
@@ -292,7 +529,7 @@ patchpilot serve --port 3000`;
 }
 
 /* ==========================================================================
-   5. Nav Bar Surface Scroll Transition
+   7. Navigation Scroll Transition
    ========================================================================== */
 function initNavScroll() {
   const nav = document.getElementById('nav-bar');
@@ -305,4 +542,15 @@ function initNavScroll() {
       nav.classList.remove('scrolled');
     }
   }, { passive: true });
+}
+
+function escapeHtml(string) {
+  const entityMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  };
+  return String(string).replace(/[&<>"']/g, (s) => entityMap[s]);
 }

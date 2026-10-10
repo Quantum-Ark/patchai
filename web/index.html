@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PatchPilot AI — Autonomous Code Repair. Tests Prove It.</title>
-  <meta name="description" content="PatchPilot investigates software issues, generates surgical patches, executes tests, recovers from regressions, and outputs evidence-gated verification.">
+  <title>PatchPilot AI — Patch the Bug. Prove the Fix.</title>
+  <meta name="description" content="Autonomous software debugging and verified code repair. PatchPilot investigates real issues, applies patches, tests for regressions, and produces evidence-backed proof.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-dark">
+<body class="theme-graphite">
 
   <!-- Desktop Signature Precision Cursor Elements -->
   <div id="cursor-halo" class="cursor-halo" aria-hidden="true"></div>
@@ -22,7 +22,6 @@
     <div class="nav-container">
       <div class="nav-left">
         <a href="#" class="nav-brand" aria-label="PatchPilot AI Home">
-          <!-- Geometric mark: two connected repaired code brackets -->
           <svg class="brand-glyph" viewBox="0 0 28 28" width="24" height="24" fill="none" aria-hidden="true">
             <path d="M7 6L3 14L7 22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M21 6L25 14L21 22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -35,11 +34,12 @@
       </div>
 
       <nav class="nav-links" aria-label="Main Navigation">
-        <a href="#how-it-works" class="nav-anchor">How it works</a>
-        <a href="#evidence-gated" class="nav-anchor">Verification</a>
-        <a href="#trace-explorer" class="nav-anchor">Trace Explorer</a>
+        <a href="#pipeline" class="nav-anchor">Pipeline</a>
+        <a href="#code-diff" class="nav-anchor">Diff Showcase</a>
+        <a href="#recovery" class="nav-anchor">Recovery</a>
+        <a href="#trace-explorer" class="nav-anchor">Verification Trace</a>
         <a href="#architecture" class="nav-anchor">Architecture</a>
-        <a href="#trust" class="nav-anchor">Trust &amp; Limits</a>
+        <a href="#workflow" class="nav-anchor">CLI</a>
       </nav>
 
       <div class="nav-right">
@@ -47,42 +47,45 @@
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
           </svg>
-          <span>Explore on GitHub</span>
+          <span>Explore GitHub</span>
         </a>
       </div>
     </div>
   </header>
 
   <!-- ======================================================================
-       SECTION A — HERO
+       SECTION 1 — HERO & "THE REPAIR CURRENT"
        ====================================================================== -->
   <section class="hero-section" id="hero">
+    <!-- The Repair Current Interactive Canvas Background -->
+    <canvas id="repair-current-canvas" class="repair-current-canvas" aria-hidden="true"></canvas>
+
     <div class="layout-container hero-layout">
       <!-- Left Column: Editorial Headline & Actions -->
       <div class="hero-copy">
         <div class="hero-eyebrow">
           <span class="eyebrow-accent"></span>
-          <span>AUTONOMOUS CODE REPAIR · EVIDENCE FIRST</span>
+          <span>AUTONOMOUS CODE REPAIR / EVIDENCE FIRST</span>
         </div>
 
         <h1 class="hero-title">
-          AI fixes the bug.<br>
-          <span class="text-lime">Tests prove it.</span>
+          Patch the bug.<br>
+          <span class="text-lime">Prove the fix.</span>
         </h1>
 
         <p class="hero-desc">
-          From issue to patch to verified result. PatchPilot investigates real code, runs real tests, and uses failure evidence to guide its next recovery attempt.
+          PatchPilot investigates software issues, generates real code changes, and runs tests to establish whether a repair actually works.
         </p>
 
         <div class="hero-actions">
-          <a href="#how-it-works" class="btn btn-primary magnetic" id="hero-cta-primary">
-            <span>See how it works</span>
+          <a href="#pipeline" class="btn btn-primary magnetic" id="hero-cta-primary">
+            <span>Watch the repair</span>
             <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M6 12L10 8L6 4"/>
             </svg>
           </a>
           <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn btn-secondary magnetic" id="hero-cta-secondary">
-            <span>Explore the code</span>
+            <span>Explore GitHub</span>
             <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <path d="M4 12L12 4M12 4H6M12 4V10"/>
             </svg>
@@ -94,89 +97,89 @@
             <circle cx="8" cy="8" r="7"/>
             <path d="M8 5V8.5L10 10.5"/>
           </svg>
-          <span>Built for verifiable software repair · Tested against real multi-attempt regressions</span>
+          <span>The Repair Current: Interactive signal field responds to cursor proximity</span>
         </div>
       </div>
 
-      <!-- Right Column: Signature Product Composition (Illustrative Workflow) -->
+      <!-- Right Column: Interactive Hero Visualization (Benchmark Case #3) -->
       <div class="hero-composition" id="hero-workflow-board">
         <div class="composition-header">
           <div class="comp-title">
             <span class="comp-dot"></span>
-            <span>Illustrative Workflow · Benchmark Case #3</span>
+            <span>The Repair Transformation · Case #3</span>
           </div>
-          <span class="comp-tag">Click any stage to lock</span>
+          <span class="comp-tag">Click to lock inspection</span>
         </div>
 
         <div class="pipeline-board">
-          <!-- Stage 1: Concrete Issue -->
+          <!-- Stage 1: Defect Specification -->
           <div class="board-stage is-inspectable" data-stage="1" id="stage-1" tabindex="0">
             <div class="stage-top">
-              <span class="stage-num">01 / ISSUE</span>
+              <span class="stage-num">01 / BUG DETECTED</span>
               <span class="stage-badge badge-neutral">INTAKE</span>
             </div>
-            <div class="stage-title">#103 Pricing Regression</div>
+            <div class="stage-title">#103 Pricing Engine Defect</div>
             <div class="stage-body">
-              Negative quantities accepted in <code>calculate_tiered_price</code>, violating billing integrity.
+              Negative quantities accepted in <code>calculate_tiered_price</code>, violating discount rules.
             </div>
           </div>
 
-          <!-- Connecting Path SVG -->
+          <!-- Connector -->
           <div class="board-connector">
-            <svg class="connector-svg" viewBox="0 0 24 32" fill="none">
-              <path d="M12 0V32" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
-              <path d="M12 0V32" stroke="#C8FF55" stroke-width="2" class="connector-active-line" id="conn-line-1"/>
+            <svg class="connector-svg" viewBox="0 0 24 24" fill="none">
+              <path d="M12 0V24" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
+              <path d="M12 0V24" stroke="#C8FF55" stroke-width="2" class="connector-active-line"/>
             </svg>
           </div>
 
-          <!-- Stage 2: Reproduction & Investigation -->
+          <!-- Stage 2: Code Investigated & Reproduced -->
           <div class="board-stage is-inspectable" data-stage="2" id="stage-2" tabindex="0">
             <div class="stage-top">
-              <span class="stage-num">02 / REPRODUCE</span>
+              <span class="stage-num">02 / CODE INVESTIGATED</span>
               <span class="stage-badge badge-fail">EXIT CODE 1</span>
             </div>
-            <div class="stage-title">Target: pricing.py:15</div>
+            <div class="stage-title">Reproduced: pricing.py:15</div>
             <div class="stage-code">
               <code>pytest -k test_negative_input</code> → <strong>ValueError unhandled</strong>
             </div>
           </div>
 
-          <!-- Connecting Path SVG -->
+          <!-- Connector -->
           <div class="board-connector">
-            <svg class="connector-svg" viewBox="0 0 24 32" fill="none">
-              <path d="M12 0V32" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
-              <path d="M12 0V32" stroke="#C8FF55" stroke-width="2" class="connector-active-line" id="conn-line-2"/>
+            <svg class="connector-svg" viewBox="0 0 24 24" fill="none">
+              <path d="M12 0V24" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
+              <path d="M12 0V24" stroke="#C8FF55" stroke-width="2" class="connector-active-line"/>
             </svg>
           </div>
 
-          <!-- Stage 3: Attempt 1 Naive Fix + Failure Detection -->
+          <!-- Stage 3: Patch Created & Test Failure -->
           <div class="board-stage is-inspectable stage-fail-box" data-stage="3" id="stage-3" tabindex="0">
             <div class="stage-top">
-              <span class="stage-num">03 / ATTEMPT #1</span>
+              <span class="stage-num">03 / TEST FAILURE</span>
               <span class="stage-badge badge-fail">REGRESSION</span>
             </div>
-            <div class="stage-title">Naive Patch Caused Regression</div>
+            <div class="stage-title">Naive Attempt Broke VIP Discounts</div>
             <div class="stage-diff">
               <span class="diff-del">- return base_price * volume * tier</span>
               <span class="diff-add">+ return base_price * max(0, volume)</span>
             </div>
             <div class="stage-alert">
-              Acceptance passed, but <code>test_vip_discount</code> failed! VIP tier multiplier destroyed.
+              Acceptance passed, but <code>test_vip_discount</code> failed! Tier multiplier destroyed.
             </div>
           </div>
 
-          <!-- Connecting Path SVG -->
+          <!-- Connector -->
           <div class="board-connector">
-            <svg class="connector-svg" viewBox="0 0 24 32" fill="none">
-              <path d="M12 0V32" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
-              <path d="M12 0V32" stroke="#E3B341" stroke-width="2" class="connector-active-line" id="conn-line-3"/>
+            <svg class="connector-svg" viewBox="0 0 24 24" fill="none">
+              <path d="M12 0V24" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
+              <path d="M12 0V24" stroke="#E3B341" stroke-width="2" class="connector-active-line"/>
             </svg>
           </div>
 
-          <!-- Stage 4: Recovery Decision & Rollback -->
+          <!-- Stage 4: Recovery Decision -->
           <div class="board-stage is-inspectable stage-recovery-box" data-stage="4" id="stage-4" tabindex="0">
             <div class="stage-top">
-              <span class="stage-num">04 / RECOVERY</span>
+              <span class="stage-num">04 / RECOVERY DECISION</span>
               <span class="stage-badge badge-warn">ROLLBACK</span>
             </div>
             <div class="stage-title">Atomic Git Rollback &amp; Strategy Pivot</div>
@@ -185,19 +188,19 @@
             </div>
           </div>
 
-          <!-- Connecting Path SVG -->
+          <!-- Connector -->
           <div class="board-connector">
-            <svg class="connector-svg" viewBox="0 0 24 32" fill="none">
-              <path d="M12 0V32" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
-              <path d="M12 0V32" stroke="#C8FF55" stroke-width="2" class="connector-active-line" id="conn-line-4"/>
+            <svg class="connector-svg" viewBox="0 0 24 24" fill="none">
+              <path d="M12 0V24" stroke="#252B35" stroke-width="2" stroke-dasharray="3 3"/>
+              <path d="M12 0V24" stroke="#C8FF55" stroke-width="2" class="connector-active-line"/>
             </svg>
           </div>
 
-          <!-- Stage 5: Attempt 2 Precision Fix & Verified Result -->
+          <!-- Stage 5: Verified Fix -->
           <div class="board-stage is-inspectable stage-verified-box" data-stage="5" id="stage-5" tabindex="0">
             <div class="stage-top">
-              <span class="stage-num">05 / ATTEMPT #2</span>
-              <span class="stage-badge badge-verified">VERIFIED</span>
+              <span class="stage-num">05 / VERIFIED FIX</span>
+              <span class="stage-badge badge-verified">VERIFIED GREEN</span>
             </div>
             <div class="stage-title">Dual-Suite Verified Fix</div>
             <div class="stage-diff">
@@ -210,14 +213,14 @@
           </div>
         </div>
 
-        <!-- Dynamic Context Explainer Card (updates on hover/click) -->
+        <!-- Dynamic Context Explainer Card -->
         <div class="composition-explainer" id="stage-explainer-card">
           <div class="explainer-header">
-            <span class="explainer-tag" id="explainer-tag">STAGE 04 EXPLANATION</span>
+            <span class="explainer-tag" id="explainer-tag">STAGE 04 / RECOVERY</span>
             <span class="explainer-status" id="explainer-status">Failure-Driven Recovery</span>
           </div>
           <p class="explainer-text" id="explainer-text">
-            When Attempt #1 introduced a regression in existing VIP discounts, PatchPilot immediately executed an atomic rollback to the clean baseline. It injected the regression failure traceback into its hypothesis, allowing Attempt #2 to craft a precision patch without contaminated state.
+            When Attempt #1 introduced a regression in existing VIP discounts, PatchPilot immediately executed an atomic rollback to the clean baseline. It injected the failure traceback into its hypothesis, allowing Attempt #2 to craft a precision patch without contaminated state.
           </p>
         </div>
       </div>
@@ -225,49 +228,86 @@
   </section>
 
   <!-- ======================================================================
-       SECTION B — THE PROBLEM
+       SECTION 2 — WHY UNVERIFIED CODE IS DANGEROUS
        ====================================================================== -->
-  <section class="section-wrapper" id="the-problem">
+  <section class="section-wrapper" id="why-dangerous">
     <div class="layout-container">
       <div class="section-intro">
         <span class="section-kicker">THE PROBLEM</span>
-        <h2 class="section-heading">Generated code is not verified code.</h2>
+        <h2 class="section-heading">A generated patch is only a hypothesis.</h2>
         <p class="section-sub">
-          Current AI coding assistants generate syntax based on probability, not verification. In production software, blind patches create hidden liabilities.
+          Current AI coding assistants generate code based on syntax probability, not execution proof. Without automated testing and rollback, generated code introduces silent liabilities.
         </p>
       </div>
 
-      <div class="editorial-risks-grid">
-        <div class="risk-card">
-          <div class="risk-index">01</div>
-          <h3 class="risk-title">Plausible patches fail tests.</h3>
-          <p class="risk-copy">
-            A generated code snippet can read convincingly, parse cleanly, and still fail basic unit assertions because the model hallucinated an internal API signature or variable scope.
+      <div class="hypothesis-comparison-grid">
+        <!-- Card A: Unverified Patch -->
+        <div class="hypothesis-card unverified">
+          <div class="hypo-badge badge-fail">UNVERIFIED HYPOTHESIS</div>
+          <h3 class="hypo-title">Plausible Code Without Proof</h3>
+          <p class="hypo-desc">
+            A generated patch can look clean to human eyes, pass syntax validation, and still destroy edge-case logic elsewhere in your codebase.
           </p>
-          <div class="risk-stat">
-            <span class="stat-highlight">41%</span> of unverified LLM patches fail initial baseline execution.
+
+          <div class="hypo-code-block">
+            <div class="hypo-code-header">
+              <span>Naive Clamp Proposal (Attempt #1)</span>
+              <span class="tag-status text-red">FAILED REGRESSION</span>
+            </div>
+            <pre><code><span class="c-dim"># Looks plausible, but destroys VIP discount multiplier</span>
+<span class="c-del">- return base_price * volume * (0.80 if is_vip else 1.0)</span>
+<span class="c-add">+ return base_price * max(0, volume)</span></code></pre>
+          </div>
+
+          <div class="hypo-diagnostic-list">
+            <div class="diag-item">
+              <span class="diag-dot dot-red"></span>
+              <span><strong>Silent Regression:</strong> Broke VIP discount assertion (<code>80.0 != 100.0</code>).</span>
+            </div>
+            <div class="diag-item">
+              <span class="diag-dot dot-red"></span>
+              <span><strong>Dirty Worktree:</strong> Without rollback, broken code contaminates the repo.</span>
+            </div>
+            <div class="diag-item">
+              <span class="diag-dot dot-red"></span>
+              <span><strong>Hallucinated Completion:</strong> Agent claims success solely because code was emitted.</span>
+            </div>
           </div>
         </div>
 
-        <div class="risk-card">
-          <div class="risk-index">02</div>
-          <h3 class="risk-title">Fixes introduce silent regressions.</h3>
-          <p class="risk-copy">
-            A patch that solves the reported bug frequently destroys edge-case logic elsewhere in the codebase. Without automated full-suite regression checks, broken code gets merged.
+        <!-- Card B: Verified Fix -->
+        <div class="hypothesis-card verified">
+          <div class="hypo-badge badge-verified">EVIDENCE-BACKED REPAIR</div>
+          <h3 class="hypo-title">Tested &amp; Proven Precision Fix</h3>
+          <p class="hypo-desc">
+            PatchPilot runs actual tests, detects regression, restores clean Git state, and only promotes the fix when 100% of test suites pass with code 0.
           </p>
-          <div class="risk-stat">
-            <span class="stat-highlight">Case #3</span> proved naive volume clamp broke existing VIP pricing tiers.
-          </div>
-        </div>
 
-        <div class="risk-card">
-          <div class="risk-index">03</div>
-          <h3 class="risk-title">Agents report success without verification.</h3>
-          <p class="risk-copy">
-            Most agentic workflows mark tasks "Complete" merely because the LLM generated an output message. PatchPilot refuses completion without tamper-evident command execution proof.
-          </p>
-          <div class="risk-stat">
-            <span class="stat-highlight">Zero</span> PRs promoted without dual-suite passing exit code 0.
+          <div class="hypo-code-block">
+            <div class="hypo-code-header">
+              <span>Precision Adaptive Fix (Attempt #2)</span>
+              <span class="tag-status text-lime">100% PASSING</span>
+            </div>
+            <pre><code><span class="c-dim"># Preserves tier multipliers while strictly validating volume</span>
+<span class="c-add">+ if volume &lt; 0:</span>
+<span class="c-add">+     raise ValueError("Volume must be non-negative")</span>
+<span class="c-ctx">  multiplier = 0.80 if is_vip else 1.0</span>
+<span class="c-ctx">  return base_price * volume * multiplier</span></code></pre>
+          </div>
+
+          <div class="hypo-diagnostic-list">
+            <div class="diag-item">
+              <span class="diag-dot dot-lime"></span>
+              <span><strong>Baseline Reproduction:</strong> Proven with initial non-zero exit code.</span>
+            </div>
+            <div class="diag-item">
+              <span class="diag-dot dot-lime"></span>
+              <span><strong>Dual-Suite Verification:</strong> Acceptance and regression tests both pass.</span>
+            </div>
+            <div class="diag-item">
+              <span class="diag-dot dot-lime"></span>
+              <span><strong>Cryptographic Trace:</strong> Neatlogs trace ID guarantees auditability.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -275,106 +315,68 @@
   </section>
 
   <!-- ======================================================================
-       SECTION C — HOW PATCHPILOT WORKS
+       SECTION 3 — THE REPAIR PIPELINE (SCROLL-DRIVEN SEQUENCE)
        ====================================================================== -->
-  <section class="section-wrapper" id="how-it-works">
+  <section class="section-wrapper bg-elevated" id="pipeline">
     <div class="layout-container">
       <div class="section-intro">
-        <span class="section-kicker">WORKFLOW</span>
-        <h2 class="section-heading">The 6-stage evidence pipeline.</h2>
+        <span class="section-kicker">THE REPAIR CURRENT PIPELINE</span>
+        <h2 class="section-heading">Seven stages of verifiable repair.</h2>
         <p class="section-sub">
-          PatchPilot replaces uncontrolled LLM loops with a structured deterministic execution flow. Every stage is bounded by timeout budgets and rollback handlers.
+          A persistent deterministic pipeline. Every stage is bounded by timeout budgets, subprocess isolation, and automated rollback handlers.
         </p>
       </div>
 
-      <div class="workflow-timeline">
-        <div class="timeline-step">
-          <div class="step-marker">
-            <span class="marker-num">01</span>
+      <div class="pipeline-story-container">
+        <!-- Interactive Stage Nodes -->
+        <div class="pipeline-steps-grid">
+          <div class="pipeline-card" data-step="1">
+            <div class="pipe-num">01 / STAGE</div>
+            <h3 class="pipe-title">Inspect</h3>
+            <p class="pipe-desc">Parses issue specification, resolves candidate source files, and maps abstract syntax trees in a disposable worktree.</p>
+            <div class="pipe-tag">Tool: Entire Graph AST map</div>
           </div>
-          <div class="step-content">
-            <h3 class="step-heading">Inspect the issue</h3>
-            <p class="step-desc">
-              Parses the issue specification, analyzes candidate source files, and maps the abstract syntax tree in a clean worktree.
-            </p>
-            <div class="step-meta">
-              <span>Tool: RepositoryTool</span> · <span>Entire Graph AST map</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="timeline-step">
-          <div class="step-marker">
-            <span class="marker-num">02</span>
+          <div class="pipeline-card" data-step="2">
+            <div class="pipe-num">02 / STAGE</div>
+            <h3 class="pipe-title">Reproduce</h3>
+            <p class="pipe-desc">Executes targeted reproduction test in isolated subprocess. Proves baseline failure exit code != 0 before editing code.</p>
+            <div class="pipe-tag">Gate: Non-zero exit code confirmation</div>
           </div>
-          <div class="step-content">
-            <h3 class="step-heading">Reproduce the failure</h3>
-            <p class="step-desc">
-              Executes a targeted reproduction test in an isolated subprocess. Confirms the defect reproduces genuinely with an exit code != 0 before touching any code.
-            </p>
-            <div class="step-meta">
-              <span>Requirement: Non-zero exit code confirmation</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="timeline-step">
-          <div class="step-marker">
-            <span class="marker-num">03</span>
+          <div class="pipeline-card" data-step="3">
+            <div class="pipe-num">03 / STAGE</div>
+            <h3 class="pipe-title">Diagnose</h3>
+            <p class="pipe-desc">Analyzes stack traces and candidate snippets. Classifies error pattern (SyntaxError, LogicError, BoundaryError).</p>
+            <div class="pipe-tag">Module: Failure Classifier</div>
           </div>
-          <div class="step-content">
-            <h3 class="step-heading">Plan and apply a patch</h3>
-            <p class="step-desc">
-              Synthesizes a minimal surgical replacement snippet via configured LLM provider (OpenAI, Anthropic, Gemini). Validates path boundaries and mirrors in-memory backups.
-            </p>
-            <div class="step-meta">
-              <span>Protection: Path traversal prevention · Memory backup store</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="timeline-step">
-          <div class="step-marker">
-            <span class="marker-num">04</span>
+          <div class="pipeline-card" data-step="4">
+            <div class="pipe-num">04 / STAGE</div>
+            <h3 class="pipe-title">Patch</h3>
+            <p class="pipe-desc">Synthesizes minimal surgical replacement diff via configured LLM provider. Validates path traversal boundaries.</p>
+            <div class="pipe-tag">Tool: PatchTool (Memory Mirror)</div>
           </div>
-          <div class="step-content">
-            <h3 class="step-heading">Execute tests</h3>
-            <p class="step-desc">
-              Runs acceptance tests first. If passed, automatically triggers the complete repository regression test suite in an isolated sandbox.
-            </p>
-            <div class="step-meta">
-              <span>Subprocess budget: 60s timeout · Scrubbed secret env</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="timeline-step">
-          <div class="step-marker">
-            <span class="marker-num">05</span>
+          <div class="pipeline-card" data-step="5">
+            <div class="pipe-num">05 / STAGE</div>
+            <h3 class="pipe-title">Test</h3>
+            <p class="pipe-desc">Executes acceptance tests first, then triggers the entire test suite in an isolated subprocess with scrubbed secrets.</p>
+            <div class="pipe-tag">Subprocess: 60s timeout budget</div>
           </div>
-          <div class="step-content">
-            <h3 class="step-heading">Recover from failure</h3>
-            <p class="step-desc">
-              If tests fail or regressions occur, PatchPilot triggers an atomic rollback to baseline. It classifies the failure category, updates hypothesis, and replans Attempt #2.
-            </p>
-            <div class="step-meta">
-              <span>Budget: Max 3 recovery attempts · RetryPolicy classifier</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="timeline-step">
-          <div class="step-marker">
-            <span class="marker-num">06</span>
+          <div class="pipeline-card highlight-recovery" data-step="6">
+            <div class="pipe-num text-amber">06 / RECOVERY</div>
+            <h3 class="pipe-title">Recover</h3>
+            <p class="pipe-desc">On test regression, auto-restores clean baseline SHA, injects error traceback into context, and pivots strategy.</p>
+            <div class="pipe-tag text-amber">Budget: Max 3 recovery cycles</div>
           </div>
-          <div class="step-content">
-            <h3 class="step-heading">Verify the result</h3>
-            <p class="step-desc">
-              Requires 100% test pass confirmation across acceptance and regression suites. Exports Neatlogs telemetry trace ID and creates an audited draft PR.
-            </p>
-            <div class="step-meta">
-              <span>Outcome: State labeled VERIFIED with command hashes</span>
-            </div>
+
+          <div class="pipeline-card highlight-verified" data-step="7">
+            <div class="pipe-num text-lime">07 / VERIFY</div>
+            <h3 class="pipe-title">Verify</h3>
+            <p class="pipe-desc">Requires 100% exit code 0 across acceptance and regression suites. Exports Neatlogs trace and drafts unmerged PR.</p>
+            <div class="pipe-tag text-lime">Outcome: State labeled VERIFIED</div>
           </div>
         </div>
       </div>
@@ -382,120 +384,106 @@
   </section>
 
   <!-- ======================================================================
-       SECTION D — EVIDENCE-GATED REPAIR
+       SECTION 4 — ACTUAL CODE-DIFF SHOWCASE
        ====================================================================== -->
-  <section class="section-wrapper bg-elevated" id="evidence-gated">
+  <section class="section-wrapper" id="code-diff">
     <div class="layout-container">
       <div class="section-intro">
-        <span class="section-kicker">CORE DIFFERENTIATOR</span>
-        <h2 class="section-heading">Evidence-Gated Repair</h2>
+        <span class="section-kicker">CODE SURGERY SHOWCASE</span>
+        <h2 class="section-heading">Surgical diff inspection.</h2>
         <p class="section-sub">
-          A patch is not a fix until tests confirm it. Here is the architectural difference between unverified generation and verified recovery.
+          Toggle between the original defect, the naive broken patch that caused a regression, and the final verified precision fix.
         </p>
       </div>
 
-      <!-- State Sequence Display -->
-      <div class="state-sequence-bar">
-        <div class="seq-node node-failed">
-          <span class="seq-tag">STAGE 1</span>
-          <span class="seq-state">FAILED</span>
-        </div>
-        <div class="seq-arrow">→</div>
-        <div class="seq-node node-recovering">
-          <span class="seq-tag">STAGE 2</span>
-          <span class="seq-state">RECOVERING</span>
-        </div>
-        <div class="seq-arrow">→</div>
-        <div class="seq-node node-verifying">
-          <span class="seq-tag">STAGE 3</span>
-          <span class="seq-state">VERIFYING</span>
-        </div>
-        <div class="seq-arrow">→</div>
-        <div class="seq-node node-verified">
-          <span class="seq-tag">STAGE 4</span>
-          <span class="seq-state">VERIFIED</span>
-        </div>
-      </div>
-
-      <!-- Side by Side Comparative Breakdown -->
-      <div class="comparison-dual-deck">
-        <div class="dual-card unverified-card">
-          <div class="dual-badge badge-neutral">CONVENTIONAL ASSISTANT</div>
-          <h3 class="dual-title">Unverified Code Generation</h3>
-          <p class="dual-desc">Produces code that looks right to human eyes, but fails under boundary conditions.</p>
-          
-          <div class="code-box">
-            <div class="code-box-header">
-              <span>pricing.py (Attempt #1 Output)</span>
-              <span class="status-pill pill-fail">UNVERIFIED</span>
-            </div>
-            <pre><code>def calculate_tiered_price(base_price, volume, is_vip):
-<span class="c-del">-   return base_price * volume * (0.80 if is_vip else 1.0)</span>
-<span class="c-add">+   return base_price * max(0, volume)</span></code></pre>
+      <div class="diff-showcase-card">
+        <div class="diff-showcase-nav">
+          <div class="diff-nav-tabs">
+            <button class="diff-view-btn" data-view="before" id="btn-diff-before">
+              <span>Before (Defective)</span>
+            </button>
+            <button class="diff-view-btn" data-view="patch1" id="btn-diff-patch1">
+              <span>Attempt #1 (Naive Clamp - Broke VIP)</span>
+            </button>
+            <button class="diff-view-btn active" data-view="patch2" id="btn-diff-patch2">
+              <span>Attempt #2 (Precision Fix - Verified Green)</span>
+            </button>
           </div>
 
-          <div class="dual-outcome">
-            <div class="outcome-row">
-              <span class="outcome-label">Acceptance Test:</span>
-              <span class="outcome-val text-green">PASSED</span>
-            </div>
-            <div class="outcome-row">
-              <span class="outcome-label">Regression Suite:</span>
-              <span class="outcome-val text-red">FAILED (VIP tier broken)</span>
-            </div>
-            <div class="outcome-row">
-              <span class="outcome-label">Agent Action:</span>
-              <span class="outcome-val text-dim">Claims completion &amp; stops</span>
-            </div>
+          <div class="diff-file-meta">
+            <span class="meta-path">benchmarks/case_3_regression_recovery/pricing.py</span>
+            <span class="meta-stats" id="diff-stats-label">+3 -1 lines</span>
           </div>
         </div>
 
-        <div class="dual-card verified-card">
-          <div class="dual-badge badge-verified">PATCHPILOT AI</div>
-          <h3 class="dual-title">Evidence-Gated Recovery</h3>
-          <p class="dual-desc">Catches the regression, rolls back, updates its strategy, and proves correctness.</p>
-
-          <div class="code-box">
-            <div class="code-box-header">
-              <span>pricing.py (Attempt #2 Precision Fix)</span>
-              <span class="status-pill pill-verified">VERIFIED GREEN</span>
-            </div>
-            <pre><code>def calculate_tiered_price(base_price, volume, is_vip):
-<span class="c-add">+   if volume &lt; 0:</span>
-<span class="c-add">+       raise ValueError("Volume must be non-negative")</span>
-<span class="c-ctx">    multiplier = 0.80 if is_vip else 1.0</span>
-<span class="c-ctx">    return base_price * volume * multiplier</span></code></pre>
-          </div>
-
-          <div class="dual-outcome">
-            <div class="outcome-row">
-              <span class="outcome-label">Acceptance Test:</span>
-              <span class="outcome-val text-lime">100% PASSED (Exit Code 0)</span>
-            </div>
-            <div class="outcome-row">
-              <span class="outcome-label">Regression Suite:</span>
-              <span class="outcome-val text-lime">3/3 PASSED (Exit Code 0)</span>
-            </div>
-            <div class="outcome-row">
-              <span class="outcome-label">Agent Action:</span>
-              <span class="outcome-val text-lime">Promotes PR with Neatlogs trace</span>
-            </div>
-          </div>
+        <div class="diff-screen-container" id="diff-screen">
+          <!-- Populated by JavaScript according to active view -->
         </div>
       </div>
     </div>
   </section>
 
   <!-- ======================================================================
-       SECTION E — INTERACTIVE TRACE EXPLORER
+       SECTION 5 — FAILURE-DRIVEN RECOVERY
+       ====================================================================== -->
+  <section class="section-wrapper bg-elevated" id="recovery">
+    <div class="layout-container">
+      <div class="section-intro">
+        <span class="section-kicker">RECOVERY CAUSALITY</span>
+        <h2 class="section-heading">How failure informs recovery.</h2>
+        <p class="section-sub">
+          The defining differentiator of PatchPilot AI. The agent does not blindly regenerate; it uses the exact failure traceback to adjust its hypothesis.
+        </p>
+      </div>
+
+      <div class="recovery-flow-sequence">
+        <div class="flow-step-box step-failed">
+          <div class="flow-tag">01 / FAILURE DETECTED</div>
+          <h4 class="flow-step-title">Regression in VIP Discounts</h4>
+          <p class="flow-step-body">Attempt #1 passed <code>test_negative_input</code>, but failed existing <code>test_vip_discount</code> (<code>80.0 != 100.0</code>).</p>
+          <div class="flow-badge text-red">FAILURE: REGRESSION_INTRODUCED</div>
+        </div>
+
+        <div class="flow-arrow-node">➔</div>
+
+        <div class="flow-step-box step-evidence">
+          <div class="flow-tag">02 / EVIDENCE PARSED</div>
+          <h4 class="flow-step-title">Traceback Injected</h4>
+          <p class="flow-step-body">TestRunner extracts the exact assertion failure. RetryPolicy classifies the regression and instructs the LLM.</p>
+          <div class="flow-badge text-cyan">ACTION: ROLLBACK &amp; ADAPT</div>
+        </div>
+
+        <div class="flow-arrow-node">➔</div>
+
+        <div class="flow-step-box step-rollback">
+          <div class="flow-tag">03 / ATOMIC ROLLBACK</div>
+          <h4 class="flow-step-title">Git Reset to Baseline</h4>
+          <p class="flow-step-body">Working tree restored cleanly to commit SHA <code>e4f892a</code>. Zero contaminated file state remains.</p>
+          <div class="flow-badge text-amber">STATE: CLEAN BASELINE</div>
+        </div>
+
+        <div class="flow-arrow-node">➔</div>
+
+        <div class="flow-step-box step-verified">
+          <div class="flow-tag">04 / VERIFIED RETEST</div>
+          <h4 class="flow-step-title">Dual-Suite Pass</h4>
+          <p class="flow-step-body">Attempt #2 preserves tier multiplier before bounds check. 100% exit code 0 across all suites.</p>
+          <div class="flow-badge text-lime">OUTCOME: VERIFIED GREEN</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       SECTION 6 — VERIFICATION TRACE
        ====================================================================== -->
   <section class="section-wrapper" id="trace-explorer">
     <div class="layout-container">
       <div class="section-intro">
-        <span class="section-kicker">OBSERVABILITY</span>
-        <h2 class="section-heading">Interactive Trace Explorer</h2>
+        <span class="section-kicker">OBSERVABILITY AUDIT</span>
+        <h2 class="section-heading">Verification event trace.</h2>
         <p class="section-sub">
-          Inspect genuine redacted execution traces. Every attempt, test command, rollback action, and model span is recorded with immutable timestamps.
+          Inspect genuine redacted execution traces. Select an event to inspect its timestamp, attempt number, duration, and subprocess output.
         </p>
       </div>
 
@@ -571,7 +559,7 @@
   </section>
 
   <!-- ======================================================================
-       SECTION F — ARCHITECTURE
+       SECTION 7 — ARCHITECTURE
        ====================================================================== -->
   <section class="section-wrapper" id="architecture">
     <div class="layout-container">
@@ -626,96 +614,59 @@
   </section>
 
   <!-- ======================================================================
-       SECTION G — DEVELOPER EXPERIENCE
+       SECTION 8 — DEVELOPER WORKFLOW
        ====================================================================== -->
-  <section class="section-wrapper bg-elevated" id="developer-experience">
+  <section class="section-wrapper bg-elevated" id="workflow">
     <div class="layout-container">
       <div class="section-intro">
-        <span class="section-kicker">CLI SYNTAX</span>
-        <h2 class="section-heading">Command-line developer experience.</h2>
+        <span class="section-kicker">DEVELOPER EXPERIENCE</span>
+        <h2 class="section-heading">Install and run in seconds.</h2>
         <p class="section-sub">
-          Install locally, verify integrations, evaluate benchmarks, and serve this interactive workbench with genuine commands.
+          Execute reproducible benchmarks, verify telemetry integrations, and launch this interactive workbench locally.
         </p>
       </div>
 
       <div class="cli-box">
         <div class="cli-bar">
           <div class="cli-label">Terminal — PowerShell / Bash</div>
-          <button class="btn-copy-cli" id="btn-copy-cli">Copy all</button>
+          <button class="btn-copy-cli" id="btn-copy-cli">Copy commands</button>
         </div>
-        <pre class="cli-code"><code><span class="c-comment"># 1. Clone repository and install dependencies in virtual environment</span>
+        <pre class="cli-code"><code><span class="c-comment"># 1. Clone repository and install in virtual environment</span>
 <span class="c-cmd">git clone</span> https://github.com/Quantum-Ark/patchai.git &amp;&amp; <span class="c-cmd">cd</span> patchai
 <span class="c-cmd">pip install</span> -e ".[dev]"
 
-<span class="c-comment"># 2. Check system status &amp; verify telemetry integrations</span>
+<span class="c-comment"># 2. Check system status &amp; verify live integrations (Neatlogs, Entire, LLM)</span>
 <span class="c-cmd">patchpilot doctor</span>
 <span class="c-cmd">patchpilot verify-integrations</span>
 
-<span class="c-comment"># 3. Execute reproducible benchmark evaluation suite (3 cases)</span>
+<span class="c-comment"># 3. Execute 3 reproducible benchmark evaluation cases</span>
 <span class="c-cmd">patchpilot evaluate</span>
 
-<span class="c-comment"># 4. Serve the interactive workbench locally on port 3000</span>
+<span class="c-comment"># 4. Serve this interactive landing page locally</span>
 <span class="c-cmd">patchpilot serve</span> --port 3000</code></pre>
       </div>
     </div>
   </section>
 
   <!-- ======================================================================
-       SECTION H — TRUST & LIMITATIONS
-       ====================================================================== -->
-  <section class="section-wrapper" id="trust">
-    <div class="layout-container">
-      <div class="section-intro">
-        <span class="section-kicker">BOUNDARIES &amp; INTEGRITY</span>
-        <h2 class="section-heading">Trust, guarantees, and limitations.</h2>
-        <p class="section-sub">
-          We believe developer tools must be honest about their boundaries. Here is what PatchPilot verifies and what it cannot guarantee.
-        </p>
-      </div>
-
-      <div class="trust-grid">
-        <div class="trust-card">
-          <h3 class="trust-heading text-lime">What PatchPilot Verifies</h3>
-          <ul class="trust-list">
-            <li><strong>Baseline defect confirmation:</strong> Proves the bug exists by executing reproduction commands before editing code.</li>
-            <li><strong>Regression immunity:</strong> Evaluates existing unit suites to confirm no previous behavior was broken.</li>
-            <li><strong>Clean workspace state:</strong> Zero uncommitted debris left in your repository when a test attempt fails.</li>
-            <li><strong>Command-level proof:</strong> Exports exact exit codes, stdout, stderr, and run durations into audit reports.</li>
-          </ul>
-        </div>
-
-        <div class="trust-card">
-          <h3 class="trust-heading text-secondary">Current Boundaries &amp; Limitations</h3>
-          <ul class="trust-list">
-            <li><strong>Test suite reliance:</strong> If a codebase lacks sufficient regression tests, PatchPilot cannot verify unexercised paths.</li>
-            <li><strong>Human-in-the-loop required:</strong> PatchPilot drafts pull requests. It <em>never</em> automatically merges or deploys code.</li>
-            <li><strong>Sandbox scope:</strong> Uses subprocess timeouts (60s) and path validation. Full hypervisor or container isolation is planned.</li>
-            <li><strong>Model constraints:</strong> Complex distributed race conditions across multiple services require human architectural guidance.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ======================================================================
-       SECTION I — FINAL CTA
+       SECTION 9 — FINAL CTA & FOOTER
        ====================================================================== -->
   <section class="section-wrapper cta-section" id="cta">
     <div class="layout-container cta-container">
       <h2 class="cta-heading">Make every fix earn your trust.</h2>
       <p class="cta-sub">
-        Inspect the workflow. Verify the evidence. Explore the code.
+        Inspect the patch. Run the tests. Trust the evidence.
       </p>
 
       <div class="cta-actions">
         <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn btn-primary magnetic" id="cta-gh-link">
-          <span>Explore PatchPilot on GitHub</span>
+          <span>Explore GitHub</span>
           <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M4 12L12 4M12 4H6M12 4V10"/>
           </svg>
         </a>
-        <a href="#hero-workflow-board" class="btn btn-secondary magnetic" id="cta-workflow-link">
-          <span>View the repair workflow</span>
+        <a href="#pipeline" class="btn btn-secondary magnetic" id="cta-workflow-link">
+          <span>See the workflow</span>
           <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M6 12L10 8L6 4"/>
           </svg>
@@ -724,9 +675,7 @@
     </div>
   </section>
 
-  <!-- ======================================================================
-       SECTION J — FOOTER
-       ====================================================================== -->
+  <!-- Minimalist Clean Footer -->
   <footer class="site-footer">
     <div class="layout-container footer-layout">
       <div class="footer-left">
@@ -740,13 +689,13 @@
         </div>
         <p class="footer-note">
           Autonomous code repair engine built for verifiable software engineering.<br>
-          Developed for neatHacks 2026. Distributed under MIT License.
+          neatHacks 2026. Distributed under MIT License.
         </p>
       </div>
 
       <div class="footer-nav">
         <div class="footer-col">
-          <span class="footer-col-head">Repository</span>
+          <span class="footer-col-head">Project</span>
           <a href="https://github.com/Quantum-Ark/patchai" target="_blank">Quantum-Ark/patchai</a>
           <a href="https://github.com/Quantum-Ark/patchai/blob/main/README.md" target="_blank">README.md</a>
           <a href="https://github.com/Quantum-Ark/patchai/blob/main/SUBMISSION_EVIDENCE.md" target="_blank">Submission Dossier</a>
@@ -762,8 +711,8 @@
 
     <div class="footer-bar">
       <div class="layout-container footer-bar-container">
-        <span>Git SHA: <code>41ed6f7</code> · Pytest: 21/21 Passing (100%)</span>
-        <span>Neatlogs HTTP 200 · Entire CLI 0.11.4 · Crustdata 2025-11-01</span>
+        <span>Git SHA: <code>4b6dd2a</code> · Pytest: 26/26 Passing (100%)</span>
+        <span>Telemetry: Neatlogs HTTP Ingest · Memory: Entire CLI 0.11.4</span>
       </div>
     </div>
   </footer>

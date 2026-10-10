@@ -1,14 +1,14 @@
 /* ==========================================================================
-   PatchPilot AI — Master Creative Design System
-   Creative Direction: Awwwards Quality × Linear Precision × Developer-Tool Clarity
+   PatchPilot AI — The Repair Current Motion Design System
+   Creative Direction: MotionSites × Dribbble × Developer-Tool Craftsmanship
    ========================================================================== */
 
 :root {
   /* Restrained, intentional palette */
   --bg-graphite: #090B0F;
   --bg-surface: #10141B;
-  --bg-surface-elevated: #161C26;
-  --bg-surface-hover: #1D2330;
+  --bg-surface-elevated: #141922;
+  --bg-surface-hover: #1A212D;
   --bg-code: #0A0D13;
 
   --border-subtle: #252B35;
@@ -22,9 +22,9 @@
 
   /* Semantic status tokens */
   --accent-lime: #C8FF55;     /* VERIFIED */
-  --accent-cyan: #76D7FF;     /* TELEMETRY */
+  --accent-cyan: #76D7FF;     /* TELEMETRY / DIAGNOSTIC */
   --accent-red: #FF5C5C;      /* FAILURE */
-  --accent-amber: #E3B341;    /* RECOVERY / ATTENTION */
+  --accent-amber: #E3B341;    /* RECOVERY / PENDING */
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -60,24 +60,6 @@ body {
   line-height: 1.55;
   background-color: var(--bg-graphite);
   overflow-x: hidden;
-}
-
-/* Subtle background precision grid with vignette */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-image: 
-    linear-gradient(to right, rgba(37, 43, 53, 0.25) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(37, 43, 53, 0.25) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse at 50% 10%, black 20%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 10%, black 20%, transparent 75%);
-  pointer-events: none;
-  z-index: 0;
 }
 
 /* ==========================================================================
@@ -142,7 +124,6 @@ body.cursor-hover .cursor-halo {
   background: rgba(200, 255, 85, 0.06);
 }
 
-/* Responsive cursor disabling */
 @media (max-width: 1024px), (pointer: coarse) {
   .cursor-point, .cursor-halo, .cursor-badge {
     display: none !important;
@@ -230,7 +211,6 @@ body.cursor-hover .cursor-halo {
   text-decoration: none;
   font-size: 0.88rem;
   font-weight: 500;
-  position: relative;
   transition: color 0.18s ease;
 }
 
@@ -261,7 +241,7 @@ body.cursor-hover .cursor-halo {
 }
 
 /* ==========================================================================
-   Shared Layout & Typography Elements
+   Shared Layout & Typography
    ========================================================================== */
 .layout-container {
   max-width: 1280px;
@@ -277,7 +257,7 @@ body.cursor-hover .cursor-halo {
 }
 
 .bg-elevated {
-  background-color: #0c0f14;
+  background-color: var(--bg-surface);
   border-top: 1px solid var(--border-muted);
   border-bottom: 1px solid var(--border-muted);
 }
@@ -316,7 +296,6 @@ body.cursor-hover .cursor-halo {
 .text-cyan { color: var(--accent-cyan); }
 .text-red { color: var(--accent-red); }
 .text-amber { color: var(--accent-amber); }
-.text-secondary { color: var(--text-secondary); }
 .text-dim { color: var(--text-dim); }
 
 /* Buttons */
@@ -358,11 +337,23 @@ body.cursor-hover .cursor-halo {
 }
 
 /* ==========================================================================
-   Section A — Hero
+   Section 1 — Hero & "The Repair Current" Canvas
    ========================================================================== */
 .hero-section {
-  padding: 6.5rem 0 5rem;
   position: relative;
+  padding: 6rem 0 5rem;
+  overflow: hidden;
+}
+
+.repair-current-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.75;
 }
 
 .hero-layout {
@@ -370,6 +361,8 @@ body.cursor-hover .cursor-halo {
   grid-template-columns: 1.05fr 1fr;
   gap: 3.5rem;
   align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-copy {
@@ -433,7 +426,7 @@ body.cursor-hover .cursor-halo {
   color: var(--text-dim);
 }
 
-/* Right Side: Interactive Workflow Board */
+/* Right Side: Interactive Hero Composition */
 .hero-composition {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
@@ -447,9 +440,9 @@ body.cursor-hover .cursor-halo {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 1.25rem;
+  padding-bottom: 1.15rem;
   border-bottom: 1px solid var(--border-muted);
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.15rem;
 }
 
 .comp-title {
@@ -483,7 +476,7 @@ body.cursor-hover .cursor-halo {
   background: var(--bg-code);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 1rem 1.15rem;
+  padding: 0.95rem 1.15rem;
   cursor: pointer;
   transition: all 0.2s var(--ease-out-expo);
   outline: none;
@@ -509,7 +502,7 @@ body.cursor-hover .cursor-halo {
 
 .stage-num {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text-dim);
   font-weight: 600;
 }
@@ -572,16 +565,15 @@ body.cursor-hover .cursor-halo {
   margin-top: 0.35rem;
 }
 
-/* Connecting paths */
 .board-connector {
-  height: 20px;
+  height: 18px;
   display: flex;
   justify-content: center;
 }
 
 .connector-svg {
   width: 24px;
-  height: 20px;
+  height: 18px;
 }
 
 .connector-active-line {
@@ -595,7 +587,6 @@ body.cursor-hover .cursor-halo {
   stroke-dashoffset: 0;
 }
 
-/* Composition Explainer Box */
 .composition-explainer {
   margin-top: 1.25rem;
   background: #0b0f16;
@@ -631,195 +622,33 @@ body.cursor-hover .cursor-halo {
 }
 
 /* ==========================================================================
-   Section B — The Problem
-   ========================================================================= */
-.editorial-risks-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.75rem;
-}
-
-.risk-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 2.25rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.risk-index {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--accent-red);
-  margin-bottom: 1.25rem;
-}
-
-.risk-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.85rem;
-  line-height: 1.35;
-}
-
-.risk-copy {
-  font-size: 0.92rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 1.75rem;
-  flex: 1;
-}
-
-.risk-stat {
-  padding-top: 1rem;
-  border-top: 1px solid var(--border-muted);
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: var(--text-dim);
-}
-
-.stat-highlight {
-  color: #fff;
-  font-weight: 700;
-}
-
-/* ==========================================================================
-   Section C — How PatchPilot Works (Workflow Timeline)
+   Section 2 — Why Unverified Code Is Dangerous
    ========================================================================== */
-.workflow-timeline {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 1.5rem;
-}
-
-.timeline-step {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 1.85rem;
-  display: flex;
-  gap: 1.25rem;
-  transition: border-color 0.2s ease;
-}
-
-.timeline-step:hover {
-  border-color: var(--border-active);
-}
-
-.step-marker {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-code);
-  border: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.marker-num {
-  font-family: var(--font-mono);
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: var(--accent-lime);
-}
-
-.step-content {
-  flex: 1;
-}
-
-.step-heading {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.5rem;
-}
-
-.step-desc {
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  line-height: 1.55;
-  margin-bottom: 1rem;
-}
-
-.step-meta {
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  color: var(--text-dim);
-}
-
-/* ==========================================================================
-   Section D — Evidence-Gated Repair
-   ========================================================================== */
-.state-sequence-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--bg-graphite);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 1rem 2rem;
-  margin-bottom: 2.5rem;
-  overflow-x: auto;
-}
-
-.seq-node {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.seq-tag {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  color: var(--text-dim);
-}
-
-.seq-state {
-  font-family: var(--font-mono);
-  font-size: 0.92rem;
-  font-weight: 700;
-}
-
-.node-failed .seq-state { color: var(--accent-red); }
-.node-recovering .seq-state { color: var(--accent-amber); }
-.node-verifying .seq-state { color: var(--accent-cyan); }
-.node-verified .seq-state { color: var(--accent-lime); }
-
-.seq-arrow {
-  font-family: var(--font-mono);
-  font-size: 1.1rem;
-  color: var(--border-active);
-}
-
-.comparison-dual-deck {
+.hypothesis-comparison-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: 2rem;
 }
 
-.dual-card {
+.hypothesis-card {
   border-radius: var(--radius-lg);
   padding: 2.25rem;
   display: flex;
   flex-direction: column;
 }
 
-.unverified-card {
+.hypothesis-card.unverified {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
 }
 
-.verified-card {
+.hypothesis-card.verified {
   background: #0d131b;
   border: 1px solid var(--border-lime);
   box-shadow: 0 10px 40px rgba(200, 255, 85, 0.08);
 }
 
-.dual-badge {
+.hypo-badge {
   font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 700;
@@ -830,21 +659,21 @@ body.cursor-hover .cursor-halo {
   border-radius: var(--radius-xs);
 }
 
-.dual-title {
+.hypo-title {
   font-size: 1.35rem;
   font-weight: 700;
   color: #fff;
   margin-bottom: 0.5rem;
 }
 
-.dual-desc {
+.hypo-desc {
   font-size: 0.88rem;
   color: var(--text-secondary);
   line-height: 1.5;
   margin-bottom: 1.5rem;
 }
 
-.code-box {
+.hypo-code-block {
   background: var(--bg-code);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
@@ -852,7 +681,7 @@ body.cursor-hover .cursor-halo {
   margin-bottom: 1.5rem;
 }
 
-.code-box-header {
+.hypo-code-header {
   background: #0e1219;
   padding: 0.5rem 0.85rem;
   display: flex;
@@ -864,52 +693,272 @@ body.cursor-hover .cursor-halo {
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.status-pill {
-  font-weight: 700;
-  font-size: 0.65rem;
-  padding: 0.1rem 0.4rem;
-  border-radius: var(--radius-xs);
-}
-
-.pill-fail { background: rgba(255, 92, 92, 0.2); color: var(--accent-red); }
-.pill-verified { background: rgba(200, 255, 85, 0.2); color: var(--accent-lime); }
-
-.code-box pre {
+.hypo-code-block pre {
   padding: 1rem;
   font-family: var(--font-mono);
   font-size: 0.8rem;
   line-height: 1.6;
 }
 
-.c-del { color: var(--accent-red); display: block; }
-.c-add { color: var(--accent-lime); display: block; }
-.c-ctx { color: var(--text-secondary); display: block; }
-
-.dual-outcome {
+.hypo-diagnostic-list {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.85rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--border-muted);
-  font-size: 0.85rem;
 }
 
-.outcome-row {
+.diag-item {
   display: flex;
-  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
-.outcome-label {
-  color: var(--text-dim);
+.diag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 0.35rem;
+  flex-shrink: 0;
 }
 
-.outcome-val {
+.dot-red { background-color: var(--accent-red); box-shadow: 0 0 8px rgba(255, 92, 92, 0.4); }
+.dot-lime { background-color: var(--accent-lime); box-shadow: 0 0 8px rgba(200, 255, 85, 0.4); }
+
+/* ==========================================================================
+   Section 3 — The Repair Pipeline
+   ========================================================================== */
+.pipeline-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.pipeline-card {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s var(--ease-out-expo);
+}
+
+.pipeline-card:hover {
+  border-color: var(--border-active);
+  transform: translateY(-3px);
+}
+
+.pipeline-card.highlight-recovery {
+  border-color: rgba(227, 179, 65, 0.35);
+  background: rgba(227, 179, 65, 0.04);
+}
+
+.pipeline-card.highlight-verified {
+  border-color: var(--border-lime);
+  background: rgba(200, 255, 85, 0.04);
+}
+
+.pipe-num {
   font-family: var(--font-mono);
-  font-weight: 600;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+}
+
+.pipe-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.45rem;
+}
+
+.pipe-desc {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 1.25rem;
+  flex: 1;
+}
+
+.pipe-tag {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border-muted);
 }
 
 /* ==========================================================================
-   Section E — Trace Explorer
+   Section 4 — Code Diff Showcase
+   ========================================================================== */
+.diff-showcase-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+.diff-showcase-nav {
+  background: #0d1118;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.diff-nav-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.diff-view-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.diff-view-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface-elevated);
+}
+
+.diff-view-btn.active {
+  background: var(--bg-surface-elevated);
+  border-color: var(--border-active);
+  color: var(--accent-lime);
+  font-weight: 600;
+}
+
+.diff-file-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+
+.meta-path {
+  color: var(--text-dim);
+}
+
+.meta-stats {
+  color: var(--accent-lime);
+}
+
+.diff-screen-container {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-code);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+.diff-row {
+  display: flex;
+  padding: 0.15rem 0.5rem;
+  border-radius: 2px;
+}
+
+.diff-row.add {
+  background: rgba(200, 255, 85, 0.1);
+  color: #d8ff80;
+  border-left: 2px solid var(--accent-lime);
+}
+
+.diff-row.del {
+  background: rgba(255, 92, 92, 0.12);
+  color: #ffa8a8;
+  border-left: 2px solid var(--accent-red);
+}
+
+.diff-row.ctx { color: var(--text-secondary); }
+.diff-row.comment { color: var(--text-dim); font-style: italic; }
+
+.diff-num {
+  width: 32px;
+  color: var(--text-dim);
+  user-select: none;
+  text-align: right;
+  margin-right: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Section 5 — Failure-Driven Recovery Causality
+   ========================================================================== */
+.recovery-flow-sequence {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.flow-step-box {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.65rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.flow-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+}
+
+.flow-step-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.45rem;
+}
+
+.flow-step-body {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1.15rem;
+  flex: 1;
+}
+
+.flow-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--border-muted);
+}
+
+.flow-arrow-node {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--border-active);
+  font-size: 1.4rem;
+}
+
+/* ==========================================================================
+   Section 6 — Verification Trace
    ========================================================================== */
 .trace-terminal-window {
   background: var(--bg-surface);
@@ -1059,7 +1108,7 @@ body.cursor-hover .cursor-halo {
 }
 
 /* ==========================================================================
-   Section F — Architecture
+   Section 7 — Architecture
    ========================================================================== */
 .architecture-flow-grid {
   display: flex;
@@ -1119,7 +1168,7 @@ body.cursor-hover .cursor-halo {
 }
 
 /* ==========================================================================
-   Section G — Developer Experience (CLI Box)
+   Section 8 — Developer Workflow CLI Box
    ========================================================================== */
 .cli-box {
   background: var(--bg-code);
@@ -1175,46 +1224,7 @@ body.cursor-hover .cursor-halo {
 .c-cmd { color: var(--accent-lime); font-weight: 600; }
 
 /* ==========================================================================
-   Section H — Trust & Boundaries
-   ========================================================================== */
-.trust-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: 2rem;
-}
-
-.trust-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 2.25rem;
-}
-
-.trust-heading {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 1.25rem;
-}
-
-.trust-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 1.15rem;
-}
-
-.trust-list li {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.trust-list li strong {
-  color: #fff;
-}
-
-/* ==========================================================================
-   Section I — Final CTA
+   Section 9 — Final CTA & Footer
    ========================================================================== */
 .cta-section {
   text-align: center;
@@ -1248,9 +1258,6 @@ body.cursor-hover .cursor-halo {
   flex-wrap: wrap;
 }
 
-/* ==========================================================================
-   Section J — Footer
-   ========================================================================== */
 .site-footer {
   background: #06080b;
   border-top: 1px solid var(--border-subtle);
@@ -1325,9 +1332,7 @@ body.cursor-hover .cursor-halo {
   gap: 1rem;
 }
 
-/* ==========================================================================
-   Responsive Breakpoints
-   ========================================================================== */
+/* Responsive Adaptations */
 @media (max-width: 1024px) {
   .hero-layout {
     grid-template-columns: 1fr;
@@ -1343,6 +1348,12 @@ body.cursor-hover .cursor-halo {
     border-right: none;
     border-bottom: 1px solid var(--border-subtle);
   }
+  .recovery-flow-sequence {
+    grid-template-columns: 1fr;
+  }
+  .flow-arrow-node {
+    transform: rotate(90deg);
+  }
 }
 
 @media (max-width: 768px) {
@@ -1355,15 +1366,11 @@ body.cursor-hover .cursor-halo {
   .section-wrapper {
     padding: 4.5rem 0;
   }
-  .state-sequence-bar {
-    padding: 0.75rem 1rem;
-  }
   .footer-nav {
     gap: 2rem;
   }
 }
 
-/* Accessibility: prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -1371,7 +1378,7 @@ body.cursor-hover .cursor-halo {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .cursor-point, .cursor-halo, .cursor-badge {
+  .repair-current-canvas, .cursor-point, .cursor-halo, .cursor-badge {
     display: none !important;
   }
 }
