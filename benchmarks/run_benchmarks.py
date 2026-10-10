@@ -161,9 +161,9 @@ def main():
     table.add_column("Benchmark Case", style="cyan")
     table.add_column("Status", style="bold")
     table.add_column("Attempts", style="yellow")
-    table.add_column("Recovery Demonstrated", style="magenta")
+    table.add_column("Recovery", style="magenta")
     table.add_column("Duration", style="green")
-    table.add_column("Neatlogs Trace ID", style="dim")
+    table.add_column("Trace ID", style="dim")
 
     out_dir = Path("artifacts/benchmarks")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -171,14 +171,15 @@ def main():
     for item in results:
         r = item["report"]
         badge = "[green][OK] VERIFIED[/green]" if r.success else "[red][FAIL] FAILED[/red]"
-        recovery_flag = "[bold green]YES (Multi-attempt)[/bold green]" if len(r.attempts) > 1 else "Direct fix"
+        recovery_flag = "[green]YES (2 tries)[/green]" if len(r.attempts) > 1 else "Direct"
+        trace_id_display = (r.neatlogs_trace_id[:12] + "...") if r.neatlogs_trace_id else "Local"
         table.add_row(
             item["case"],
             badge,
             str(len(r.attempts)),
             recovery_flag,
             f"{r.total_duration_seconds:.2f}s",
-            r.neatlogs_trace_id or "Local"
+            trace_id_display
         )
         ReportGenerator.save_reports(r, out_dir)
 
