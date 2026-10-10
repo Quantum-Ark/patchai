@@ -35,15 +35,6 @@
     <svg class="blueprint-svg-canvas" id="blueprint-svg" xmlns="http://www.w3.org/2000/svg"></svg>
   </div>
 
-  <!-- Floating Mobile/Keyboard Inspection Mode Indicator & Control -->
-  <aside class="lens-floating-hint" aria-label="Inspection controls">
-    <button class="btn-xray-toggle" id="btn-floating-xray" aria-pressed="false" aria-label="Toggle X-ray inspection layer">
-      <span class="xray-indicator-dot"></span>
-      <span class="xray-toggle-text" id="floating-xray-label">X-RAY [HOLD SPACE]</span>
-    </button>
-    <div class="xray-status-bubble" id="xray-status-bubble">Hold mouse or Space to reveal the architecture underneath</div>
-  </aside>
-
   <!-- ======================================================================
        HEADER: MINIMAL PRINTED ARCHITECTURAL PILL NAV
        ====================================================================== -->
@@ -62,7 +53,7 @@
         </button>
       </div>
 
-      <!-- Center Readout: Build Scroll Progress -->
+      <!-- Center Readout: Build Scroll Progress (Only active during #build-sequence) -->
       <div class="nav-center-readout" id="nav-center-readout" aria-hidden="true">
         <span class="nav-progress-track">
           <span class="nav-progress-fill" id="nav-progress-fill"></span>
@@ -72,7 +63,7 @@
 
       <!-- Right Pill: X-Ray, Theme Switcher, Quick Brief, Menu -->
       <div class="nav-pill nav-pill-right">
-        <button type="button" class="nav-item btn-xray" id="btn-nav-xray" aria-pressed="false" title="X-ray: show how the page is built" data-inspect-label="btn-xray">
+        <button type="button" class="nav-item btn-xray" id="btn-nav-xray" aria-pressed="false" title="X-ray: inspect underlying DOM geometry [Space]" data-inspect-label="btn-xray">
           <svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true">
             <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/>
           </svg>
@@ -101,7 +92,7 @@
   <main id="main-content">
 
     <!-- --------------------------------------------------------------------
-         HERO SECTION: CALM EDITORIAL INTRO WITH INTERACTIVE PROMPT
+         HERO SECTION: CALM EDITORIAL INTRO WITH CALIBRATION BOARD
          -------------------------------------------------------------------- -->
     <section class="hero-section" id="hero" data-inspect-label="hero-section">
       <div class="shell">
@@ -203,21 +194,40 @@
     <!-- --------------------------------------------------------------------
          PHASE 4 — SCROLL-DRIVEN CONSTRUCTION STORY (8 STAGES)
          -------------------------------------------------------------------- -->
-    <section class="build-section" id="build-sequence" style="height: 480vh;" aria-label="From an issue to verification" data-inspect-label="build-sequence">
+    <section class="build-section" id="build-sequence" style="height: 380vh;" aria-label="From an issue to verification" data-inspect-label="build-sequence">
       <div class="build-sticky-stage" id="build-sticky-stage">
         
-        <!-- Header HUD inside sticky stage -->
+        <!-- Stable Stage Header Rail inside sticky stage -->
         <div class="build-hud-top">
-          <div class="shell flex justify-between items-start">
-            <div class="build-hud-left max-xl-hidden">
-              <div class="measure text-secondary">The build</div>
-              <div class="measure text-primary font-medium">From an issue to verified repair.</div>
+          <div class="shell flex justify-between items-center">
+            <div class="flex items-center gap-4">
+              <span class="stage-tag" id="stage-badge-num">STAGE 01 / 08</span>
+              <div class="stage-rail-wrap">
+                <span class="stage-rail-fill" id="stage-rail-fill"></span>
+              </div>
             </div>
-            <div class="build-hud-right text-right">
-              <div class="measure text-secondary">Build progress</div>
+            
+            <div class="flex items-center gap-4">
               <div class="build-count-value tabular-nums" id="build-count-display">
                 <span id="build-pct-num">000</span><span class="build-pct-unit">%</span>
               </div>
+              <button type="button" class="btn-skip-build" id="btn-skip-build" title="Skip to next section">
+                <span>Skip build</span>
+                <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                  <path d="M6 1v10M2 7l4 4 4-4"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stable Narrative Title & Description Area -->
+        <div class="build-narrative-area">
+          <div class="shell">
+            <div class="narrative-content-wrap">
+              <div class="measure text-accent font-semibold mb-1" id="stage-eyebrow">01 · REPO DISCOVERY</div>
+              <h2 class="display-3 stage-headline" id="stage-headline">A line.</h2>
+              <p class="lead stage-desc" id="stage-desc">Every repair starts somewhere. Where code breaks is pinpointed, not guessed.</p>
             </div>
           </div>
         </div>
@@ -316,122 +326,21 @@ ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
 
         </div>
 
-        <!-- Bottom Captions Deck (Synchronized with current stage) -->
-        <div class="build-captions-deck">
-          <div class="shell flex justify-between items-end pb-8">
-            <div class="captions-text-wrap" id="captions-text-wrap">
-              
-              <div class="caption-slide is-active" data-step-index="1">
-                <div class="measure mb-2 flex items-center gap-2">
-                  <span class="text-accent font-semibold">01</span>
-                  <span class="caption-divider"></span>
-                  <span class="text-secondary">08</span>
-                </div>
-                <h3 class="display-3">A line.</h3>
-                <p class="mt-2 caption-desc">Every repair starts somewhere. Where code breaks is pinpointed, not guessed.</p>
-              </div>
-
-              <div class="caption-slide" data-step-index="2">
-                <div class="measure mb-2 flex items-center gap-2">
-                  <span class="text-accent font-semibold">02</span>
-                  <span class="caption-divider"></span>
-                  <span class="text-secondary">08</span>
-                </div>
-                <h3 class="display-3">A grid.</h3>
-                <p class="mt-2 caption-desc">Understand the structure. Columns, modules, sandbox. The scaffolding everything aligns with.</p>
-              </div>
-
-              <div class="caption-slide" data-step-index="3">
-                <div class="measure mb-2 flex items-center gap-2">
-                  <span class="text-accent font-semibold">03</span>
-                  <span class="caption-divider"></span>
-                  <span class="text-secondary">08</span>
-                </div>
-                <h3 class="display-3">A layout.</h3>
-                <p class="mt-2 caption-desc">Find the part that matters. Issue report, candidate AST, and reproduction test in one frame.</p>
-              </div>
-
-              <div class="caption-slide" data-step-index="4">
-                <div class="measure mb-2 flex items-center gap-2">
-                  <span class="text-accent font-semibold">04</span>
-                  <span class="caption-divider"></span>
-                  <span class="text-secondary">08</span>
-                </div>
-                <h3 class="display-3">A typeface.</h3>
-                <p class="mt-2 caption-desc">Make the diagnosis clear. An explicit hypothesis with verifiable boundaries.</p>
-              </div>
-
-              <div class="caption-slide" data-step-index="5">
-                <div class="measure mb-2 flex items-center gap-2">
-                  <span class="text-accent font-semibold">05</span>
-                  <span class="caption-divider"></span>
-                  <span class="text-secondary">08</span>
-                </div>
-                <h3 class="display-3">A colour.</h3>
-                <p class="mt-2 caption-desc">Every signal has a purpose. Red interrupts the build when a test regression occurs.</p>
-              </div>
-
-              <div class="caption-slide" data-step-index="6">
-                <div class="measure mb-2 flex items-center gap-2">
-                  <span class="text-accent font-semibold">06</span>
-                  <span class="caption-divider"></span>
-                  <span class="text-secondary">08</span>
-                </div>
-                <h3 class="display-3">A line of code.</h3>
-                <p class="mt-2 caption-desc">Change the code. Inspect the diff. Minimal surgery with Before / Patch / After views.</p>
-              </div>
-
-              <div class="caption-slide" data-step-index="7">
-                <div class="measure mb-2 flex items-center gap-2">
-                  <span class="text-accent font-semibold">07</span>
-                  <span class="caption-divider"></span>
-                  <span class="text-secondary">08</span>
-                </div>
-                <h3 class="display-3">Online.</h3>
-                <p class="mt-2 caption-desc">Run it. Check it. Report it. Dual-suite execution with zero mock fallback.</p>
-              </div>
-
-              <div class="caption-slide" data-step-index="8">
-                <div class="measure mb-2 flex items-center gap-2">
-                  <span class="text-accent font-semibold">08</span>
-                  <span class="caption-divider"></span>
-                  <span class="text-secondary">08</span>
-                </div>
-                <h3 class="display-3">Your turn.</h3>
-                <p class="mt-2 caption-desc">Make every fix earn your trust. All evidence converges into one single button.</p>
-              </div>
-
-            </div>
-
-            <!-- Skip the build button -->
-            <button type="button" class="btn-skip-build" id="btn-skip-build">
-              <span>Skip the build</span>
-              <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-                <path d="M6 1v10M2 7l4 4 4-4"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
       </div>
     </section>
 
     <!-- --------------------------------------------------------------------
          PHASE 6A — THE PRINCIPLE ("A patch is not proof")
          -------------------------------------------------------------------- -->
-    <section class="shell py-24 md:py-40" id="principle-section" data-inspect-label="principle-section">
-      <div class="relative w-fit max-w-full">
+    <section class="shell section-pad" id="principle-section" data-inspect-label="principle-section">
+      <div class="section-header-block mb-16">
         <h2 class="display-2 max-w-[28ch]" data-inspect-label="stance-headline">
           A patch is not proof.<br>
           <span class="text-secondary">AI proposes the fix, but real execution decides whether it survives production.</span>
         </h2>
-        
-        <span class="secret-annotation" style="right: -0.5rem; top: calc(100% + 0.4rem); --tilt: -3deg;" aria-hidden="true">
-          <span class="annotation-text">Not one sentence too many.</span>
-        </span>
       </div>
 
-      <ul class="principles-grid mt-16 md:mt-24" role="list">
+      <ul class="principles-grid" role="list">
         <li class="principle-item rule pt-5" data-inspect-label="principle-01">
           <h3 class="display-4">No blind acceptance.</h3>
           <p class="mt-3 text-secondary">Generated code often reads smoothly to human reviewers while silently breaking dependent invariants. Every patch requires automated tests.</p>
@@ -452,163 +361,132 @@ ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
     </section>
 
     <!-- --------------------------------------------------------------------
-         PHASE 5 — THE POINTER-RESPONSIVE "FAN" CAPABILITIES ACCORDION
+         PHASE 5 — CAPABILITIES: REFINED MASTER-DETAIL SYSTEM
          -------------------------------------------------------------------- -->
-    <section class="shell py-24 md:py-40" id="capabilities-section" aria-labelledby="capabilities-title" data-inspect-label="capabilities-section">
-      <div class="mb-12 md:mb-16">
+    <section class="shell section-pad" id="capabilities-section" aria-labelledby="capabilities-title" data-inspect-label="capabilities-section">
+      <div class="section-header-block mb-12">
         <div class="measure text-accent font-semibold mb-2">PRODUCT CAPABILITIES</div>
-        <h2 class="display-2 max-w-[22ch]" id="capabilities-title">
+        <h2 class="display-2 max-w-[24ch]" id="capabilities-title">
           The surgical engine.<br>
           <span class="text-secondary">Seven autonomous stages of software repair.</span>
         </h2>
       </div>
 
-      <!-- The Responsive Fan: Expands under pointer, contracts inactive cards -->
-      <div class="capabilities-fan-container" id="capabilities-fan">
-        <ul class="fan-list" role="list">
+      <!-- Master-Detail Capabilities Layout -->
+      <div class="capabilities-master-detail" id="capabilities-master-detail">
+        
+        <!-- Left: Interactive Capability List / Stepper -->
+        <div class="cap-master-col" role="tablist" aria-label="Product capabilities">
           
-          <!-- Fan Item 01: Repository Inspection -->
-          <li class="fan-card is-active" data-fan="1" tabindex="0">
-            <span class="fan-vertical-label" aria-hidden="true">
-              <span class="measure">01</span>
-              <span class="display-4 vertical-title">Inspection</span>
-            </span>
-            <div class="fan-card-body">
-              <div class="fan-body-header">
-                <span class="measure text-secondary">01 / CAPABILITY</span>
-                <h3 class="display-4">Repository Inspection</h3>
-                <p class="mt-2 text-secondary">AST parsing and symbol dependency mapping across your codebase.</p>
+          <button type="button" class="cap-nav-item is-active" data-cap-id="1" role="tab" aria-selected="true" id="cap-tab-1" aria-controls="cap-panel-detail">
+            <span class="cap-num">01</span>
+            <div class="cap-text-block">
+              <span class="cap-title">Repository Inspection</span>
+              <span class="cap-summary">AST parsing and symbol dependency mapping across your codebase.</span>
+            </div>
+          </button>
+
+          <button type="button" class="cap-nav-item" data-cap-id="2" role="tab" aria-selected="false" id="cap-tab-2" aria-controls="cap-panel-detail">
+            <span class="cap-num">02</span>
+            <div class="cap-text-block">
+              <span class="cap-title">Baseline Reproduction</span>
+              <span class="cap-summary">Executes targeted repro commands. Confirms exit code != 0.</span>
+            </div>
+          </button>
+
+          <button type="button" class="cap-nav-item" data-cap-id="3" role="tab" aria-selected="false" id="cap-tab-3" aria-controls="cap-panel-detail">
+            <span class="cap-num">03</span>
+            <div class="cap-text-block">
+              <span class="cap-title">Patch Synthesis</span>
+              <span class="cap-summary">Bounded surgical diff generation. Validates file path boundaries.</span>
+            </div>
+          </button>
+
+          <button type="button" class="cap-nav-item" data-cap-id="4" role="tab" aria-selected="false" id="cap-tab-4" aria-controls="cap-panel-detail">
+            <span class="cap-num">04</span>
+            <div class="cap-text-block">
+              <span class="cap-title">Isolated Test Runner</span>
+              <span class="cap-summary">Executes test suites with 60s timeout budgets and env scrubbing.</span>
+            </div>
+          </button>
+
+          <button type="button" class="cap-nav-item" data-cap-id="5" role="tab" aria-selected="false" id="cap-tab-5" aria-controls="cap-panel-detail">
+            <span class="cap-num">05</span>
+            <div class="cap-text-block">
+              <span class="cap-title">Failure Recovery</span>
+              <span class="cap-summary">Atomic git rollback on test regression & traceback replan.</span>
+            </div>
+          </button>
+
+          <button type="button" class="cap-nav-item" data-cap-id="6" role="tab" aria-selected="false" id="cap-tab-6" aria-controls="cap-panel-detail">
+            <span class="cap-num">06</span>
+            <div class="cap-text-block">
+              <span class="cap-title">Dual Gate Verification</span>
+              <span class="cap-summary">Requires 100% exit code 0 across repro & regression suites.</span>
+            </div>
+          </button>
+
+          <button type="button" class="cap-nav-item" data-cap-id="7" role="tab" aria-selected="false" id="cap-tab-7" aria-controls="cap-panel-detail">
+            <span class="cap-num">07</span>
+            <div class="cap-text-block">
+              <span class="cap-title">Cryptographic Evidence</span>
+              <span class="cap-summary">Exports run telemetry to Neatlogs, archives patch diffs & PR.</span>
+            </div>
+          </button>
+
+        </div>
+
+        <!-- Right: Focused Capability Detail Card -->
+        <div class="cap-detail-col" id="cap-panel-detail" role="tabpanel" aria-labelledby="cap-tab-1">
+          <div class="cap-detail-card">
+            <div class="cap-card-header">
+              <div class="flex items-center gap-3">
+                <span class="measure text-accent font-semibold" id="cap-detail-num">01 / CAPABILITY</span>
+                <span class="cap-status-pill" id="cap-detail-badge">OPERATIONAL</span>
               </div>
-              <div class="fan-body-evidence">
-                <div class="fan-chip">Entire Graph AST</div>
-                <div class="fan-chip">Candidate Resolver</div>
+              <span class="measure text-secondary" id="cap-detail-tag">Entire Graph AST</span>
+            </div>
+
+            <div class="cap-card-body">
+              <h3 class="display-3" id="cap-detail-title">Repository Inspection</h3>
+              <p class="cap-detail-desc" id="cap-detail-desc">
+                PatchPilot traverses the codebase tree using AST symbols and dependency graphs. It indexes functions, references, and test locations to establish an isolated surgical scope without hallucinating unreferenced modules.
+              </p>
+
+              <!-- Technical Specification Box -->
+              <div class="cap-spec-box">
+                <div class="cap-spec-row">
+                  <span class="spec-label">MECHANISM</span>
+                  <span class="spec-value" id="cap-spec-mechanism">Entire Graph code graph & AST symbol resolution</span>
+                </div>
+                <div class="cap-spec-row">
+                  <span class="spec-label">ISOLATION</span>
+                  <span class="spec-value" id="cap-spec-isolation">Read-only candidate discovery in working tree</span>
+                </div>
+                <div class="cap-spec-row">
+                  <span class="spec-label">GUARANTEE</span>
+                  <span class="spec-value text-verified" id="cap-spec-guarantee">Zero file modifications during intake stage</span>
+                </div>
+              </div>
+
+              <!-- Badges / Evidence tags -->
+              <div class="cap-tags-row" id="cap-detail-chips">
+                <span class="fan-chip">Entire Graph AST</span>
+                <span class="fan-chip">Candidate Resolver</span>
+                <span class="fan-chip">Symbol Cross-ref</span>
               </div>
             </div>
-          </li>
+          </div>
+        </div>
 
-          <!-- Fan Item 02: Bug Reproduction -->
-          <li class="fan-card" data-fan="2" tabindex="0">
-            <span class="fan-vertical-label" aria-hidden="true">
-              <span class="measure">02</span>
-              <span class="display-4 vertical-title">Reproduction</span>
-            </span>
-            <div class="fan-card-body">
-              <div class="fan-body-header">
-                <span class="measure text-secondary">02 / CAPABILITY</span>
-                <h3 class="display-4">Baseline Reproduction</h3>
-                <p class="mt-2 text-secondary">Executes targeted reproduction commands. Confirms exit code != 0 before editing.</p>
-              </div>
-              <div class="fan-body-evidence">
-                <div class="fan-chip text-accent">Exit Code 1 Confirmed</div>
-                <div class="fan-chip">Subprocess Runner</div>
-              </div>
-            </div>
-          </li>
-
-          <!-- Fan Item 03: Patch Generation -->
-          <li class="fan-card" data-fan="3" tabindex="0">
-            <span class="fan-vertical-label" aria-hidden="true">
-              <span class="measure">03</span>
-              <span class="display-4 vertical-title">Synthesis</span>
-            </span>
-            <div class="fan-card-body">
-              <div class="fan-body-header">
-                <span class="measure text-secondary">03 / CAPABILITY</span>
-                <h3 class="display-4">Patch Synthesis</h3>
-                <p class="mt-2 text-secondary">Bounded surgical diff generation. Validates file path boundaries against traversal attacks.</p>
-              </div>
-              <div class="fan-body-evidence">
-                <div class="fan-chip">Traversal Guard</div>
-                <div class="fan-chip">Minimal Surgery</div>
-              </div>
-            </div>
-          </li>
-
-          <!-- Fan Item 04: Test Execution -->
-          <li class="fan-card" data-fan="4" tabindex="0">
-            <span class="fan-vertical-label" aria-hidden="true">
-              <span class="measure">04</span>
-              <span class="display-4 vertical-title">Testing</span>
-            </span>
-            <div class="fan-card-body">
-              <div class="fan-body-header">
-                <span class="measure text-secondary">04 / CAPABILITY</span>
-                <h3 class="display-4">Isolated Test Runner</h3>
-                <p class="mt-2 text-secondary">Executes acceptance tests first, then triggers regression test suites with timeout budgets.</p>
-              </div>
-              <div class="fan-body-evidence">
-                <div class="fan-chip">60s Timeout Budget</div>
-                <div class="fan-chip">Env Scrubbing</div>
-              </div>
-            </div>
-          </li>
-
-          <!-- Fan Item 05: Failure Recovery -->
-          <li class="fan-card" data-fan="5" tabindex="0">
-            <span class="fan-vertical-label" aria-hidden="true">
-              <span class="measure">05</span>
-              <span class="display-4 vertical-title">Recovery</span>
-            </span>
-            <div class="fan-card-body">
-              <div class="fan-body-header">
-                <span class="measure text-secondary">05 / CAPABILITY</span>
-                <h3 class="display-4">Failure Recovery</h3>
-                <p class="mt-2 text-secondary">On test regression, auto-restores clean baseline SHA and replans using traceback context.</p>
-              </div>
-              <div class="fan-body-evidence">
-                <div class="fan-chip text-accent">Atomic Rollback</div>
-                <div class="fan-chip">Traceback Injection</div>
-              </div>
-            </div>
-          </li>
-
-          <!-- Fan Item 06: Independent Verification -->
-          <li class="fan-card" data-fan="6" tabindex="0">
-            <span class="fan-vertical-label" aria-hidden="true">
-              <span class="measure">06</span>
-              <span class="display-4 vertical-title">Verification</span>
-            </span>
-            <div class="fan-card-body">
-              <div class="fan-body-header">
-                <span class="measure text-secondary">06 / CAPABILITY</span>
-                <h3 class="display-4">Dual Gate Verification</h3>
-                <p class="mt-2 text-secondary">Requires 100% exit code 0 across reproduction and regression suites simultaneously.</p>
-              </div>
-              <div class="fan-body-evidence">
-                <div class="fan-chip text-verified">Dual-Suite Gate</div>
-                <div class="fan-chip text-verified">100% Pass Required</div>
-              </div>
-            </div>
-          </li>
-
-          <!-- Fan Item 07: Evidence Reporting -->
-          <li class="fan-card" data-fan="7" tabindex="0">
-            <span class="fan-vertical-label" aria-hidden="true">
-              <span class="measure">07</span>
-              <span class="display-4 vertical-title">Evidence</span>
-            </span>
-            <div class="fan-card-body">
-              <div class="fan-body-header">
-                <span class="measure text-secondary">07 / CAPABILITY</span>
-                <h3 class="display-4">Cryptographic Evidence</h3>
-                <p class="mt-2 text-secondary">Exports run telemetry to Neatlogs, archives git patch diffs, and drafts unmerged PRs.</p>
-              </div>
-              <div class="fan-body-evidence">
-                <div class="fan-chip">Neatlogs Telemetry</div>
-                <div class="fan-chip">Draft PR Dossier</div>
-              </div>
-            </div>
-          </li>
-
-        </ul>
       </div>
     </section>
 
     <!-- --------------------------------------------------------------------
          PHASE 6C & 6D — THE REAL DIFF & EVIDENCE TRAIL
          -------------------------------------------------------------------- -->
-    <section class="shell py-24 md:py-36" id="evidence-section" data-inspect-label="evidence-section">
-      <div class="mb-12">
+    <section class="shell section-pad" id="evidence-section" data-inspect-label="evidence-section">
+      <div class="section-header-block mb-12">
         <div class="measure text-accent font-semibold mb-2">EMPIRICAL PROOF</div>
         <h2 class="display-2 max-w-[20ch]">
           The evidence trail.<br>
@@ -636,7 +514,7 @@ ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
         <!-- Telemetry Trail Box -->
         <div class="telemetry-card-box" data-inspect-label="telemetry-box">
           <div class="tel-bar-top">
-            <span class="measure font-medium">GENUINE RUN RECORD // RUN-648AB230</span>
+            <span class="measure font-medium">ILLUSTRATIVE RUN // RUN-648AB230</span>
             <span class="tel-badge-verified text-verified">DUAL PASS</span>
           </div>
           
@@ -668,8 +546,8 @@ ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
     <!-- --------------------------------------------------------------------
          PHASE 7 — LIVE DRAFT BRIEFING EXPERIENCE
          -------------------------------------------------------------------- -->
-    <section class="shell py-24 md:py-40" id="repair-brief-section" aria-labelledby="brief-title" data-inspect-label="brief-section">
-      <div class="mb-12">
+    <section class="shell section-pad" id="repair-brief-section" aria-labelledby="brief-title" data-inspect-label="brief-section">
+      <div class="section-header-block mb-12">
         <div class="measure text-accent font-semibold mb-2">LIVE DRAFT GENERATOR</div>
         <h2 class="display-2 max-w-[24ch]" id="brief-title">
           Prepare your repair brief.<br>
@@ -683,9 +561,6 @@ ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
         <form class="brief-form" id="brief-form" novalidate onsubmit="return false;" data-inspect-label="brief-form">
           
           <div class="form-step-block">
-            <h3 class="display-4 form-step-head">
-              <span class="measure text-accent">01</span> Target Repository
-            </h3>
             <div class="field-group">
               <label for="f-repo" class="field-label">Repository URL or Local Path <span class="text-accent">*</span></label>
               <input type="text" id="f-repo" class="field-input" placeholder="https://github.com/Quantum-Ark/patchai or ." value="https://github.com/Quantum-Ark/patchai" required>
@@ -693,9 +568,6 @@ ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
           </div>
 
           <div class="form-step-block">
-            <h3 class="display-4 form-step-head">
-              <span class="measure text-accent">02</span> Issue Description
-            </h3>
             <div class="field-group">
               <label for="f-issue" class="field-label">Issue Specification / Error Trace <span class="text-accent">*</span></label>
               <textarea id="f-issue" class="field-input resize-y" rows="4" placeholder="Describe the failure or paste pytest output...">ValueError: negative volume input in pricing.py produces negative customer billing total.</textarea>
@@ -703,9 +575,6 @@ ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
           </div>
 
           <div class="form-step-block">
-            <h3 class="display-4 form-step-head">
-              <span class="measure text-accent">03</span> Execution Constraints
-            </h3>
             <div class="grid gap-4 sm-grid-cols-2">
               <div class="field-group">
                 <label for="f-test-cmd" class="field-label">Reproduction Test Command</label>
@@ -738,8 +607,8 @@ ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
           <div class="brief-draft-card sticky top-28">
             <div class="draft-card-header">
               <div>
-                <div class="measure">The draft</div>
-                <div class="measure text-primary font-medium">Draws along while you write.</div>
+                <div class="measure text-accent font-semibold">THE LIVE BRIEF</div>
+                <div class="measure text-primary font-medium">Constructs as you write.</div>
               </div>
               <div class="text-right">
                 <div class="measure text-secondary">Brief Completion</div>
@@ -761,20 +630,24 @@ ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
               </div>
             </div>
 
-            <div class="draft-summary-meta">
-              <div class="meta-row">
-                <span class="measure text-secondary">Isolation</span>
-                <span class="measure text-primary font-medium">Ephemeral Worktree</span>
+            <!-- Execution Parameters Disclosure -->
+            <details class="draft-details-disclosure mt-4" open>
+              <summary class="measure text-secondary cursor-pointer py-1 select-none">Execution Parameters &amp; Isolation</summary>
+              <div class="draft-summary-meta mt-3">
+                <div class="meta-row">
+                  <span class="measure text-secondary">Isolation</span>
+                  <span class="measure text-primary font-medium">Ephemeral Worktree</span>
+                </div>
+                <div class="meta-row">
+                  <span class="measure text-secondary">Rollback Mode</span>
+                  <span class="measure text-primary font-medium">Atomic Baseline Reset</span>
+                </div>
+                <div class="meta-row">
+                  <span class="measure text-secondary">Auditing</span>
+                  <span class="measure text-verified font-medium">Neatlogs Spans Enabled</span>
+                </div>
               </div>
-              <div class="meta-row">
-                <span class="measure text-secondary">Rollback Mode</span>
-                <span class="measure text-primary font-medium">Atomic Baseline Reset</span>
-              </div>
-              <div class="meta-row">
-                <span class="measure text-secondary">Auditing</span>
-                <span class="measure text-verified font-medium">Neatlogs Spans Enabled</span>
-              </div>
-            </div>
+            </details>
           </div>
         </aside>
 
