@@ -85,10 +85,20 @@ def doctor():
     else:
         table.add_row("Docker Sandbox", "[yellow][WARN][/yellow]", "Not active; using isolated subprocess fallback")
 
-    # Entire CLI
-    entire_bin = shutil.which("entire") or str(Path.home() / ".local" / "bin" / "entire.exe")
-    if Path(entire_bin).exists() or shutil.which("entire"):
-        table.add_row("Entire CLI", "[green][OK][/green]", "Installed & configured")
+    # Entire CLI (portable detection)
+    _entire_bin = shutil.which("entire")
+    _entire_found = bool(_entire_bin)
+    if not _entire_found:
+        for _cand in (
+            Path.home() / ".local" / "bin" / "entire",
+            Path.home() / ".local" / "bin" / "entire.exe",
+        ):
+            if _cand.exists():
+                _entire_bin = str(_cand)
+                _entire_found = True
+                break
+    if _entire_found:
+        table.add_row("Entire CLI", "[green][OK][/green]", f"Installed & configured ({_entire_bin})")
     else:
         table.add_row("Entire CLI", "[yellow][WARN][/yellow]", "Entire binary not found")
 
@@ -133,11 +143,11 @@ def repair(
         "-r",
         help="Target repository directory to investigate and fix."
     ),
-    provider: str = typer.Option(
-        "openai",
+    provider: Optional[str] = typer.Option(
+        None,
         "--provider",
         "-p",
-        help="LLM provider: 'openai' or 'mock' (for deterministic offline testing)."
+        help="LLM provider: 'openai', 'anthropic', 'gemini', or 'mock' (offline unit test only)."
     ),
     output_dir: Path = typer.Option(
         Path("artifacts"),
@@ -149,10 +159,17 @@ def repair(
     """
     Autonomously investigate, reproduce, generate patch, and verify fix.
     """
+    # Initialize provider
+    try:
+        llm = get_llm_provider(provider)
+    except Exception as e:
+        console.print(f"[bold red]LLM Provider Error:[/bold red] {e}")
+        raise typer.Exit(code=1)
+
     console.print(Panel.fit(
         f"[bold cyan]PatchPilot AI[/bold cyan] - Autonomous Verified Recovery Agent\n"
         f"Target Repo: [yellow]{repo_dir.resolve()}[/yellow]\n"
-        f"Provider: [magenta]{provider}[/magenta]",
+        f"Provider: [magenta]{llm.provider_name}[/magenta] ([dim]{llm.model_name}[/dim])",
         border_style="cyan"
     ))
 
@@ -182,7 +199,6 @@ def repair(
     console.print(f"Loaded Issue: [bold]#{issue.id}[/bold] - [italic]{issue.title}[/italic]\n")
 
     # Initialize orchestrator
-    llm = get_llm_provider(provider)
     orchestrator = PatchPilotOrchestrator(
         repo_dir=repo_dir,
         llm_provider=llm
@@ -275,8 +291,12 @@ def report(run_id: str = typer.Argument(..., help="Run ID to show report for")):
 @app.command()
 def evaluate():
     """Execute the 3 reproducible benchmark evaluation cases."""
+    repo_root = Path(__file__).resolve().parent.parent.parent
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
     from benchmarks.run_benchmarks import main as run_benchmarks_main
     run_benchmarks_main()
+
 
 
 @app.command()
@@ -297,9 +317,12 @@ def verify_integrations():
 
     # Entire
     try:
-        entire_path = Path.home() / ".local" / "bin" / "entire.exe"
-        if entire_path.exists():
-            table.add_row("Entire Continuous Memory", "[green][OK] Enabled[/green]", "Entire CLI v0.11.4 verified")
+        entire_ok = bool(shutil.which("entire")) or any(
+            (Path.home() / ".local" / "bin" / name).exists()
+            for name in ("entire", "entire.exe")
+        )
+        if entire_ok:
+            table.add_row("Entire Continuous Memory", "[green][OK] Enabled[/green]", "Entire CLI verified")
         else:
             table.add_row("Entire Continuous Memory", "[yellow][WARN][/yellow]", "Entire binary not found")
     except Exception as e:
@@ -308,9 +331,9 @@ def verify_integrations():
     # LLM
     try:
         provider = get_llm_provider()
-        table.add_row("LLM Provider", "[green][OK] Ready[/green]", provider.__class__.__name__)
-    except Exception as e:
-        table.add_row("LLM Provider", "[red][FAIL][/red]", str(e))
+        table.add_row("LLM Provider", "[green][OK] Ready[/green]", f"{provider.provider_name} ({provider.model_name})")
+    except Exception:
+        table.add_row("LLM Provider", "[yellow][WARN] Not Configured[/yellow]", "Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY in .env")
 
     # Crustdata
     if config.crustdata_api_key:
@@ -373,5 +396,44 @@ def entire_sync():
     ))
 
 
+@app.command()
+def serve(
+    port: int = typer.Option(3000, "--port", "-p", help="Port to serve the interactive homepage"),
+    host: str = typer.Option("127.0.0.1", "--host", "-h", help="Host address to bind")
+):
+    """Serve the interactive animated web homepage locally."""
+    import http.server
+    import socketserver
+    import webbrowser
+    from functools import partial
+
+    web_dir = Path(__file__).parent.parent.parent / "web"
+    if not web_dir.is_dir():
+        console.print(f"[bold red]Error:[/bold red] Web directory not found at {web_dir}")
+        raise typer.Exit(code=1)
+
+    handler = partial(http.server.SimpleHTTPRequestHandler, directory=str(web_dir))
+    
+    console.print(Panel.fit(
+        f"[bold cyan]PatchPilot AI — Web Experience[/bold cyan]\n"
+        f"Serving directory: [yellow]{web_dir.resolve()}[/yellow]\n"
+        f"URL: [bold green]http://{host}:{port}[/bold green]\n"
+        f"Press [dim]Ctrl+C[/dim] to stop server.",
+        border_style="cyan"
+    ))
+
+    try:
+        with socketserver.TCPServer((host, port), handler) as httpd:
+            console.print(f"[dim]Opening browser at http://{host}:{port} ...[/dim]")
+            try:
+                webbrowser.open(f"http://{host}:{port}")
+            except Exception:
+                pass
+            httpd.serve_forever()
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Server stopped.[/yellow]")
+
+
 if __name__ == "__main__":
     app()
+

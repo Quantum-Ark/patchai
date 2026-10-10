@@ -81,11 +81,32 @@ patchpilotai/
 │   ├── case_2_boundary_bug/
 │   ├── case_3_regression_recovery/
 │   └── run_benchmarks.py      # Automated benchmark suite runner
-├── tests/                     # 18 automated unit and integration tests
-├── demo_recovery.py           # Flagship verified recovery showcase
+├── web/                       # High-aesthetic interactive animated homepage
+│   ├── index.html             # Semantic workbench UI, diff viewer, and ROI model
+│   ├── style.css              # Cyber-engineering glassmorphism design system
+│   └── app.js                 # Particle mesh canvas, cursor effect, live simulator
+├── tests/                     # 21 automated unit and integration tests
 ├── pyproject.toml             # Package configuration
 └── .env.example               # Environment variables template
 ```
+
+---
+
+## 🌐 Interactive Web Experience & Simulator
+
+PatchPilot AI includes an animated homepage featuring an interactive state machine simulator, diff inspector, and ROI economics calculator:
+
+```bash
+# Launch the web experience locally (opens at http://127.0.0.1:3000)
+patchpilot serve
+```
+
+### Features:
+- **Motion Graphic Visuals:** Reactive particle mesh canvas responding to mouse coordinates.
+- **Custom Fluid Cursor:** Magnetic dual-layer glowing cursor with lerp trajectory tracking.
+- **Live State Machine Stepper:** Watch the 7-stage engine transition through Inspecting, Reproducing, Patching, Testing, Recovering, Verifying, and Completed.
+- **Audited Diff Inspector:** Toggle between broken naive patches and verified precision patches.
+- **Interactive Financial Model:** Synthesized from the cfo.ai financial SaaS framework.
 
 ---
 
@@ -95,8 +116,8 @@ patchpilotai/
 Clone the repository and install dependencies in a Python 3.12+ virtual environment:
 
 ```bash
-git clone https://github.com/ABHISHEK-DBZ/patchpilotai.git
-cd patchpilotai
+git clone https://github.com/Quantum-Ark/patchai.git
+cd patchai
 
 # Create and activate virtual environment
 python -m venv .venv
@@ -105,28 +126,32 @@ python -m venv .venv
 # Linux/macOS:
 source .venv/bin/activate
 
-# Install in editable mode
-pip install -e .
+# Install in editable mode with development dependencies
+pip install -e ".[dev]"
 ```
 
 ### 2. Configure Environment
-Copy the example environment file and add your credentials:
+Copy the example environment file and configure your credentials:
 ```bash
 cp .env.example .env
 ```
 
 ```ini
-NEATLOGS_PROJECT_ID=b0860223-3c80-445d-a3f1-3002c0643197
 NEATLOGS_API_KEY=your_neatlogs_project_api_key_here
 NEATLOGS_INGEST_URL=https://ingest.neatlogs.com/v1/trace
 
+# Configured LLM Provider (openai, anthropic, or gemini)
 OPENAI_API_KEY=your_openai_api_key_here
+# ANTHROPIC_API_KEY=your_anthropic_api_key_here
+# GEMINI_API_KEY=your_gemini_api_key_here
+
+CRUSTDATA_API_KEY=your_crustdata_key_here
 PATCHPILOT_MODEL=gpt-4o
 PATCHPILOT_MAX_ATTEMPTS=3
 ```
-*(Note: If no OpenAI key is set, PatchPilot gracefully falls back to the deterministic Mock provider for zero-cost offline evaluations).*
 
 ### 3. Check System Status
+
 ```bash
 patchpilot status
 ```

@@ -4,10 +4,11 @@ Coordinates issue intake, reproduction, investigation, bounded patch loops, veri
 and telemetry reporting.
 """
 
+import ast
 import uuid
 import time
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 
 from patchpilot.config import config
 from patchpilot.models import (
@@ -27,6 +28,55 @@ from patchpilot.verification.acceptance import AcceptanceVerifier
 from patchpilot.verification.regression import RegressionVerifier
 from patchpilot.telemetry.tracing import NeatlogsTracer, TraceBuilder
 from patchpilot.reporting.report import ReportGenerator
+
+
+def _parse_investigation(text: str) -> Tuple[str, List[str], str, str]:
+    hypo, sol, strat = "", "", ""
+    files: List[str] = []
+    for line in (text or "").splitlines():
+        up = line.strip().upper()
+        if up.startswith("HYPOTHESIS:"):
+            hypo = line.split(":", 1)[1].strip()
+        elif up.startswith("RELEVANT_FILES:"):
+            raw = line.split(":", 1)[1]
+            files = [p.strip().strip("./") for p in raw.replace(";", ",").split(",") if p.strip()]
+        elif up.startswith("PROPOSED_SOLUTION:"):
+            sol = line.split(":", 1)[1].strip()
+        elif up.startswith("TEST_STRATEGY:"):
+            strat = line.split(":", 1)[1].strip()
+    return hypo, files, sol, strat
+
+
+def _parse_patch_response(text: str) -> Tuple[str, str, str]:
+    target, orig, new = "", "", ""
+    if not text or "ORIGINAL_CODE:" not in text or "PATCHED_CODE:" not in text:
+        return target, orig, new
+    head, _, tail = text.partition("PATCHED_CODE:")
+    new = tail.strip().strip("`").strip()
+    _, _, after_orig = head.partition("ORIGINAL_CODE:")
+    after_orig = after_orig.strip()
+    if "TARGET_FILE:" in head.split("ORIGINAL_CODE:")[0]:
+        pre = head.split("ORIGINAL_CODE:")[0]
+        _, _, tf = pre.partition("TARGET_FILE:")
+        target = tf.strip().splitlines()[0].strip().strip("./") if tf.strip() else ""
+    orig = after_orig.strip().strip("`").strip()
+    return target, orig, new
+
+
+def _validate_patch_syntax(repo_tool, rel_path: str, original: str, replacement: str) -> Optional[str]:
+    try:
+        content = repo_tool.read_file_safe(rel_path)
+    except (ValueError, FileNotFoundError, OSError) as e:
+        return f"Cannot read {rel_path}: {e}"
+    if original not in content:
+        return f"Original snippet not found in {rel_path}."
+    candidate = content.replace(original, replacement, 1)
+    if rel_path.endswith(".py"):
+        try:
+            ast.parse(candidate)
+        except SyntaxError as e:
+            return f"Patched Python is invalid: {e}"
+    return None
 
 
 class PatchPilotOrchestrator:
@@ -86,17 +136,38 @@ class PatchPilotOrchestrator:
             investigation_prompt = (
                 f"Analyze issue: {issue.title}\nDescription: {issue.body}\n"
                 f"Candidate files: {rel_files[:10]}\n"
-                f"Formulate hypothesis, identify exact root cause file, and outline fix."
+                f"Reply in exactly this format:\n"
+                f"HYPOTHESIS: <one-sentence root cause>\n"
+                f"RELEVANT_FILES: <comma-separated repo-relative paths>\n"
+                f"PROPOSED_SOLUTION: <concrete fix>\n"
+                f"TEST_STRATEGY: <how to verify>"
             )
             investigation_response = self.llm.generate(investigation_prompt)
             trace_builder.record_llm_span("investigate_root_cause", config.model, investigation_prompt, investigation_response)
 
-            target_files = issue.file_hints if issue.file_hints else rel_files[:2]
+            hypothesis, relevant, solution, strategy = _parse_investigation(
+                investigation_response
+            )
+            llm_files = [f for f in relevant if f]
+            # Prefer explicit issue hints, then validated LLM files, then discovery.
+            validated_llm_files = []
+            for cand in llm_files:
+                try:
+                    self.repo_tool.read_file_safe(cand)
+                    validated_llm_files.append(cand)
+                except (ValueError, FileNotFoundError):
+                    continue
+            if issue.file_hints:
+                target_files = [h for h in issue.file_hints]
+            elif validated_llm_files:
+                target_files = validated_llm_files
+            else:
+                target_files = rel_files[:2]
             investigation_plan = InvestigationPlan(
-                root_cause_hypothesis=f"Hypothesis derived from issue #{issue.id}",
+                root_cause_hypothesis=hypothesis or f"Hypothesis derived from issue #{issue.id}",
                 relevant_files=target_files,
-                proposed_solution="Implement defensive check / boundary correction",
-                test_strategy=issue.reproduction_command or "pytest tests/ -v"
+                proposed_solution=solution or "Implement defensive check / boundary correction",
+                test_strategy=strategy or issue.reproduction_command or "pytest tests/ -v",
             )
 
             # 3. State: REPRODUCING
@@ -121,11 +192,21 @@ class PatchPilotOrchestrator:
 
                 attempt_strategy = f"Attempt #{current_attempt}: " + (recovery_guidance or "Initial direct fix hypothesis")
 
-                # Generate patch via LLM / Provider
+                # Generate patch via LLM with real file context
+                ctx_parts = []
+                for tf in target_files[:3]:
+                    try:
+                        ctx_parts.append(f"--- {tf} ---\n{self.repo_tool.read_file_safe(tf)[:4000]}")
+                    except (ValueError, FileNotFoundError, OSError):
+                        continue
+                ctx_block = "\n\n".join(ctx_parts) if ctx_parts else "(no file context)"
                 patch_prompt = (
                     f"Generate code replacement for issue '{issue.title}'.\n"
-                    f"Previous attempt error notes: {recovery_guidance}\n"
-                    f"Target files: {target_files}"
+                    f"Description: {issue.body[:1000]}\n"
+                    f"Previous notes: {recovery_guidance}\n"
+                    f"Target files: {target_files}\n"
+                    f"Contents:\n{ctx_block}\n\n"
+                    f"Reply EXACTLY:\nTARGET_FILE: <path>\nORIGINAL_CODE:\n<verbatim>\nPATCHED_CODE:\n<fix>"
                 )
                 patch_code_resp = self.llm.generate(patch_prompt)
                 trace_builder.record_llm_span(f"generate_patch_attempt_{current_attempt}", config.model, patch_prompt, patch_code_resp)
@@ -135,42 +216,96 @@ class PatchPilotOrchestrator:
                 original_text = ""
                 replacement_text = ""
 
-                if "ORIGINAL_CODE:" in patch_code_resp and "PATCHED_CODE:" in patch_code_resp:
-                    parts = patch_code_resp.split("PATCHED_CODE:")
-                    replacement_text = parts[1].strip()
-                    first_part = parts[0]
-                    if "ORIGINAL_CODE:" in first_part:
-                        orig_sub = first_part.split("ORIGINAL_CODE:")[1].strip()
-                        original_text = orig_sub
-                    if "TARGET_FILE:" in first_part:
-                        tf_sub = first_part.split("TARGET_FILE:")[1].split("ORIGINAL_CODE:")[0].strip()
-                        if tf_sub:
-                            target_file_rel = tf_sub
+                parsed_target, original_text, replacement_text = _parse_patch_response(patch_code_resp)
+                if parsed_target:
+                    target_file_rel = parsed_target
 
                 if not original_text or not replacement_text:
-                    try:
-                        full_content = self.repo_tool.read_file_safe(target_file_rel)
-                        if "return x / y" in full_content:
-                            original_text = "return x / y"
-                            if current_attempt == 1:
-                                replacement_text = "if y == 0: return None\n    return x / y"
-                            else:
-                                replacement_text = "if y == 0:\n        raise ZeroDivisionError('Division by zero')\n    return x / y"
-                        elif "def calculate(" in full_content:
-                            original_text = "def calculate("
-                            replacement_text = "# Fixed boundary\ndef calculate("
-                        else:
-                            original_text = full_content[:50]
-                            replacement_text = full_content[:50]
-                    except Exception:
-                        original_text = ""
-                        replacement_text = ""
+                    # LLM gave no usable patch: fail this attempt cleanly and pivot.
+                    from patchpilot.models import TestExecutionResult as _TER
+                    _parse_fail = _TER(
+                        command="patch-parse", exit_code=1, stdout="",
+                        stderr="LLM response missing usable ORIGINAL_CODE/PATCHED_CODE.",
+                        duration_seconds=0.0, passed=False,
+                        summary="Patch parse failure.",
+                    )
+                    _fc = FailureCategory.INCOMPLETE_PATCH
+                    _act, _guide = self.retry_policy.evaluate_recovery(current_attempt, _fc, _parse_fail)
+                    attempts_list.append(PatchAttempt(
+                        attempt_number=current_attempt, strategy_description=attempt_strategy,
+                        target_file=target_file_rel, original_snippet=original_text,
+                        patched_snippet=replacement_text, unified_diff="",
+                        applied_successfully=False, test_result=None,
+                        failure_category=_fc, recovery_decision=_act, recovery_notes=_guide,
+                    ))
+                    if _act == RecoveryAction.TERMINATE_MAX_BUDGET:
+                        sm.transition_to(AgentState.FAILED, "Retry budget exhausted.")
+                        break
+                    sm.transition_to(AgentState.RECOVERING, f"Pivoting: {_guide}")
+                    recovery_guidance = _guide
+                    current_attempt += 1
+                    continue
+
+                _syn_err = _validate_patch_syntax(self.repo_tool, target_file_rel, original_text, replacement_text)
+                if _syn_err:
+                    from patchpilot.models import TestExecutionResult as _TER2
+                    _syn_fail = _TER2(
+                        command="patch-syntax-check", exit_code=1, stdout="",
+                        stderr=_syn_err, duration_seconds=0.0, passed=False,
+                        summary="Patch syntax check failed.",
+                    )
+                    _fc2 = FailureCategory.SYNTAX_ERROR
+                    _act2, _guide2 = self.retry_policy.evaluate_recovery(current_attempt, _fc2, _syn_fail)
+                    attempts_list.append(PatchAttempt(
+                        attempt_number=current_attempt, strategy_description=attempt_strategy,
+                        target_file=target_file_rel, original_snippet=original_text,
+                        patched_snippet=replacement_text, unified_diff="",
+                        applied_successfully=False, test_result=None,
+                        failure_category=_fc2, recovery_decision=_act2, recovery_notes=_guide2,
+                    ))
+                    if _act2 == RecoveryAction.TERMINATE_MAX_BUDGET:
+                        sm.transition_to(AgentState.FAILED, "Retry budget exhausted.")
+                        break
+                    sm.transition_to(AgentState.RECOVERING, f"Pivoting: {_guide2}")
+                    recovery_guidance = _guide2
+                    current_attempt += 1
+                    continue
 
                 applied, diff, err = self.patch_tool.apply_replacement(
                     target_file_rel,
                     original_text,
                     replacement_text
                 )
+
+                if not applied:
+                    # Patch could not be applied (missing snippet, traversal, etc.)
+                    from patchpilot.models import TestExecutionResult as _TER3
+                    _apply_fail = _TER3(
+                        command="patch-apply", exit_code=1, stdout="",
+                        stderr=err or "Patch apply failed.",
+                        duration_seconds=0.0, passed=False,
+                        summary="Patch apply failed.",
+                    )
+                    _fc3 = FailureCategory.INCOMPLETE_PATCH
+                    _act3, _guide3 = self.retry_policy.evaluate_recovery(current_attempt, _fc3, _apply_fail)
+                    attempts_list.append(PatchAttempt(
+                        attempt_number=current_attempt, strategy_description=attempt_strategy,
+                        target_file=target_file_rel, original_snippet=original_text,
+                        patched_snippet=replacement_text, unified_diff=diff,
+                        applied_successfully=False, test_result=None,
+                        failure_category=_fc3, recovery_decision=_act3, recovery_notes=_guide3,
+                    ))
+                    trace_builder.record_tool_span(
+                        f"patch_apply_failure_{current_attempt}",
+                        {"target_file": target_file_rel}, err or "apply failed",
+                    )
+                    if _act3 == RecoveryAction.TERMINATE_MAX_BUDGET:
+                        sm.transition_to(AgentState.FAILED, "Retry budget exhausted.")
+                        break
+                    sm.transition_to(AgentState.RECOVERING, f"Pivoting: {_guide3}")
+                    recovery_guidance = _guide3
+                    current_attempt += 1
+                    continue
 
                 # State: TESTING
                 sm.transition_to(AgentState.TESTING, f"Running tests on patch attempt #{current_attempt}")

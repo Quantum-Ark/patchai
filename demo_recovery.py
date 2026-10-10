@@ -32,7 +32,7 @@ def run_showcase():
         border_style="cyan"
     ))
 
-    benchmark_dir = Path("benchmarks/case_3_regression_recovery").resolve()
+    benchmark_dir = (Path(__file__).resolve().parent / "benchmarks" / "case_3_regression_recovery").resolve()
     issue_file = benchmark_dir / "issue.json"
 
     with open(issue_file, "r", encoding="utf-8") as f:

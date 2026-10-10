@@ -21,9 +21,15 @@ from patchpilot.reporting.report import ReportGenerator
 
 console = Console()
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def _case_dir(name: str) -> Path:
+    return (BASE_DIR / "benchmarks" / name).resolve()
+
 
 def run_benchmark_case_1() -> dict:
-    case_dir = Path("benchmarks/case_1_logic_bug").resolve()
+    case_dir = _case_dir("case_1_logic_bug")
     # Reset to baseline buggy state
     (case_dir / "calc.py").write_text(
         "def safe_divide(x: float, y: float) -> float:\n"
@@ -56,7 +62,7 @@ def run_benchmark_case_1() -> dict:
 
 
 def run_benchmark_case_2() -> dict:
-    case_dir = Path("benchmarks/case_2_boundary_bug").resolve()
+    case_dir = _case_dir("case_2_boundary_bug")
     # Reset to baseline buggy state
     (case_dir / "paginator.py").write_text(
         "from typing import List, Any\n\n\n"
@@ -97,7 +103,7 @@ def run_benchmark_case_2() -> dict:
 
 
 def run_benchmark_case_3() -> dict:
-    case_dir = Path("benchmarks/case_3_regression_recovery").resolve()
+    case_dir = _case_dir("case_3_regression_recovery")
     # Reset to baseline buggy state
     (case_dir / "pricing.py").write_text(
         "def calculate_tiered_price(base_price: float, tier: str, quantity: int) -> float:\n"

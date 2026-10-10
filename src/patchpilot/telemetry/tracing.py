@@ -4,10 +4,25 @@ Provides workflow-level tracing, span recording, and graceful flush for PatchPil
 Follows official Neatlogs specification (https://docs.neatlogs.com/sdk/http-injection).
 """
 
+import logging
 import time
 import requests
 from typing import Dict, Any, List, Optional
 from patchpilot.config import config
+
+logger = logging.getLogger(__name__)
+
+_SECRET_HINTS = ("api_key", "apikey", "token", "secret", "password", "authorization", "bearer")
+
+
+def _redact(value: Any, limit: int = 1000) -> str:
+    text = value if isinstance(value, str) else str(value)
+    low = text.lower()
+    if any(h in low for h in _SECRET_HINTS) and len(text) < 5000:
+        return "[redacted: possible secret]"
+    if len(text) > limit:
+        return text[:limit] + "...[truncated]"
+    return text
 
 
 class NeatlogsTracer:
@@ -49,11 +64,11 @@ class NeatlogsTracer:
             "input": {
                 "run_id": run_id,
                 "issue_id": issue_id,
-                "summary": str(input_data)[:500]
+                "summary": _redact(input_data, 500),
             },
             "output": {
-                "summary": str(output_data)[:500],
-                "duration_seconds": duration_seconds
+                "summary": _redact(output_data, 500),
+                "duration_seconds": duration_seconds,
             },
             "attributes": {
                 "neatlogs.workflow.name": workflow_name,
@@ -73,8 +88,10 @@ class NeatlogsTracer:
                 data = response.json()
                 return data.get("trace_id")
             else:
+                logger.warning("Neatlogs ingest HTTP %s: %s", response.status_code, response.text[:300])
                 return None
-        except Exception:
+        except Exception as e:
+            logger.warning("Neatlogs ingest failed: %s", e)
             return None
 
 
@@ -101,8 +118,8 @@ class TraceBuilder:
         span: Dict[str, Any] = {
             "name": name,
             "kind": kind,
-            "input": str(input_data)[:1000],
-            "output": str(output_data)[:1000]
+            "input": _redact(input_data),
+            "output": _redact(output_data),
         }
         if model:
             span["model"] = model

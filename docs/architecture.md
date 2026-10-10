@@ -16,18 +16,18 @@ PatchPilot AI is an autonomous software repair agent specifically engineered aro
 
 ```mermaid
 stateDiagram-v2
-    [*] --> PENDING
-    PENDING --> INSPECTING: Issue Intake & AST Scan
-    INSPECTING --> REPRODUCING: Baseline Test Run
+    [*] --> IDLE
+    IDLE --> INTAKE: Issue Intake
+    INTAKE --> INVESTIGATING: Repository Scan
     REPRODUCING --> PATCHING: Bug Confirmed
     PATCHING --> TESTING: Sandboxed Execution
     TESTING --> EVALUATING: Inspect Test Results
-    EVALUATING --> VERIFYING: All Tests Pass
+    EVALUATING --> VERIFIED: All Tests Pass
     EVALUATING --> RECOVERING: Failure or Regression Detected
     RECOVERING --> PATCHING: Strategy Pivot (Budget Left)
     RECOVERING --> FAILED: Budget Exhausted
-    VERIFYING --> COMPLETED: Dual Suites Confirmed Clean
-    COMPLETED --> [*]
+    VERIFIED --> [*]
+    FAILED --> [*]
 ```
 
 ---

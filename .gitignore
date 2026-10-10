@@ -26,6 +26,7 @@ htmlcov/
 *.sqlite3
 checkpoints/
 artifacts/
+.patchpilot_backups/
 
 # Build & Packaging
 build/

@@ -20,11 +20,15 @@ class RetryPolicy:
             return FailureCategory.SYNTAX_ERROR
         if "modulenotfounderror" in combined or "importerror" in combined:
             return FailureCategory.MISSING_DEPENDENCY
-        if "timed out" in combined or test_result.exit_code == -1:
+        if "timed out" in combined or "timeout" in combined or test_result.exit_code == -1:
             return FailureCategory.TIMEOUT
+        if test_result.exit_code == -2:
+            return FailureCategory.INCOMPLETE_PATCH
         if "failed" in combined and "assert" in combined:
             return FailureCategory.TEST_ASSERTION_FAILURE
-        if "error" in combined:
+        if "failed" in combined and ("passed" in combined or "regression" in combined):
+            return FailureCategory.REGRESSION_INTRODUCED
+        if "error" in combined or "traceback" in combined:
             return FailureCategory.INCOMPLETE_PATCH
 
         return FailureCategory.TEST_ASSERTION_FAILURE

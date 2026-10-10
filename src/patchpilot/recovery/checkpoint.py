@@ -25,6 +25,8 @@ class CheckpointStore:
 
     def _init_db(self):
         with self._connect() as conn:
+            conn.execute("PRAGMA journal_mode=WAL;")
+            conn.execute("PRAGMA foreign_keys=ON;")
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS runs (
@@ -62,6 +64,7 @@ class CheckpointStore:
     def save_run(self, report: RunReport):
         with self._connect() as conn:
             cursor = conn.cursor()
+            cursor.execute("DELETE FROM attempts WHERE run_id = ?", (report.run_id,))
             cursor.execute("""
                 INSERT OR REPLACE INTO runs (
                     run_id, issue_id, issue_title, final_state, success,

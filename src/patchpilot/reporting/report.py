@@ -9,6 +9,22 @@ from pathlib import Path
 from patchpilot.models import RunReport
 
 
+def _md(text: object) -> str:
+    """Escape markdown-sensitive characters in interpolated values."""
+    s = "" if text is None else str(text)
+    return (
+        s.replace("\\", "\\\\")
+        .replace("`", "'")
+        .replace("*", "\\*")
+        .replace("_", "\\_")
+        .replace("#", "\\#")
+        .replace("[", "\\[")
+        .replace("]", "\\]")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
 class ReportGenerator:
     @staticmethod
     def to_json(report: RunReport) -> str:
@@ -24,35 +40,35 @@ class ReportGenerator:
             f"# PatchPilot AI — Verification Report",
             f"",
             f"**Status**: {status_badge}  ",
-            f"**Run ID**: `{report.run_id}`  ",
-            f"**Issue**: #{report.issue.id} — *{report.issue.title}*  ",
+            f"**Run ID**: `{_md(report.run_id)}`  ",
+            f"**Issue**: #{_md(report.issue.id)} — *{_md(report.issue.title)}*  ",
             f"**Total Duration**: {report.total_duration_seconds:.2f}s  ",
         ]
 
         if report.neatlogs_trace_id:
-            md.append(f"**Neatlogs Trace ID**: `{report.neatlogs_trace_id}`  ")
+            md.append(f"**Neatlogs Trace ID**: `{_md(report.neatlogs_trace_id)}`  ")
         if report.entire_checkpoint_id:
-            md.append(f"**Entire Checkpoint**: `{report.entire_checkpoint_id}`  ")
+            md.append(f"**Entire Checkpoint**: `{_md(report.entire_checkpoint_id)}`  ")
 
         md.extend([
             f"",
             f"---",
             f"",
             f"## 1. Issue & Reproduction",
-            f"- **Issue Title**: {report.issue.title}",
+            f"- **Issue Title**: {_md(report.issue.title)}",
             f"- **Reproduction Status**: {'Reproduced (Failing baseline confirmed)' if report.reproduction and report.reproduction.reproduced else 'Unverified baseline'}",
         ])
         if report.reproduction:
-            md.append(f"- **Repro Command**: `{report.reproduction.command_executed}`")
-            md.append(f"- **Baseline Output Summary**: {report.reproduction.baseline_result.summary}")
+            md.append(f"- **Repro Command**: `{_md(report.reproduction.command_executed)}`")
+            md.append(f"- **Baseline Output Summary**: {_md(report.reproduction.baseline_result.summary)}")
 
         if report.investigation:
             md.extend([
                 f"",
                 f"## 2. Investigation & Root Cause",
-                f"- **Hypothesis**: {report.investigation.root_cause_hypothesis}",
-                f"- **Relevant Files**: {', '.join(report.investigation.relevant_files)}",
-                f"- **Proposed Solution**: {report.investigation.proposed_solution}",
+                f"- **Hypothesis**: {_md(report.investigation.root_cause_hypothesis)}",
+                f"- **Relevant Files**: {_md(', '.join(report.investigation.relevant_files))}",
+                f"- **Proposed Solution**: {_md(report.investigation.proposed_solution)}",
             ])
 
         md.extend([
@@ -66,12 +82,12 @@ class ReportGenerator:
             res_str = "\u2705 Passed" if (attempt.test_result and attempt.test_result.passed) else "\u274c Failed"
             md.extend([
                 f"### Attempt #{attempt.attempt_number} — {res_str}",
-                f"- **Strategy**: {attempt.strategy_description}",
-                f"- **Target File**: `{attempt.target_file}`",
-                f"- **Failure Category**: `{attempt.failure_category.value}`",
+                f"- **Strategy**: {_md(attempt.strategy_description)}",
+                f"- **Target File**: `{_md(attempt.target_file)}`",
+                f"- **Failure Category**: `{_md(attempt.failure_category.value)}`",
             ])
             if attempt.recovery_decision:
-                md.append(f"- **Recovery Pivot**: `{attempt.recovery_decision.value}` — {attempt.recovery_notes or ''}")
+                md.append(f"- **Recovery Pivot**: `{_md(attempt.recovery_decision.value)}` — {_md(attempt.recovery_notes or '')}")
 
             if attempt.unified_diff:
                 md.extend([
@@ -85,8 +101,8 @@ class ReportGenerator:
         if report.verification:
             md.extend([
                 f"## 4. Final Verification",
-                f"- **Acceptance Test**: {'\u2705 PASSED' if report.verification.acceptance_passed else '\u274c FAILED'} — {report.verification.acceptance_summary}",
-                f"- **Regression Suite**: {'\u2705 PASSED (No side effects)' if report.verification.regression_passed else '\u274c FAILED'} — {report.verification.regression_summary}",
+                f"- **Acceptance Test**: {'\u2705 PASSED' if report.verification.acceptance_passed else '\u274c FAILED'} — {_md(report.verification.acceptance_summary)}",
+                f"- **Regression Suite**: {'\u2705 PASSED (No side effects)' if report.verification.regression_passed else '\u274c FAILED'} — {_md(report.verification.regression_summary)}",
                 f"- **Core Differentiator**: Verified recovery confirmed with zero introduced regressions."
             ])
 
@@ -96,7 +112,7 @@ class ReportGenerator:
             f"",
             f"## 5. Pull Request Summary",
             f"> **PatchPilot Autonomous Fix Summary**",
-            f"> - **Fix**: Resolved issue #{report.issue.id} with verified acceptance tests.",
+            f"> - **Fix**: Resolved issue #{_md(report.issue.id)} with verified acceptance tests.",
             f"> - **Evidence**: Verified through {len(report.attempts)} bounded attempts with automated rollback.",
             f"> - **Audit**: Traced via Neatlogs and Entire checkpointing.",
             f"> *Note: PatchPilot never automatically merges code. Human review recommended.*"
