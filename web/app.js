@@ -1,311 +1,308 @@
 /**
- * PatchPilot AI — Interactive Infrastructure Workbench Controller
- * Handles deterministic state machine simulation, code diff inspection,
- * and SaaS unit economics calculation.
+ * PatchPilot AI — Master Creative Interaction Engine
+ * Features: High-precision desktop cursor with magnetic pulling,
+ * inspectable repair composition, trace explorer, and accessible keyboard controls.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  initWorkbench();
-  initDiffViewer();
-  initEconomicsCalculator();
-  initQuickCopy();
+  initPrecisionCursor();
+  initRepairWorkflowComposition();
+  initTraceExplorer();
+  initCliCopy();
+  initNavScroll();
 });
 
 /* ==========================================================================
-   1. Interactive Simulation Workbench (State Machine & Terminal)
+   1. Signature Desktop Precision Cursor & Magnetic Interactions
    ========================================================================== */
-const CASES_DATABASE = {
-  case3: {
-    target: 'benchmarks/case_3_regression_recovery/pricing.py',
-    attemptLabel: '2 / 3 (Recovered)',
-    traceId: '16578e5ee3829a5a',
-    auditTitle: 'State: Verified Complete',
-    auditDesc: 'Dual-suite verification green. Acceptance: PASSED · Regressions: 3/3 PASSED. Baseline clean.',
-    logs: [
-      { step: 'inspecting', tag: 'info', delay: 100, msg: 'INTAKE: Parsing issue #103 — Invalid negative volume in calculate_tiered_price.' },
-      { step: 'inspecting', tag: 'trace', delay: 350, msg: 'SANDBOX: Cloned ephemeral worktree at .worktrees/patchpilot_sandbox_916d. Git baseline: e4f892a.' },
-      { step: 'reproducing', tag: 'warn', delay: 700, msg: 'REPRODUCING: Executing pytest test_pricing.py -k test_negative_input ...' },
-      { step: 'reproducing', tag: 'fail', delay: 1100, msg: 'BASELINE CONFIRMED: ValueError unhandled. Reproduction exit code: 1 (FAILED).' },
-      { step: 'patching', tag: 'info', delay: 1500, msg: 'ATTEMPT #1: Synthesized initial candidate patch via configured LLM provider.' },
-      { step: 'patching', tag: 'trace', delay: 1850, msg: 'PATCHTOOL: Applied naive clamp: volume = max(0, volume).' },
-      { step: 'testing', tag: 'info', delay: 2200, msg: 'SANDBOX TEST: Running acceptance test test_negative_input ...' },
-      { step: 'testing', tag: 'pass', delay: 2500, msg: 'ACCEPTANCE SUITE: test_negative_input PASSED (Exit Code: 0).' },
-      { step: 'testing', tag: 'warn', delay: 2850, msg: 'REGRESSION SUITE: Executing full regression test suite (3 existing tests) ...' },
-      { step: 'recovering', tag: 'fail', delay: 3200, msg: 'REGRESSION DETECTED: test_vip_discount failed! Naive clamp violated multiplier tier calculation.' },
-      { step: 'recovering', tag: 'warn', delay: 3600, msg: 'ATOMIC ROLLBACK: Restoring clean Git baseline state (git reset --hard e4f892a). Zero residue.' },
-      { step: 'recovering', tag: 'trace', delay: 3950, msg: 'HYPOTHESIS UPDATE: Error traceback fed to context. Strategy: Preserve discount tier before bounds check.' },
-      { step: 'patching', tag: 'info', delay: 4300, msg: 'ATTEMPT #2: Applying precision adaptive patch with explicit validation raise.' },
-      { step: 'verifying', tag: 'info', delay: 4650, msg: 'DUAL VERIFICATION: Re-evaluating acceptance and regression suites on Attempt #2 ...' },
-      { step: 'verifying', tag: 'pass', delay: 4950, msg: 'ACCEPTANCE SUITE: PASSED (100% exit code 0).' },
-      { step: 'verifying', tag: 'pass', delay: 5250, msg: 'REGRESSION SUITE: PASSED (3/3 tests green, 0 warnings).' },
-      { step: 'completed', tag: 'pass', delay: 5550, msg: 'RECOVERY VERIFIED: Neatlogs trace 16578e5ee3829a5a logged. Ephemeral worktree pruned. PR #42 ready.' }
-    ]
+function initPrecisionCursor() {
+  // Respect user preference or touch devices
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || 
+      window.matchMedia('(pointer: coarse)').matches) {
+    return;
+  }
+
+  const point = document.getElementById('cursor-point');
+  const halo = document.getElementById('cursor-halo');
+  const badge = document.getElementById('cursor-badge');
+
+  if (!point || !halo) return;
+
+  let mouseX = -100;
+  let mouseY = -100;
+  let haloX = -100;
+  let haloY = -100;
+
+  window.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    point.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+    if (badge) {
+      badge.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(22px, -50%)`;
+    }
+  });
+
+  // 60fps smooth positional lag for halo
+  function renderCursor() {
+    haloX += (mouseX - haloX) * 0.18;
+    haloY += (mouseY - haloY) * 0.18;
+    halo.style.transform = `translate3d(${haloX}px, ${haloY}px, 0) translate(-50%, -50%)`;
+    requestAnimationFrame(renderCursor);
+  }
+  renderCursor();
+
+  // Hover states for links & buttons
+  const interactiveTargets = document.querySelectorAll('a, button, .board-stage, .trace-event-row, .arch-node');
+  interactiveTargets.forEach((target) => {
+    target.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+    target.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+  });
+
+  // Magnetic button pull effect
+  const magneticButtons = document.querySelectorAll('.magnetic');
+  magneticButtons.forEach((btn) => {
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      btn.style.transform = `translate3d(${x * 0.18}px, ${y * 0.18}px, 0)`;
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = 'translate3d(0, 0, 0)';
+    });
+  });
+
+  // Inspect badge when hovering over workflow stages
+  const inspectableStages = document.querySelectorAll('.is-inspectable');
+  inspectableStages.forEach((stage) => {
+    stage.addEventListener('mouseenter', () => document.body.classList.add('cursor-inspecting'));
+    stage.addEventListener('mouseleave', () => document.body.classList.remove('cursor-inspecting'));
+  });
+}
+
+/* ==========================================================================
+   2. Interactive Signature Repair Workflow Composition
+   ========================================================================== */
+const STAGE_EXPLANATIONS = {
+  1: {
+    tag: 'STAGE 01 / DEFECT SPECIFICATION',
+    status: 'Defect Intake & Scope Isolation',
+    text: 'A defect report indicates unhandled negative quantities in calculate_tiered_price. Before proposing any patch, PatchPilot clones a clean disposable worktree to guarantee your active branch remains untouched.'
   },
-  case1: {
-    target: 'benchmarks/case_1_logic_bug/calc.py',
-    attemptLabel: '1 / 3 (Direct Fix)',
-    traceId: '9051cc67fd823b12',
-    auditTitle: 'State: Verified Complete',
-    auditDesc: 'Single-attempt arithmetic guard clause verified. 100% test pass rate.',
-    logs: [
-      { step: 'inspecting', tag: 'info', delay: 100, msg: 'INTAKE: Parsing issue #101 — ZeroDivisionError in safe_divide.' },
-      { step: 'reproducing', tag: 'warn', delay: 500, msg: 'REPRODUCING: Executing pytest test_calc.py::test_zero ...' },
-      { step: 'reproducing', tag: 'fail', delay: 900, msg: 'DEFECT CONFIRMED: ZeroDivisionError reproduced with exit code: 1.' },
-      { step: 'patching', tag: 'info', delay: 1300, msg: 'ATTEMPT #1: Applied zero-denominator guard clause returning None.' },
-      { step: 'testing', tag: 'pass', delay: 1700, msg: 'ACCEPTANCE: test_zero PASSED.' },
-      { step: 'verifying', tag: 'pass', delay: 2100, msg: 'REGRESSION SUITE: 4/4 tests PASSED.' },
-      { step: 'completed', tag: 'pass', delay: 2400, msg: 'VERIFIED ON ATTEMPT #1. Neatlogs trace recorded.' }
-    ]
+  2: {
+    tag: 'STAGE 02 / REPRODUCTION PROOF',
+    status: 'Baseline Failure Execution',
+    text: 'PatchPilot executes a targeted reproduction command in an isolated subprocess with scrubbed secrets. It confirms the baseline failure exits with code 1, establishing genuine proof that the bug reproduces.'
   },
-  case2: {
-    target: 'benchmarks/case_2_boundary_bug/paginator.py',
-    attemptLabel: '1 / 3 (Boundary Resolved)',
-    traceId: 'd966f503a1441b80',
-    auditTitle: 'State: Verified Complete',
-    auditDesc: 'Off-by-one boundary defect on empty query response resolved safely.',
-    logs: [
-      { step: 'inspecting', tag: 'info', delay: 100, msg: 'INTAKE: Parsing issue #102 — IndexError on empty list pagination.' },
-      { step: 'reproducing', tag: 'fail', delay: 600, msg: 'DEFECT CONFIRMED: IndexError: list index out of range reproduced.' },
-      { step: 'patching', tag: 'info', delay: 1100, msg: 'ATTEMPT #1: Bound check applied to items slice indexing.' },
-      { step: 'verifying', tag: 'pass', delay: 1600, msg: 'ACCEPTANCE & REGRESSION: 100% tests green.' },
-      { step: 'completed', tag: 'pass', delay: 2000, msg: 'BOUNDARY RESOLVED. Neatlogs trace recorded.' }
-    ]
+  3: {
+    tag: 'STAGE 03 / CANDIDATE ATTEMPT & REGRESSION',
+    status: 'Regression Detection in Sandbox',
+    text: 'Attempt #1 used a naive clamp (max(0, volume)). While the input acceptance test passed, the comprehensive regression suite failed! The naive clamp broke existing VIP tiered discounts. PatchPilot caught this before any merge.'
+  },
+  4: {
+    tag: 'STAGE 04 / FAILURE-DRIVEN RECOVERY',
+    status: 'Atomic Git Rollback & Hypothesis Update',
+    text: 'PatchPilot instantly triggers an atomic rollback to baseline SHA e4f892a. Zero residue is left. It injects the failure traceback into its context, determining that volume tier calculations must be preserved before bounds guards.'
+  },
+  5: {
+    tag: 'STAGE 05 / PRECISION VERIFICATION',
+    status: 'Dual-Suite Acceptance (100% Exit Code 0)',
+    text: 'Attempt #2 applies an explicit validation raise. Both the targeted acceptance test AND all regression test cases pass with 100% exit code 0. Telemetry trace 16578e5e is exported to Neatlogs.'
   }
 };
 
-let currentSimulationTimer = null;
+function initRepairWorkflowComposition() {
+  const stages = document.querySelectorAll('.board-stage');
+  const explainerTag = document.getElementById('explainer-tag');
+  const explainerStatus = document.getElementById('explainer-status');
+  const explainerText = document.getElementById('explainer-text');
 
-function initWorkbench() {
-  const terminal = document.getElementById('terminal-screen');
-  const replayBtn = document.getElementById('replay-btn');
-  const tabs = document.querySelectorAll('.tab-item');
-  const targetLabel = document.getElementById('terminal-target-label');
-  const telAttempt = document.getElementById('tel-attempt');
-  const telTrace = document.getElementById('tel-trace');
-  const auditTitle = document.getElementById('audit-title');
-  const auditDesc = document.getElementById('audit-desc');
+  let lockedStage = 4; // Default to recovery stage
 
-  let activeCase = 'case3';
-
-  function runSimulation(caseKey) {
-    if (currentSimulationTimer) {
-      clearTimeout(currentSimulationTimer);
-    }
-
-    const data = CASES_DATABASE[caseKey];
+  function updateExplainer(stageNum) {
+    const data = STAGE_EXPLANATIONS[stageNum];
     if (!data) return;
 
-    if (targetLabel) targetLabel.textContent = data.target;
-    if (telAttempt) telAttempt.textContent = data.attemptLabel;
-    if (telTrace) telTrace.textContent = data.traceId;
-    if (auditTitle) auditTitle.textContent = data.auditTitle;
-    if (auditDesc) auditDesc.textContent = data.auditDesc;
+    if (explainerTag) explainerTag.textContent = data.tag;
+    if (explainerStatus) explainerStatus.textContent = data.status;
+    if (explainerText) explainerText.textContent = data.text;
+  }
 
-    terminal.innerHTML = '';
-    resetStepper();
-
-    data.logs.forEach((log) => {
-      setTimeout(() => {
-        appendTerminalLine(log.tag, log.msg);
-        updateStepper(log.step);
-      }, log.delay);
+  function setStageActive(stageNum) {
+    stages.forEach((s) => {
+      const num = parseInt(s.dataset.stage, 10);
+      s.classList.toggle('is-locked', num === stageNum);
     });
+    updateExplainer(stageNum);
   }
 
-  function appendTerminalLine(tag, msg) {
-    const row = document.createElement('div');
-    row.className = 'log-entry';
+  stages.forEach((stage) => {
+    const num = parseInt(stage.dataset.stage, 10);
 
-    const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    // Hover previews stage
+    stage.addEventListener('mouseenter', () => {
+      updateExplainer(num);
+    });
 
-    const tagLabels = {
-      info: 'INFO',
-      trace: 'TRACE',
-      warn: 'WARN',
-      fail: 'FAIL',
-      pass: 'PASS'
-    };
+    // Mouseleave returns to locked stage
+    stage.addEventListener('mouseleave', () => {
+      updateExplainer(lockedStage);
+    });
 
-    row.innerHTML = `
-      <span class="log-time">${timeStr}</span>
-      <span class="log-tag ${tag}">[${tagLabels[tag] || 'LOG'}]</span>
-      <span class="log-msg">${escapeHtml(msg)}</span>
-    `;
+    // Click locks selection
+    stage.addEventListener('click', () => {
+      lockedStage = num;
+      setStageActive(lockedStage);
+    });
 
-    terminal.appendChild(row);
-    terminal.scrollTop = terminal.scrollHeight;
-  }
-
-  function resetStepper() {
-    const steps = document.querySelectorAll('.step-item');
-    steps.forEach((s) => s.classList.remove('active', 'completed-step'));
-  }
-
-  function updateStepper(step) {
-    const stepMap = {
-      inspecting: 'step-inspecting',
-      reproducing: 'step-reproducing',
-      patching: 'step-patching',
-      testing: 'step-testing',
-      recovering: 'step-recovering',
-      verifying: 'step-verifying',
-      completed: 'step-completed'
-    };
-
-    const targetId = stepMap[step];
-    if (!targetId) return;
-
-    const el = document.getElementById(targetId);
-    if (!el) return;
-
-    if (step === 'completed') {
-      el.classList.add('completed-step');
-    } else {
-      el.classList.add('active');
-    }
-  }
-
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      tabs.forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-      activeCase = tab.dataset.case;
-      runSimulation(activeCase);
+    // Accessible keyboard navigation
+    stage.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        lockedStage = num;
+        setStageActive(lockedStage);
+      }
     });
   });
 
-  if (replayBtn) {
-    replayBtn.addEventListener('click', () => runSimulation(activeCase));
-  }
-
-  runSimulation('case3');
+  setStageActive(lockedStage);
 }
 
 /* ==========================================================================
-   2. Precision Code Diff Viewer
+   3. Interactive Trace Explorer
    ========================================================================== */
-const DIFF_DATA = {
-  attempt2: {
-    stats: '+3 -1 lines',
-    rows: [
-      { type: 'meta', num: '14', text: '# Attempt #2: Precision Patch — Preserves VIP tier, validates invalid negative volume' },
-      { type: 'ctx',  num: '15', text: 'def calculate_tiered_price(base_price: float, volume: int, is_vip: bool) -> float:' },
-      { type: 'del',  num: '16', text: '-    if volume < 0: volume = 0  # Naive clamp destroyed discount calculation tier' },
-      { type: 'add',  num: '16', text: '+    if volume < 0:' },
-      { type: 'add',  num: '17', text: '+        raise ValueError("Volume must be non-negative")' },
-      { type: 'ctx',  num: '18', text: '    multiplier = 0.80 if is_vip else 1.0' },
-      { type: 'ctx',  num: '19', text: '    return base_price * volume * multiplier' }
-    ]
+const TRACE_EVENTS_DATA = [
+  {
+    type: 'INTAKE & BASELINE DISCOVERY',
+    time: '2026-10-10T19:48:50.412Z',
+    trace: '16578e5ee3829a5a6f053c7cbeabd88f',
+    cmd: 'git clone --no-hardlinks . .worktrees/patchpilot_sandbox_916d',
+    log: 'Cloned clean worktree at commit e4f892a. Mapped abstract syntax tree for pricing.py. Discovered 1 candidate defect and 3 associated regression test cases.'
   },
-  attempt1: {
-    stats: '+1 -1 lines (Broken)',
-    rows: [
-      { type: 'meta', num: '14', text: '# Attempt #1: Naive Blind Clamp — Caused regression in test_vip_discount' },
-      { type: 'ctx',  num: '15', text: 'def calculate_tiered_price(base_price: float, volume: int, is_vip: bool) -> float:' },
-      { type: 'del',  num: '16', text: '-    return base_price * volume * (0.80 if is_vip else 1.0)' },
-      { type: 'add',  num: '16', text: '+    return base_price * max(0, volume)  # BROKE VIP DISCOUNT RULE' }
-    ]
+  {
+    type: 'REPRODUCTION EXECUTION',
+    time: '2026-10-10T19:48:51.842Z',
+    trace: '16578e5ee3829a5a6f053c7cbeabd88f',
+    cmd: 'pytest tests/test_pricing.py -k test_negative_input',
+    log: 'FAILED: ValueError unhandled in calculate_tiered_price.\nExit code: 1\nDuration: 0.42s\nDefect confirmed present in clean repository.'
+  },
+  {
+    type: 'ATTEMPT #1 TEST REGRESSION',
+    time: '2026-10-10T19:48:53.119Z',
+    trace: '16578e5ee3829a5a6f053c7cbeabd88f',
+    cmd: 'pytest tests/test_pricing.py',
+    log: 'PASSED: test_negative_input\nFAILED: test_vip_discount (AssertionError: 80.0 != 100.0)\nRegression detected: Naive volume clamp violated discount multiplier!'
+  },
+  {
+    type: 'ATOMIC BASELINE ROLLBACK',
+    time: '2026-10-10T19:48:54.004Z',
+    trace: '16578e5ee3829a5a6f053c7cbeabd88f',
+    cmd: 'git reset --hard e4f892a && git clean -fd',
+    log: 'Restored clean working tree state. Injected failure traceback to RetryPolicy. Strategy pivoted: preserve tier multipliers before applying bounds guard.'
+  },
+  {
+    type: 'ATTEMPT #2 DUAL VERIFICATION',
+    time: '2026-10-10T19:48:56.772Z',
+    trace: '16578e5ee3829a5a6f053c7cbeabd88f',
+    cmd: 'pytest tests/test_pricing.py -v',
+    log: 'test_negative_input PASSED [ 25%]\ntest_standard_price PASSED [ 50%]\ntest_vip_discount PASSED [ 75%]\ntest_bulk_tier PASSED [100%]\n===================== 4 passed in 0.81s =====================\nExit code: 0. Fixed & Verified.'
   }
-};
+];
 
-function initDiffViewer() {
-  const container = document.getElementById('diff-content');
-  const btn2 = document.getElementById('btn-attempt2');
-  const btn1 = document.getElementById('btn-attempt1');
-  const statsLabel = document.getElementById('diff-stats');
+function initTraceExplorer() {
+  const eventRows = document.querySelectorAll('.trace-event-row');
+  const detType = document.getElementById('det-type');
+  const detTime = document.getElementById('det-time');
+  const detTrace = document.getElementById('det-trace');
+  const detCmd = document.getElementById('det-cmd');
+  const detLog = document.getElementById('det-log');
+  const copyTraceBtn = document.getElementById('copy-trace-btn');
 
-  if (!container || !btn2 || !btn1) return;
+  function renderEvent(idx) {
+    const data = TRACE_EVENTS_DATA[idx];
+    if (!data) return;
 
-  function renderDiff(key) {
-    const diff = DIFF_DATA[key];
-    if (statsLabel) statsLabel.textContent = diff.stats;
-    container.innerHTML = '';
+    if (detType) detType.textContent = data.type;
+    if (detTime) detTime.textContent = data.time;
+    if (detTrace) detTrace.textContent = data.trace;
+    if (detCmd) detCmd.textContent = data.cmd;
+    if (detLog) detLog.textContent = data.log;
 
-    diff.rows.forEach((row) => {
-      const lineEl = document.createElement('div');
-      lineEl.className = `diff-row ${row.type}`;
-      lineEl.innerHTML = `
-        <span class="diff-num">${row.num}</span>
-        <span class="diff-code">${escapeHtml(row.text)}</span>
-      `;
-      container.appendChild(lineEl);
+    eventRows.forEach((row, i) => {
+      row.classList.toggle('is-active', i === idx);
     });
   }
 
-  btn2.addEventListener('click', () => {
-    btn2.classList.add('active');
-    btn1.classList.remove('active');
-    renderDiff('attempt2');
+  eventRows.forEach((row, idx) => {
+    row.addEventListener('click', () => renderEvent(idx));
+    row.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        renderEvent(idx);
+      }
+    });
   });
 
-  btn1.addEventListener('click', () => {
-    btn1.classList.add('active');
-    btn2.classList.remove('active');
-    renderDiff('attempt1');
-  });
+  if (copyTraceBtn) {
+    copyTraceBtn.addEventListener('click', () => {
+      const traceId = '16578e5ee3829a5a6f053c7cbeabd88f';
+      navigator.clipboard.writeText(traceId).then(() => {
+        const span = copyTraceBtn.querySelector('span');
+        const orig = span.textContent;
+        span.textContent = 'Copied!';
+        copyTraceBtn.style.color = 'var(--accent-lime)';
 
-  renderDiff('attempt2');
-}
-
-/* ==========================================================================
-   3. SaaS Unit Economics & ROI Calculator (cfo.ai Model)
-   ========================================================================== */
-function initEconomicsCalculator() {
-  const slider = document.getElementById('bug-slider');
-  const sliderVal = document.getElementById('slider-val');
-  const hoursVal = document.getElementById('res-hours');
-  const cogsVal = document.getElementById('res-cogs');
-  const savingsVal = document.getElementById('res-savings');
-
-  if (!slider) return;
-
-  function recalculate() {
-    const bugs = parseInt(slider.value, 10);
-    const hours = bugs * 3.2; // 3.2 dev hours saved per defect
-    const cogs = bugs * 0.045; // $0.045 inference COGS
-    const netSavings = (hours * 100) - cogs; // $100/hr blended engineering rate
-
-    sliderVal.textContent = `${bugs} fixes`;
-    hoursVal.textContent = `${Math.round(hours)} hrs`;
-    cogsVal.textContent = `$${cogs.toFixed(2)}`;
-    savingsVal.textContent = `$${Math.round(netSavings).toLocaleString()}`;
+        setTimeout(() => {
+          span.textContent = orig;
+          copyTraceBtn.style.color = '';
+        }, 2000);
+      });
+    });
   }
-
-  slider.addEventListener('input', recalculate);
-  recalculate();
 }
 
 /* ==========================================================================
-   4. Quick Copy Button
+   4. CLI Quick Copy
    ========================================================================== */
-function initQuickCopy() {
-  const container = document.getElementById('quick-copy-cmd');
-  if (!container) return;
+function initCliCopy() {
+  const btn = document.getElementById('btn-copy-cli');
+  if (!btn) return;
 
-  container.addEventListener('click', () => {
-    const text = 'pip install -e . && patchpilot evaluate';
+  btn.addEventListener('click', () => {
+    const text = `git clone https://github.com/Quantum-Ark/patchai.git && cd patchai
+pip install -e ".[dev]"
+patchpilot doctor
+patchpilot verify-integrations
+patchpilot evaluate
+patchpilot serve --port 3000`;
+
     navigator.clipboard.writeText(text).then(() => {
-      const cmdText = container.querySelector('.cmd-text');
-      const original = cmdText.textContent;
-      cmdText.textContent = 'Copied to clipboard!';
-      cmdText.style.color = 'var(--accent-emerald)';
+      btn.textContent = 'Copied to clipboard!';
+      btn.style.background = 'var(--accent-lime)';
+      btn.style.color = '#090B0F';
 
       setTimeout(() => {
-        cmdText.textContent = original;
-        cmdText.style.color = '';
+        btn.textContent = 'Copy all';
+        btn.style.background = '';
+        btn.style.color = '';
       }, 2000);
     });
   });
 }
 
-function escapeHtml(string) {
-  const entityMap = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-  };
-  return String(string).replace(/[&<>"']/g, (s) => entityMap[s]);
+/* ==========================================================================
+   5. Nav Bar Surface Scroll Transition
+   ========================================================================== */
+function initNavScroll() {
+  const nav = document.getElementById('nav-bar');
+  if (!nav) return;
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 25) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  }, { passive: true });
 }
