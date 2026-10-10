@@ -34,8 +34,10 @@ function initInspectionLens() {
 
   let isInspecting = false;
   let isLockedToggle = false;
+  let isMouseDown = false;
   let mouseX = window.innerWidth / 2;
   let mouseY = window.innerHeight / 2;
+  let rafId = null;
 
   // Design tokens to display dynamically in the readout
   const tokenSamples = [
@@ -50,6 +52,7 @@ function initInspectionLens() {
 
   function activateLens(x, y) {
     isInspecting = true;
+    document.body.classList.add('is-inspecting');
     lensLayer.classList.add('is-active');
     blueprintLayer.classList.add('is-visible');
     if (toggleBtn) toggleBtn.classList.add('is-active');
@@ -61,68 +64,99 @@ function initInspectionLens() {
   function deactivateLens() {
     if (isLockedToggle) return;
     isInspecting = false;
+    document.body.classList.remove('is-inspecting');
     lensLayer.classList.remove('is-active');
     blueprintLayer.classList.remove('is-visible');
     if (toggleBtn) toggleBtn.classList.remove('is-active');
-    if (statusHint) statusHint.textContent = 'Press & hold anywhere to reveal the architecture underneath';
+    if (statusHint) statusHint.textContent = 'Press & hold anywhere or click button to inspect';
     blueprintSvg.innerHTML = '';
   }
 
   function updateLensPosition(x, y) {
     mouseX = x;
     mouseY = y;
+    
+    // Position lens circle rim
     lensCircle.style.left = `${x}px`;
     lensCircle.style.top = `${y}px`;
+
+    // Clip dark blueprint layer so only the 280px circular window shows the underneath!
+    const clipStyle = `circle(140px at ${x}px ${y}px)`;
+    blueprintLayer.style.clipPath = clipStyle;
+    blueprintLayer.style.webkitClipPath = clipStyle;
 
     if (readoutCoord) {
       readoutCoord.textContent = `X: ${Math.round(x)}  Y: ${Math.round(y)}`;
     }
 
-    // Identify underlying element
+    // Inspect underlying element
     const elem = document.elementFromPoint(x, y);
     if (elem) {
       const inspectLabel = elem.closest('[data-inspect-label]')?.getAttribute('data-inspect-label')
+        || elem.getAttribute('id')
         || elem.tagName.toLowerCase();
       const rect = elem.getBoundingClientRect();
+      const cs = window.getComputedStyle(elem);
 
       if (readoutTarget) readoutTarget.textContent = `<${inspectLabel}>`;
-      if (readoutDim) readoutDim.textContent = `${Math.round(rect.width)} × ${Math.round(rect.height)} px`;
+      if (readoutDim) readoutDim.textContent = `W: ${Math.round(rect.width)}px  H: ${Math.round(rect.height)}px`;
 
-      // Pseudo-random token display based on element hash
       if (readoutToken) {
-        const tokenIdx = Math.abs((Math.round(x) + Math.round(y)) % tokenSamples.length);
-        readoutToken.textContent = tokenSamples[tokenIdx];
+        if (cs.fontSize && cs.fontSize !== '0px') {
+          readoutToken.textContent = `font: ${cs.fontSize} / pad: ${cs.padding.split(' ')[0]}`;
+        } else {
+          const tokenIdx = Math.abs((Math.round(x) + Math.round(y)) % tokenSamples.length);
+          readoutToken.textContent = tokenSamples[tokenIdx];
+        }
       }
     }
+
+    scheduleBlueprintRedraw();
   }
 
-  // Draw real DOM element boundaries and measurement hairlines into SVG
+  function scheduleBlueprintRedraw() {
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = null;
+      if (isInspecting) {
+        renderBlueprintOverlay();
+      }
+    });
+  }
+
+  // Draw real DOM element boundaries, guides, and technical measurements in SVG
   function renderBlueprintOverlay() {
-    const inspectables = document.querySelectorAll('[data-inspect-label], .stage-guide-bar, .hero-editorial-col, .hero-schematic-col, .diff-toggle-bar');
+    const inspectables = document.querySelectorAll('[data-inspect-label], .stage-guide-bar, .hero-editorial-col, .hero-schematic-col, .diff-toggle-bar, .defect-wire, .tree-header');
     let svgMarkup = '';
 
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
+    // Center crosshairs intersecting at cursor
+    svgMarkup += `
+      <line x1="0" y1="${mouseY}" x2="${vw}" y2="${mouseY}" stroke="rgba(255, 255, 255, 0.22)" stroke-width="0.8"/>
+      <line x1="${mouseX}" y1="0" x2="${mouseX}" y2="${vh}" stroke="rgba(255, 255, 255, 0.22)" stroke-width="0.8"/>
+    `;
+
+    // Real element boundaries
     inspectables.forEach((el) => {
       const rect = el.getBoundingClientRect();
-      // Only draw if inside viewport or nearby
+      // Render elements that intersect or are nearby the lens
       if (rect.bottom >= 0 && rect.top <= vh) {
-        const tag = el.getAttribute('data-inspect-label') || el.className.split(' ')[0] || el.tagName.toLowerCase();
+        const tag = el.getAttribute('data-inspect-label') || el.id || el.className.split(' ')[0] || el.tagName.toLowerCase();
         
-        // Hairline boundary rect
+        // Check if mouse is inside this element
+        const isHovered = (mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom);
+        const strokeColor = isHovered ? '#F04438' : 'rgba(130, 223, 255, 0.6)';
+        const strokeWidth = isHovered ? '1.5' : '0.8';
+        const fillCol = isHovered ? 'rgba(240, 68, 56, 0.08)' : 'rgba(44, 130, 201, 0.04)';
+
         svgMarkup += `
           <rect x="${rect.left}" y="${rect.top}" width="${rect.width}" height="${rect.height}" 
-                fill="rgba(44, 130, 201, 0.03)" stroke="rgba(44, 130, 201, 0.45)" stroke-width="1" stroke-dasharray="3 3"/>
-          <text x="${rect.left + 6}" y="${rect.top + 14}" fill="#2C82C9" font-family="'JetBrains Mono', monospace" font-size="10">
-            &lt;${tag}&gt; ${Math.round(rect.width)}×${Math.round(rect.height)}
+                fill="${fillCol}" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-dasharray="${isHovered ? 'none' : '4 4'}"/>
+          <text x="${rect.left + 6}" y="${rect.top + 14}" fill="${isHovered ? '#F04438' : '#82DFFF'}" font-family="'JetBrains Mono', monospace" font-size="10">
+            &lt;${tag}&gt; ${Math.round(rect.width)}×${Math.round(rect.height)}px
           </text>
-        `;
-
-        // Horizontal and vertical guide lines
-        svgMarkup += `
-          <line x1="0" y1="${rect.top}" x2="${vw}" y2="${rect.top}" stroke="rgba(212, 208, 197, 0.25)" stroke-width="0.5"/>
-          <line x1="${rect.left}" y1="0" x2="${rect.left}" y2="${vh}" stroke="rgba(212, 208, 197, 0.25)" stroke-width="0.5"/>
         `;
       }
     });
@@ -130,31 +164,61 @@ function initInspectionLens() {
     blueprintSvg.innerHTML = svgMarkup;
   }
 
-  // Mouse Hold Listener
+  function toggleLockInspection() {
+    isLockedToggle = !isLockedToggle;
+    if (isLockedToggle) {
+      if (toggleBtn) toggleBtn.classList.add('is-active');
+      if (toggleLabel) toggleLabel.textContent = 'INSPECT LOCKED [ON]';
+      if (statusHint) statusHint.textContent = 'Inspection locked active · Move cursor to inspect';
+      activateLens(mouseX, mouseY);
+    } else {
+      if (toggleBtn) toggleBtn.classList.remove('is-active');
+      if (toggleLabel) toggleLabel.textContent = 'HOLD TO INSPECT [SPACE]';
+      if (statusHint) statusHint.textContent = 'Press & hold anywhere or click button to inspect';
+      deactivateLens();
+    }
+  }
+
+  // Interactive hero prompt click
+  const heroPrompt = document.querySelector('.sch-lens-prompt');
+  if (heroPrompt) {
+    heroPrompt.style.cursor = 'pointer';
+    heroPrompt.setAttribute('title', 'Click to toggle inspection lens');
+    heroPrompt.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleLockInspection();
+    });
+  }
+
+  // Mouse Hold Listeners
   window.addEventListener('mousedown', (e) => {
-    // Avoid triggering on links or buttons unless explicitly desired
-    if (e.target.closest('a, button, input, textarea')) return;
+    // Avoid triggering hold on interactive buttons or links
+    if (e.target.closest('a, button, input, textarea, .tree-item, .diff-toggle-btn, .defect-node-marker')) return;
+    isMouseDown = true;
     activateLens(e.clientX, e.clientY);
   });
 
   window.addEventListener('mousemove', (e) => {
-    if (isInspecting) {
-      updateLensPosition(e.clientX, e.clientY);
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    if (isInspecting && (isMouseDown || isLockedToggle)) {
+      updateLensPosition(mouseX, mouseY);
     }
   });
 
   window.addEventListener('mouseup', () => {
-    deactivateLens();
+    isMouseDown = false;
+    if (!isLockedToggle) {
+      deactivateLens();
+    }
   });
 
-  // Touch Support (Press & Hold)
-  let touchTimer = null;
+  // Touch Support
   window.addEventListener('touchstart', (e) => {
-    if (e.target.closest('a, button')) return;
+    if (e.target.closest('a, button, input, textarea, .tree-item, .diff-toggle-btn')) return;
     const touch = e.touches[0];
-    touchTimer = setTimeout(() => {
-      activateLens(touch.clientX, touch.clientY);
-    }, 280);
+    isMouseDown = true;
+    activateLens(touch.clientX, touch.clientY);
   }, { passive: true });
 
   window.addEventListener('touchmove', (e) => {
@@ -164,17 +228,22 @@ function initInspectionLens() {
   }, { passive: true });
 
   window.addEventListener('touchend', () => {
-    if (touchTimer) clearTimeout(touchTimer);
-    deactivateLens();
+    isMouseDown = false;
+    if (!isLockedToggle) {
+      deactivateLens();
+    }
   });
 
-  // Accessible Keyboard Hold ([Space] or [KeyI])
+  // Accessible Keyboard Shortcuts ([Space] to hold, [I] to toggle lock)
   window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && !e.target.closest('input, textarea')) {
+    if (e.target.closest('input, textarea')) return;
+    if (e.code === 'Space') {
       e.preventDefault();
       if (!isInspecting) {
         activateLens(mouseX, mouseY);
       }
+    } else if (e.key === 'i' || e.key === 'I') {
+      toggleLockInspection();
     }
   });
 
@@ -184,25 +253,18 @@ function initInspectionLens() {
     }
   });
 
-  // Toggle Button Click
+  // HUD Toggle Button Click
   if (toggleBtn) {
     toggleBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      isLockedToggle = !isLockedToggle;
-      if (isLockedToggle) {
-        toggleLabel.textContent = 'INSPECT MODE [ACTIVE]';
-        activateLens(mouseX, mouseY);
-      } else {
-        toggleLabel.textContent = 'HOLD TO INSPECT [SPACE]';
-        deactivateLens();
-      }
+      toggleLockInspection();
     });
   }
 
   // Redraw blueprint guides on scroll when active
   window.addEventListener('scroll', () => {
     if (isInspecting) {
-      renderBlueprintOverlay();
+      scheduleBlueprintRedraw();
     }
   }, { passive: true });
 }
