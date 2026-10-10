@@ -1,0 +1,8 @@
+{
+  "id": "CASE-103",
+  "title": "Invalid zero or negative quantities accepted in calculate_tiered_price",
+  "body": "When quantity <= 0 is passed to calculate_tiered_price, it calculates negative charges or zero without validation. It must raise ValueError('Quantity must be greater than 0') while preserving all existing tier discounts.",
+  "file_hints": ["pricing.py"],
+  "reproduction_command": "pytest test_reproduction_quantity.py -v",
+  "regression_command": "pytest test_regression_suite.py -v"
+}

@@ -1,0 +1,33 @@
+# Environment & Secrets
+.env
+*.env
+*.pem
+*.key
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Databases & Runtime State
+*.db
+*.sqlite3
+checkpoints/
+artifacts/
+
+# Build & Packaging
+build/
+dist/
+*.egg-info/

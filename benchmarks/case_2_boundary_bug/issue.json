@@ -1,0 +1,7 @@
+{
+  "id": "CASE-102",
+  "title": "IndexError on empty list pagination when page is 1",
+  "body": "When paginating an empty list with page=1, paginate([], 1, 10) raises IndexError: list index out of range instead of returning [].",
+  "file_hints": ["paginator.py"],
+  "reproduction_command": "pytest test_paginator.py -v"
+}

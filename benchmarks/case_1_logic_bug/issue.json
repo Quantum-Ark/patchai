@@ -1,0 +1,7 @@
+{
+  "id": "CASE-101",
+  "title": "ZeroDivisionError in safe_divide when denominator is 0",
+  "body": "Calling safe_divide(x, 0.0) raises unhandled ZeroDivisionError instead of ValueError('Division by zero').",
+  "file_hints": ["calc.py"],
+  "reproduction_command": "pytest test_calc.py -v"
+}
