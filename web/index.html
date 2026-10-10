@@ -1,611 +1,782 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PatchPilot AI — Built Under the Surface</title>
-  <meta name="description" content="A repair is not complete until you inspect what is underneath. Autonomous software repair, baseline reproduction, atomic rollback, and empirical verification.">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PatchPilot AI — Autonomous Software Repair &amp; Empirical Proof</title>
+  <meta name="description" content="AI proposes the fix. Evidence decides if it works. Autonomous code repair, baseline reproduction, atomic rollback, and empirical verification.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="metic-body">
 
+  <a href="#main-content" class="skip-link">Skip to content</a>
+
   <!-- ======================================================================
-       03 — THE SIGNATURE INSPECTION LENS OVERLAY
+       SIGNATURE INTERACTION: THE INSPECTION LENS (X-RAY LAYER)
        ====================================================================== -->
   <div id="inspection-lens-layer" class="inspection-lens-layer" aria-hidden="true">
     <div id="lens-circle" class="lens-circle">
       <div class="lens-crosshair-h"></div>
       <div class="lens-crosshair-v"></div>
       <div class="lens-readout" id="lens-readout">
-        <span class="readout-coord" id="readout-coord">X: 000 Y: 000</span>
+        <span class="readout-coord" id="readout-coord">X: 000  Y: 000</span>
         <span class="readout-target" id="readout-target">&lt;surface&gt;</span>
         <span class="readout-dim" id="readout-dim">0 × 0 px</span>
-        <span class="readout-token" id="readout-token">--bg-canvas: #F4F1E9</span>
+        <span class="readout-token" id="readout-token">--surface-base: #F4F1E9</span>
       </div>
     </div>
   </div>
 
-  <!-- Accessible Construction Overlay (shown inside lens or when inspection toggle is engaged) -->
+  <!-- Blueprint X-Ray Guide Layer (Clipped to circular lens window) -->
   <div id="blueprint-guide-layer" class="blueprint-guide-layer" aria-hidden="true">
     <svg class="blueprint-svg-canvas" id="blueprint-svg" xmlns="http://www.w3.org/2000/svg"></svg>
   </div>
 
-  <!-- Floating Mobile/Keyboard Inspection Mode Indicator & Toggle -->
-  <aside class="inspection-control-bar" aria-label="Inspection controls">
-    <button class="btn-inspect-toggle" id="btn-inspect-toggle" aria-pressed="false" aria-label="Toggle technical inspection layer">
-      <span class="inspect-dot"></span>
-      <span class="inspect-text" id="inspect-toggle-label">HOLD TO INSPECT [SPACE]</span>
+  <!-- Floating Mobile/Keyboard Inspection Mode Indicator & Control -->
+  <aside class="lens-floating-hint" aria-label="Inspection controls">
+    <button class="btn-xray-toggle" id="btn-floating-xray" aria-pressed="false" aria-label="Toggle X-ray inspection layer">
+      <span class="xray-indicator-dot"></span>
+      <span class="xray-toggle-text" id="floating-xray-label">X-RAY [HOLD SPACE]</span>
     </button>
-    <div class="inspect-hint" id="inspect-status-hint">Press &amp; hold anywhere to reveal the architecture underneath</div>
+    <div class="xray-status-bubble" id="xray-status-bubble">Hold mouse or Space to reveal the architecture underneath</div>
   </aside>
 
   <!-- ======================================================================
-       02 — MINIMAL PRINTED HEADER
+       HEADER: MINIMAL PRINTED ARCHITECTURAL PILL NAV
        ====================================================================== -->
-  <header class="metic-header" id="site-header" data-component="header">
-    <div class="header-container">
-      <div class="header-identity">
-        <a href="#" class="brand-anchor" aria-label="PatchPilot AI Home">
-          <span class="brand-symbol">/</span>
-          <span class="brand-name">PatchPilot</span>
-          <span class="brand-sub">AI</span>
+  <header class="metic-header" id="site-header" data-inspect-label="nav-header">
+    <div class="shell header-shell">
+      
+      <!-- Left Pill: Wordmark & Audio Toggle -->
+      <div class="nav-pill nav-pill-left">
+        <a href="#" class="brand-link" aria-label="PatchPilot AI home" data-inspect-label="wordmark">
+          <span class="brand-text">PatchPilot<span class="text-accent">.</span></span>
         </a>
-        <span class="build-stamp" title="Current build status">v1.2 · PROOF ENGINE</span>
+        <button type="button" class="btn-icon-sound" id="btn-sound-toggle" aria-pressed="false" aria-label="Toggle sound feedback" title="Toggle audio clicks">
+          <span class="sound-bars" aria-hidden="true">
+            <i></i><i></i><i></i><i></i>
+          </span>
+        </button>
       </div>
 
-      <nav class="header-nav" aria-label="Main Navigation">
-        <a href="#stage-issue" class="nav-anchor">Product</a>
-        <a href="#stage-investigation" class="nav-anchor">How it works</a>
-        <a href="#stage-verification" class="nav-anchor">Verification</a>
-        <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="nav-anchor">GitHub</a>
-      </nav>
+      <!-- Center Readout: Build Scroll Progress -->
+      <div class="nav-center-readout" id="nav-center-readout" aria-hidden="true">
+        <span class="nav-progress-track">
+          <span class="nav-progress-fill" id="nav-progress-fill"></span>
+        </span>
+        <span class="measure" id="nav-step-label">01 / 08 · A line</span>
+      </div>
 
-      <div class="header-action">
-        <a href="#stage-patch" class="btn-understated" id="header-cta">
-          <span>Inspect a repair</span>
-          <span class="arrow-glyph">→</span>
+      <!-- Right Pill: X-Ray, Theme Switcher, Quick Brief, Menu -->
+      <div class="nav-pill nav-pill-right">
+        <button type="button" class="nav-item btn-xray" id="btn-nav-xray" aria-pressed="false" title="X-ray: show how the page is built" data-inspect-label="btn-xray">
+          <svg viewBox="0 0 256 256" width="16" height="16" fill="currentColor" aria-hidden="true">
+            <path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"/>
+          </svg>
+          <span class="btn-label-desktop">X-ray</span>
+        </button>
+
+        <button type="button" class="nav-item btn-theme-toggle" id="btn-theme-toggle" aria-label="Toggle theme" title="Toggle light/dark theme">
+          <span class="theme-label-text" id="theme-icon-label">Dark</span>
+        </button>
+
+        <a href="#repair-brief-section" class="nav-item btn-start-nav max-md-hidden" data-inspect-label="link-brief">
+          <span>Run repair</span>
+        </a>
+
+        <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="nav-item nav-github-link" title="GitHub Repository">
+          <span>GitHub</span>
         </a>
       </div>
+
     </div>
   </header>
 
   <!-- ======================================================================
-       02 — HERO SECTION: CALM EDITORIAL SURFACE
+       MAIN CONTENT
        ====================================================================== -->
-  <section class="metic-hero-section" id="hero-section" data-component="hero">
-    <div class="metic-grid-container">
-      
-      <!-- Top Technical Alignment Bar -->
-      <div class="hero-calibration-line">
-        <span class="cal-item">REF: PRICING-FAULT-103</span>
-        <span class="cal-rule"></span>
-        <span class="cal-item">DETERMINISTIC FSM</span>
-        <span class="cal-rule"></span>
-        <span class="cal-item text-signal">SIGNAL ACCENT // #F04438</span>
-      </div>
+  <main id="main-content">
 
-      <div class="hero-split-layout">
-        <!-- Left Editorial Typography -->
-        <div class="hero-editorial-col" data-inspect-label="hero-editorial">
-          <div class="editorial-eyebrow">
-            <span class="eyebrow-index">00</span>
-            <span class="eyebrow-text">AUTONOMOUS SOFTWARE SURGERY</span>
-          </div>
-
-          <h1 class="hero-editorial-heading" id="hero-headline">
-            A fix is only real<br>
-            <span class="heading-italic">when it holds up.</span>
-          </h1>
-
-          <p class="hero-editorial-lead" id="hero-lead">
-            PatchPilot investigates software issues, applies code changes, runs tests, and uses failure evidence to determine whether a repair actually works.
-          </p>
-
-          <div class="hero-action-row">
-            <a href="#stage-issue" class="btn-editorial-primary" id="hero-primary-cta">
-              <span>Inspect the sequence</span>
-              <span class="btn-arrow">↓</span>
-            </a>
-            <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn-editorial-ghost">
-              <span>Explore the repository</span>
-            </a>
-          </div>
-
-          <!-- Subtle Construction Annotation -->
-          <div class="detail-note-badge" data-note="Measurements are taken from the actual element.">
-            <span class="note-bullet"></span>
-            <span class="note-content">"Measurements are taken from the actual element."</span>
-          </div>
-        </div>
-
-        <!-- Right Architectural Graphic: Lines, Code, and Measured Assembly -->
-        <div class="hero-schematic-col" data-inspect-label="hero-schematic">
-          <div class="schematic-board" id="hero-schematic-board">
-            
-            <div class="schematic-header">
-              <span class="sch-id">FIG. 01 — SURFACE VS. UNDERNEATH</span>
-              <span class="sch-lens-prompt">HOLD TO INSPECT</span>
+    <!-- --------------------------------------------------------------------
+         HERO SECTION: CALM EDITORIAL INTRO WITH INTERACTIVE PROMPT
+         -------------------------------------------------------------------- -->
+    <section class="hero-section" id="hero" data-inspect-label="hero-section">
+      <div class="shell">
+        <div class="hero-grid" data-inspect-label="hero-grid">
+          
+          <div class="hero-content-col" data-inspect-label="hero-content">
+            <div class="hero-eyebrow">
+              <span class="measure text-accent">00</span>
+              <span class="measure">AUTONOMOUS SOFTWARE SURGERY</span>
             </div>
 
-            <div class="schematic-surface">
-              <!-- Visible Editorial Layer -->
-              <div class="sch-layer-surface">
-                <div class="sch-surface-spec">
-                  <div class="sch-line-row">
-                    <span class="sch-token">Target:</span>
-                    <span class="sch-val">pricing.py:15</span>
-                  </div>
-                  <div class="sch-line-row">
-                    <span class="sch-token">Defect:</span>
-                    <span class="sch-val text-signal">Unhandled volume &lt; 0 produces negative bill</span>
-                  </div>
-                  <div class="sch-line-row">
-                    <span class="sch-token">Verification:</span>
-                    <span class="sch-val text-verified">Dual-Suite Pass Gate (100% Exit Code 0)</span>
-                  </div>
-                </div>
+            <h1 class="display-1 hero-headline" id="hero-headline" data-inspect-label="hero-headline">
+              AI proposes the fix.<br>
+              <span class="heading-italic">Evidence decides if it works.</span>
+            </h1>
 
-                <div class="sch-diagram-mock">
-                  <div class="sch-node sch-node-idle">AST Parse</div>
-                  <div class="sch-connector"></div>
-                  <div class="sch-node sch-node-defect">Defect #103</div>
-                  <div class="sch-connector"></div>
-                  <div class="sch-node sch-node-verified">Verified Gate</div>
-                </div>
-              </div>
-
-              <!-- Technical Underneath Blueprint (reveals in inspection lens) -->
-              <div class="sch-layer-blueprint">
-                <div class="bp-grid-ruler">
-                  <span>W: 480px</span>
-                  <span>H: 260px</span>
-                  <span>PAD: 24px</span>
-                  <span>GAP: 12px</span>
-                </div>
-                <div class="bp-box-callout">
-                  <span class="bp-tag">&lt;ReproductionSandbox&gt;</span>
-                  <span class="bp-coord">top: 140px · left: 32px</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="schematic-footer">
-              <span class="sch-mono-caption">"A repair is not complete until you inspect what is underneath."</span>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ======================================================================
-       04 — THE SCROLL STORY: 8 PROGRESSIVE ASSEMBLY STAGES
-       ====================================================================== -->
-  <main class="metic-assembly-stream" id="assembly-stream">
-
-    <!-- ------------------------------------------------------------------
-         STAGE 01: A line — The issue
-         ------------------------------------------------------------------ -->
-    <section class="assembly-stage" id="stage-issue" data-stage="1" data-inspect-label="stage-01-issue">
-      <div class="metic-grid-container">
-        <div class="stage-guide-bar">
-          <span class="stage-num">01</span>
-          <span class="stage-bracket">[ A LINE ]</span>
-          <span class="stage-rule"></span>
-          <span class="stage-tag">THE ISSUE INTAKE</span>
-        </div>
-
-        <div class="stage-layout-split">
-          <div class="stage-copy-block">
-            <h2 class="stage-heading">Every repair starts with a problem.</h2>
-            <p class="stage-p">
-              A line drawn across the system reveals where expectations break down. Before writing a single character of code, PatchPilot isolates the reported bug and establishes a strict reproduction baseline.
-            </p>
-            <div class="detail-note-badge" data-note="This is the original source location.">
-              <span class="note-bullet"></span>
-              <span class="note-content">"This is the original source location."</span>
-            </div>
-          </div>
-
-          <div class="stage-artifact-block">
-            <!-- The Interactive Defect Line -->
-            <div class="defect-line-assembly" id="defect-line-assembly">
-              <div class="line-meta-top">
-                <span class="mono-dim">REPRO LINE // tests/test_pricing.py:24</span>
-                <span class="mono-stat text-signal">EXIT CODE 1 (FAILED)</span>
-              </div>
+            <div class="hero-lead-wrapper">
+              <p class="lead hero-lead" data-inspect-label="hero-lead">
+                PatchPilot investigates software issues, applies code changes, runs isolated tests, and uses failure evidence to determine whether a repair actually works.
+              </p>
               
-              <div class="defect-wire">
-                <div class="wire-track"></div>
-                <!-- Interactive Defect Marker -->
-                <button class="defect-node-marker" id="defect-marker-btn" aria-label="Inspect defect marker in pricing.py">
-                  <span class="marker-pulse"></span>
-                  <span class="marker-core"></span>
-                  <span class="marker-label">DEFECT #103</span>
+              <!-- Subtle handwritten engineering annotation -->
+              <span class="secret-annotation" style="--tilt: -3deg;" aria-hidden="true">
+                <span class="annotation-text">30 characters per line. No buzzwords.</span>
+                <svg viewBox="0 0 100 24" class="annotation-arrow" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M4 12C32 10 70 14 96 6M88 2L96 6L90 14"/>
+                </svg>
+              </span>
+            </div>
+
+            <div class="hero-actions">
+              <a href="#build-sequence" class="btn btn-primary" id="hero-cta-build" data-inspect-label="btn-build">
+                <span class="btn-glow" aria-hidden="true"></span>
+                <span>See the build</span>
+                <span class="btn-dot">
+                  <svg viewBox="0 0 256 256" width="14" height="14" fill="currentColor">
+                    <path d="M204,64V168a12,12,0,0,1-24,0V93L72.49,200.49a12,12,0,0,1-17-17L163,76H88a12,12,0,0,1,0-24H192A12,12,0,0,1,204,64Z"/>
+                  </svg>
+                </span>
+              </a>
+
+              <a href="#repair-brief-section" class="btn btn-secondary" id="hero-cta-brief" data-inspect-label="btn-brief">
+                <span class="btn-glow" aria-hidden="true"></span>
+                <span>Prepare a repair brief</span>
+                <span class="btn-dot">
+                  <svg viewBox="0 0 256 256" width="14" height="14" fill="currentColor">
+                    <path d="M204,64V168a12,12,0,0,1-24,0V93L72.49,200.49a12,12,0,0,1-17-17L163,76H88a12,12,0,0,1,0-24H192A12,12,0,0,1,204,64Z"/>
+                  </svg>
+                </span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Hero Visual: Architectural Calibration Board -->
+          <div class="hero-visual-col" data-inspect-label="hero-schematic">
+            <div class="hero-schematic-board" id="hero-board">
+              <div class="board-top-bar">
+                <span class="measure">FIG. 00 · ARCHITECTURAL SPECIFICATION</span>
+                <button type="button" class="board-hold-prompt" id="btn-hero-inspect-prompt" title="Click to inspect underlying layout">
+                  HOLD TO INSPECT [SPACE]
                 </button>
               </div>
 
-              <div class="defect-card-body" id="defect-card-body">
-                <div class="dcb-header">
-                  <span class="dcb-badge text-signal">ISSUE #103 REPORT</span>
-                  <span class="dcb-file">pricing.py:15</span>
+              <div class="board-body">
+                <div class="board-meta-row">
+                  <span class="board-key">Target Issue</span>
+                  <span class="board-val">Issue #103 · pricing.py:15</span>
                 </div>
-                <pre class="dcb-code"><code>ValueError: Volume must be non-negative.
-Expected exception on volume=-10, but got negative bill total -$80.00.</code></pre>
-                <div class="dcb-footer">
-                  <span class="mono-dim">Subprocess status: Proven reproducible prior to patch generation.</span>
+                <div class="board-meta-row">
+                  <span class="board-key">Isolation</span>
+                  <span class="board-val">Ephemeral Git Worktree (.worktrees/sandbox_916d)</span>
                 </div>
+                <div class="board-meta-row">
+                  <span class="board-key">Gate</span>
+                  <span class="board-val text-verified">Dual-Suite Pass Gate (100% Exit Code 0)</span>
+                </div>
+                
+                <div class="board-diagram-wire">
+                  <div class="wire-point wire-idle">AST Intake</div>
+                  <div class="wire-dash"></div>
+                  <div class="wire-point wire-defect">Defect #103</div>
+                  <div class="wire-dash"></div>
+                  <div class="wire-point wire-repro">Repro Code 1</div>
+                  <div class="wire-dash"></div>
+                  <div class="wire-point wire-verified">Gate Green</div>
+                </div>
+              </div>
+
+              <div class="board-footer">
+                <span class="measure text-secondary">"A repair is not complete until you inspect what is underneath."</span>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>
 
-    <!-- ------------------------------------------------------------------
-         STAGE 02: A grid — The codebase
-         ------------------------------------------------------------------ -->
-    <section class="assembly-stage" id="stage-grid" data-stage="2" data-inspect-label="stage-02-codebase">
-      <div class="metic-grid-container">
-        <div class="stage-guide-bar">
-          <span class="stage-num">02</span>
-          <span class="stage-bracket">[ A GRID ]</span>
-          <span class="stage-rule"></span>
-          <span class="stage-tag">THE CODEBASE TOPOGRAPHY</span>
-        </div>
-
-        <div class="stage-layout-split">
-          <div class="stage-copy-block">
-            <h2 class="stage-heading">Understand the system before changing it.</h2>
-            <p class="stage-p">
-              The issue line expands into an architectural grid. PatchPilot parses the AST, maps symbol dependencies, and constructs an isolated ephemeral worktree to protect your repository from dirty changes.
-            </p>
-            <div class="stage-stat-row">
-              <div class="stat-unit">
-                <span class="stat-num">1</span>
-                <span class="stat-lbl">Target File</span>
-              </div>
-              <div class="stat-unit">
-                <span class="stat-num">3</span>
-                <span class="stat-lbl">Regression Tests</span>
-              </div>
-              <div class="stat-unit">
-                <span class="stat-num">100%</span>
-                <span class="stat-lbl">Clean Sandbox</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="stage-artifact-block">
-            <!-- File System Topography Grid -->
-            <div class="codebase-grid-box" id="codebase-tree-box">
-              <div class="tree-header">
-                <span class="tree-title">REPOSITORY STRUCTURE // EPHEMERAL WORKTREE</span>
-                <span class="tree-sha">SHA: e4f892a</span>
-              </div>
-              <div class="tree-list" id="tree-interactive-list">
-                <div class="tree-item tree-file is-selected" data-file="pricing.py" tabindex="0">
-                  <span class="tree-icon">📄</span>
-                  <span class="tree-name">src/pricing.py</span>
-                  <span class="tree-role text-signal">Fault Origin (calculate_tiered_price)</span>
-                </div>
-                <div class="tree-item tree-file" data-file="test_pricing.py" tabindex="0">
-                  <span class="tree-icon">🧪</span>
-                  <span class="tree-name">tests/test_pricing.py</span>
-                  <span class="tree-role">Reproduction Suite (test_negative_input)</span>
-                </div>
-                <div class="tree-item tree-file" data-file="test_regression.py" tabindex="0">
-                  <span class="tree-icon">🛡️</span>
-                  <span class="tree-name">tests/test_regression.py</span>
-                  <span class="tree-role">Regression Suite (test_vip_discount)</span>
-                </div>
-                <div class="tree-item tree-file" data-file="models.py" tabindex="0">
-                  <span class="tree-icon">📦</span>
-                  <span class="tree-name">src/models.py</span>
-                  <span class="tree-role text-dim">Customer Tier Entities (Unaffected)</span>
-                </div>
-              </div>
-              <div class="tree-detail-callout" id="tree-detail-callout">
-                <span class="td-label">RESOLVED ROLE:</span>
-                <span class="td-desc" id="tree-role-desc"><code>src/pricing.py</code> contains the defective <code>calculate_tiered_price</code> calculation. AST parser mapped 1 candidate function and 2 call sites.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------------------------
-         STAGE 03: A layout — The investigation
-         ------------------------------------------------------------------ -->
-    <section class="assembly-stage" id="stage-investigation" data-stage="3" data-inspect-label="stage-03-investigation">
-      <div class="metic-grid-container">
-        <div class="stage-guide-bar">
-          <span class="stage-num">03</span>
-          <span class="stage-bracket">[ A LAYOUT ]</span>
-          <span class="stage-rule"></span>
-          <span class="stage-tag">THE INVESTIGATION MATRIX</span>
-        </div>
-
-        <div class="stage-layout-split">
-          <div class="stage-copy-block">
-            <h2 class="stage-heading">Find the cause, not just the symptom.</h2>
-            <p class="stage-p">
-              The grid organizes into the discrete stages of the diagnostic pipeline. Affected functions, failing stack traces, and environment boundaries are linked together in a single deterministic matrix.
-            </p>
-            <div class="detail-note-badge" data-note="No passing test, no verified claim.">
-              <span class="note-bullet"></span>
-              <span class="note-content">"No passing test, no verified claim."</span>
-            </div>
-          </div>
-
-          <div class="stage-artifact-block">
-            <div class="investigation-matrix-box">
-              <div class="matrix-card">
-                <div class="mc-tag">AFFECTED FUNCTION</div>
-                <div class="mc-val"><code>calculate_tiered_price(base, volume, is_vip)</code></div>
-                <div class="mc-sub">File: <code>pricing.py:12-19</code> · AST Node #42</div>
-              </div>
-
-              <div class="matrix-card">
-                <div class="mc-tag">REPRODUCTION HARNESS</div>
-                <div class="mc-val"><code>pytest -q -k test_negative_input</code></div>
-                <div class="mc-sub text-signal">Baseline: Exit code 1 · Output: Assertion failure</div>
-              </div>
-
-              <div class="matrix-card">
-                <div class="mc-tag">PATH TRAVERSAL GUARD</div>
-                <div class="mc-val text-verified">Active Boundary Check</div>
-                <div class="mc-sub">Patch tool prevents writes escaping <code>.worktrees/sandbox</code></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------------------------
-         STAGE 04: Typography — The hypothesis
-         ------------------------------------------------------------------ -->
-    <section class="assembly-stage" id="stage-hypothesis" data-stage="4" data-inspect-label="stage-04-hypothesis">
-      <div class="metic-grid-container">
-        <div class="stage-guide-bar">
-          <span class="stage-num">04</span>
-          <span class="stage-bracket">[ TYPOGRAPHY ]</span>
-          <span class="stage-rule"></span>
-          <span class="stage-tag">THE REPAIR HYPOTHESIS</span>
-        </div>
-
-        <div class="stage-layout-split">
-          <div class="stage-copy-block">
-            <h2 class="stage-heading">Turn evidence into a plan.</h2>
-            <p class="stage-p">
-              PatchPilot formulates an explicit hypothesis: reject negative volume inputs while preserving existing discount multipliers. Every plan is held provisional until real execution proves its validity.
-            </p>
-            <div class="detail-note-badge" data-note="The next attempt uses the failure evidence.">
-              <span class="note-bullet"></span>
-              <span class="note-content">"The next attempt uses the failure evidence."</span>
-            </div>
-          </div>
-
-          <div class="stage-artifact-block">
-            <div class="hypothesis-editorial-sheet">
-              <div class="sheet-top">
-                <span class="sheet-title">HYPOTHESIS SPECIFICATION // ATTEMPT #1</span>
-                <span class="sheet-stat">STATUS: PROVISIONAL</span>
-              </div>
-              <div class="sheet-body">
-                <div class="sheet-field">
-                  <span class="sf-label">ORIGINAL DIAGNOSIS</span>
-                  <p class="sf-content">The function fails to validate input boundary: volume &lt; 0 is multiplied into final total without defensive check.</p>
-                </div>
-                <div class="sheet-field">
-                  <span class="sf-label">PROPOSED REPAIR</span>
-                  <p class="sf-content">Clamp volume parameter or raise explicit <code>ValueError</code> on negative values.</p>
-                </div>
-                <div class="sheet-field">
-                  <span class="sf-label">VERIFICATION REQUIREMENT</span>
-                  <p class="sf-content">Must pass reproduction test <em>and</em> maintain parity across existing VIP volume discount assertions.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------------------------
-         STAGE 05: Colour — The failure
-         ------------------------------------------------------------------ -->
-    <section class="assembly-stage" id="stage-failure" data-stage="5" data-inspect-label="stage-05-failure">
-      <div class="metic-grid-container">
-        <div class="stage-guide-bar">
-          <span class="stage-num">05</span>
-          <span class="stage-bracket">[ COLOUR ]</span>
-          <span class="stage-rule"></span>
-          <span class="stage-tag text-signal">THE REGRESSION INTERCEPTION</span>
-        </div>
-
-        <div class="stage-layout-split">
-          <div class="stage-copy-block">
-            <h2 class="stage-heading">A generated patch can still be wrong.</h2>
-            <p class="stage-p">
-              Attempt #1 introduced a naive clamp: <code>volume = max(0, volume)</code>. While it passed the defect check, it broke the regression suite by destroying VIP tiered calculations.
-            </p>
-            <p class="stage-p text-signal">
-              Instead of promoting broken code, PatchPilot immediately halts, logs the failure traceback, and executes an atomic Git rollback to baseline.
-            </p>
-          </div>
-
-          <div class="stage-artifact-block">
-            <div class="failure-alert-box" id="failure-interception-box">
-              <div class="fab-head">
-                <span class="fab-pill">REGRESSION INTERCEPTED</span>
-                <span class="fab-attempt">ATTEMPT #1 FAILED</span>
-              </div>
-              <div class="fab-trace">
-                <div class="trace-cmd">$ pytest tests/test_regression.py::test_vip_discount</div>
-                <pre class="trace-err"><code>FAILED tests/test_regression.py::test_vip_discount
-AssertionError: 80.0 != 100.0
-VIP discount multiplier was overwritten by naive volume clamp.
-Exit code: 1. Atomic rollback initiated.</code></pre>
-              </div>
-              <div class="fab-footer">
-                <span class="fab-action">ACTION: <code>git reset --hard e4f892a</code></span>
-                <span class="fab-clean">Repository state restored cleanly.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------------------------
-         STAGE 06: A line of code — The patch
-         ------------------------------------------------------------------ -->
-    <section class="assembly-stage" id="stage-patch" data-stage="6" data-inspect-label="stage-06-patch">
-      <div class="metic-grid-container">
-        <div class="stage-guide-bar">
-          <span class="stage-num">06</span>
-          <span class="stage-bracket">[ A LINE OF CODE ]</span>
-          <span class="stage-rule"></span>
-          <span class="stage-tag">THE CODE SURGERY</span>
-        </div>
-
-        <div class="stage-layout-split">
-          <div class="stage-copy-block">
-            <h2 class="stage-heading">Change only what the evidence supports.</h2>
-            <p class="stage-p">
-              Using failure evidence from Attempt #1, PatchPilot crafts a surgical, minimal fix for Attempt #2. It validates the input boundary without collateral damage to surrounding logic.
-            </p>
-            
-            <div class="diff-toggle-bar">
-              <button class="diff-toggle-btn active" data-diff="after" id="btn-show-after">
-                <span>Verified Patch (Attempt #2)</span>
-              </button>
-              <button class="diff-toggle-btn" data-diff="before" id="btn-show-before">
-                <span>Before (Defective)</span>
-              </button>
-              <button class="diff-toggle-btn" data-diff="attempt1" id="btn-show-attempt1">
-                <span>Attempt #1 (Regression)</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="stage-artifact-block">
-            <div class="editorial-diff-card" id="editorial-diff-card">
-              <div class="edc-header">
-                <span class="edc-file">src/pricing.py:12-20</span>
-                <span class="edc-stats" id="edc-stats-text">+3 lines · Surgical Validation</span>
-              </div>
-              <div class="edc-content" id="edc-content-body">
-                <!-- Dynamically populated via app.js -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------------------------
-         STAGE 07: Online — Verification
-         ------------------------------------------------------------------ -->
-    <section class="assembly-stage" id="stage-verification" data-stage="7" data-inspect-label="stage-07-verification">
-      <div class="metic-grid-container">
-        <div class="stage-guide-bar">
-          <span class="stage-num">07</span>
-          <span class="stage-bracket">[ ONLINE ]</span>
-          <span class="stage-rule"></span>
-          <span class="stage-tag text-verified">EMPIRICAL VERIFICATION</span>
-        </div>
-
-        <div class="stage-layout-split">
-          <div class="stage-copy-block">
-            <h2 class="stage-heading">The tests decide when the work is done.</h2>
-            <p class="stage-p">
-              A second verification signal passes through the codebase. Both the original defect reproduction test and the comprehensive regression suite pass with 100% exit code 0.
-            </p>
-            <div class="verification-pill-group">
-              <span class="vp-item text-verified">✓ Repro Passed</span>
-              <span class="vp-item text-verified">✓ Regression Passed</span>
-              <span class="vp-item text-verified">✓ Trace Dossier Sealed</span>
-            </div>
-          </div>
-
-          <div class="stage-artifact-block">
-            <div class="verification-proof-box">
-              <div class="vpb-head">
-                <span class="vpb-title">EMPIRICAL VERIFICATION PROOF</span>
-                <span class="vpb-state text-verified">ALL 26 TESTS PASSING</span>
-              </div>
-              <div class="vpb-row">
-                <span class="vpb-lbl">NEATLOGS TRACE ID</span>
-                <div class="vpb-copy-wrapper">
-                  <code class="vpb-code" id="proof-trace-id">16578e5ee3829a5a6f053c7cbeabd88f</code>
-                  <button class="btn-copy-sm" id="btn-copy-trace" title="Copy Trace ID">Copy</button>
-                </div>
-              </div>
-              <div class="vpb-row">
-                <span class="vpb-lbl">EXECUTION TIME</span>
-                <span class="vpb-val">0.42s subprocess run · Zero mock fallback</span>
-              </div>
-              <div class="vpb-row">
-                <span class="vpb-lbl">OUTCOME DOSSIER</span>
-                <span class="vpb-val">Unmerged draft PR generated with attached proof log</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------------------------
-         STAGE 08: Your turn — The action
-         ------------------------------------------------------------------ -->
-    <section class="assembly-stage stage-final-action" id="stage-action" data-stage="8" data-inspect-label="stage-08-action">
-      <div class="metic-grid-container final-convergence-container">
+    <!-- --------------------------------------------------------------------
+         PHASE 4 — SCROLL-DRIVEN CONSTRUCTION STORY (8 STAGES)
+         -------------------------------------------------------------------- -->
+    <section class="build-section" id="build-sequence" style="height: 480vh;" aria-label="From an issue to verification" data-inspect-label="build-sequence">
+      <div class="build-sticky-stage" id="build-sticky-stage">
         
-        <div class="convergence-rules-top">
-          <div class="conv-line"></div>
+        <!-- Header HUD inside sticky stage -->
+        <div class="build-hud-top">
+          <div class="shell flex justify-between items-start">
+            <div class="build-hud-left max-xl-hidden">
+              <div class="measure text-secondary">The build</div>
+              <div class="measure text-primary font-medium">From an issue to verified repair.</div>
+            </div>
+            <div class="build-hud-right text-right">
+              <div class="measure text-secondary">Build progress</div>
+              <div class="build-count-value tabular-nums" id="build-count-display">
+                <span id="build-pct-num">000</span><span class="build-pct-unit">%</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div class="final-action-content">
-          <div class="final-kicker">08 // THE CONVERGENCE</div>
+        <!-- Center Dynamic Graphic Deck -->
+        <div class="build-canvas-center" id="build-canvas-center" data-inspect-label="build-canvas">
           
-          <h2 class="final-headline">
-            Inspect a repair.<br>
-            <span class="heading-italic">Trust the evidence.</span>
-          </h2>
-
-          <p class="final-sub">
-            Run PatchPilot on your own repository. Inspect the plan, execute tests in isolation, and verify that code changes solve the root problem.
-          </p>
-
-          <div class="final-cta-cluster">
-            <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn-converge-primary" id="btn-converge-gh">
-              <span>Explore the code on GitHub</span>
-              <span class="btn-arrow">→</span>
-            </a>
-            <a href="#hero-section" class="btn-converge-ghost" id="btn-converge-top">
-              <span>Return to top</span>
-              <span class="btn-arrow">↑</span>
-            </a>
+          <!-- Stage 01 Graphic: A line & defect marker -->
+          <div class="stage-visual is-active" data-stage-vis="1">
+            <div class="graphic-line-wire">
+              <div class="wire-axis"></div>
+              <div class="wire-defect-pin" id="demo-defect-pin">
+                <span class="pin-pulse"></span>
+                <span class="pin-tag">DEFECT #103</span>
+              </div>
+            </div>
           </div>
 
-          <div class="cli-quick-install">
-            <span class="cli-label">INSTALL VIA PIP:</span>
-            <code class="cli-code">git clone https://github.com/Quantum-Ark/patchai &amp;&amp; pip install -e .</code>
+          <!-- Stage 02 Graphic: A grid & codebase tree -->
+          <div class="stage-visual" data-stage-vis="2">
+            <div class="graphic-grid-matrix">
+              <div class="grid-ruler-col">src/pricing.py (AST mapped)</div>
+              <div class="grid-ruler-col">tests/test_pricing.py (Repro)</div>
+              <div class="grid-ruler-col">tests/test_regression.py (VIP Suite)</div>
+            </div>
+          </div>
+
+          <!-- Stage 03 Graphic: A layout matrix -->
+          <div class="stage-visual" data-stage-vis="3">
+            <div class="graphic-layout-matrix">
+              <div class="mat-card">
+                <span class="measure text-secondary">AFFECTED REGION</span>
+                <code class="mat-code">pricing.py::calculate_tiered_price</code>
+              </div>
+              <div class="mat-card">
+                <span class="measure text-secondary">SANDBOX GUARD</span>
+                <span class="mat-stat text-verified">Clean Worktree Isolated</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage 04 Graphic: A typeface hypothesis -->
+          <div class="stage-visual" data-stage-vis="4">
+            <div class="graphic-hypothesis-sheet">
+              <div class="hypo-eyebrow">HYPOTHESIS SPECIFICATION // ATTEMPT #1</div>
+              <div class="hypo-text">
+                "Reject volume &lt; 0 via explicit ValueError while preserving VIP multiplier tier."
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage 05 Graphic: A colour regression alert -->
+          <div class="stage-visual" data-stage-vis="5">
+            <div class="graphic-failure-box">
+              <div class="fail-badge text-accent">TEST REGRESSION INTERCEPTED</div>
+              <pre class="fail-trace"><code>FAILED tests/test_regression.py::test_vip_discount
+AssertionError: 80.0 != 100.0 (VIP multiplier violated)
+ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
+            </div>
+          </div>
+
+          <!-- Stage 06 Graphic: A line of code diff -->
+          <div class="stage-visual" data-stage-vis="6">
+            <div class="graphic-diff-deck">
+              <div class="diff-header-bar">
+                <span>pricing.py:15</span>
+                <span class="text-verified">+2 lines validated</span>
+              </div>
+              <div class="diff-snippet-body">
+                <div class="diff-r diff-r-del"><span class="d-n">16</span><span class="d-s">-</span><span>multiplier = 0.80 if is_vip else 1.0</span></div>
+                <div class="diff-r diff-r-add"><span class="d-n">16</span><span class="d-s">+</span><span>if volume &lt; 0: raise ValueError("volume must be &gt;= 0")</span></div>
+                <div class="diff-r diff-r-add"><span class="d-n">17</span><span class="d-s">+</span><span>multiplier = 0.80 if is_vip else 1.0</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stage 07 Graphic: Online verification gate -->
+          <div class="stage-visual" data-stage-vis="7">
+            <div class="graphic-proof-seal">
+              <div class="seal-icon text-verified">✓</div>
+              <div class="seal-title">DUAL-SUITE PASS GATE: 100% GREEN</div>
+              <div class="measure text-secondary">Neatlogs Trace ID: 16578e5ee3829a5a6f053c7cbeabd88f</div>
+            </div>
+          </div>
+
+          <!-- Stage 08 Graphic: Your turn convergence button -->
+          <div class="stage-visual" data-stage-vis="8">
+            <div class="graphic-convergence-action">
+              <a href="#repair-brief-section" class="btn btn-primary btn-large-convergence">
+                <span class="btn-glow" aria-hidden="true"></span>
+                <span>Prepare Your Repair Brief</span>
+                <span class="btn-dot">→</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom Captions Deck (Synchronized with current stage) -->
+        <div class="build-captions-deck">
+          <div class="shell flex justify-between items-end pb-8">
+            <div class="captions-text-wrap" id="captions-text-wrap">
+              
+              <div class="caption-slide is-active" data-step-index="1">
+                <div class="measure mb-2 flex items-center gap-2">
+                  <span class="text-accent font-semibold">01</span>
+                  <span class="caption-divider"></span>
+                  <span class="text-secondary">08</span>
+                </div>
+                <h3 class="display-3">A line.</h3>
+                <p class="mt-2 caption-desc">Every repair starts somewhere. Where code breaks is pinpointed, not guessed.</p>
+              </div>
+
+              <div class="caption-slide" data-step-index="2">
+                <div class="measure mb-2 flex items-center gap-2">
+                  <span class="text-accent font-semibold">02</span>
+                  <span class="caption-divider"></span>
+                  <span class="text-secondary">08</span>
+                </div>
+                <h3 class="display-3">A grid.</h3>
+                <p class="mt-2 caption-desc">Understand the structure. Columns, modules, sandbox. The scaffolding everything aligns with.</p>
+              </div>
+
+              <div class="caption-slide" data-step-index="3">
+                <div class="measure mb-2 flex items-center gap-2">
+                  <span class="text-accent font-semibold">03</span>
+                  <span class="caption-divider"></span>
+                  <span class="text-secondary">08</span>
+                </div>
+                <h3 class="display-3">A layout.</h3>
+                <p class="mt-2 caption-desc">Find the part that matters. Issue report, candidate AST, and reproduction test in one frame.</p>
+              </div>
+
+              <div class="caption-slide" data-step-index="4">
+                <div class="measure mb-2 flex items-center gap-2">
+                  <span class="text-accent font-semibold">04</span>
+                  <span class="caption-divider"></span>
+                  <span class="text-secondary">08</span>
+                </div>
+                <h3 class="display-3">A typeface.</h3>
+                <p class="mt-2 caption-desc">Make the diagnosis clear. An explicit hypothesis with verifiable boundaries.</p>
+              </div>
+
+              <div class="caption-slide" data-step-index="5">
+                <div class="measure mb-2 flex items-center gap-2">
+                  <span class="text-accent font-semibold">05</span>
+                  <span class="caption-divider"></span>
+                  <span class="text-secondary">08</span>
+                </div>
+                <h3 class="display-3">A colour.</h3>
+                <p class="mt-2 caption-desc">Every signal has a purpose. Red interrupts the build when a test regression occurs.</p>
+              </div>
+
+              <div class="caption-slide" data-step-index="6">
+                <div class="measure mb-2 flex items-center gap-2">
+                  <span class="text-accent font-semibold">06</span>
+                  <span class="caption-divider"></span>
+                  <span class="text-secondary">08</span>
+                </div>
+                <h3 class="display-3">A line of code.</h3>
+                <p class="mt-2 caption-desc">Change the code. Inspect the diff. Minimal surgery with Before / Patch / After views.</p>
+              </div>
+
+              <div class="caption-slide" data-step-index="7">
+                <div class="measure mb-2 flex items-center gap-2">
+                  <span class="text-accent font-semibold">07</span>
+                  <span class="caption-divider"></span>
+                  <span class="text-secondary">08</span>
+                </div>
+                <h3 class="display-3">Online.</h3>
+                <p class="mt-2 caption-desc">Run it. Check it. Report it. Dual-suite execution with zero mock fallback.</p>
+              </div>
+
+              <div class="caption-slide" data-step-index="8">
+                <div class="measure mb-2 flex items-center gap-2">
+                  <span class="text-accent font-semibold">08</span>
+                  <span class="caption-divider"></span>
+                  <span class="text-secondary">08</span>
+                </div>
+                <h3 class="display-3">Your turn.</h3>
+                <p class="mt-2 caption-desc">Make every fix earn your trust. All evidence converges into one single button.</p>
+              </div>
+
+            </div>
+
+            <!-- Skip the build button -->
+            <button type="button" class="btn-skip-build" id="btn-skip-build">
+              <span>Skip the build</span>
+              <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <path d="M6 1v10M2 7l4 4 4-4"/>
+              </svg>
+            </button>
           </div>
         </div>
 
-        <div class="convergence-rules-bottom">
-          <div class="conv-line"></div>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------
+         PHASE 6A — THE PRINCIPLE ("A patch is not proof")
+         -------------------------------------------------------------------- -->
+    <section class="shell py-24 md:py-40" id="principle-section" data-inspect-label="principle-section">
+      <div class="relative w-fit max-w-full">
+        <h2 class="display-2 max-w-[28ch]" data-inspect-label="stance-headline">
+          A patch is not proof.<br>
+          <span class="text-secondary">AI proposes the fix, but real execution decides whether it survives production.</span>
+        </h2>
+        
+        <span class="secret-annotation" style="right: -0.5rem; top: calc(100% + 0.4rem); --tilt: -3deg;" aria-hidden="true">
+          <span class="annotation-text">Not one sentence too many.</span>
+        </span>
+      </div>
+
+      <ul class="principles-grid mt-16 md:mt-24" role="list">
+        <li class="principle-item rule pt-5" data-inspect-label="principle-01">
+          <h3 class="display-4">No blind acceptance.</h3>
+          <p class="mt-3 text-secondary">Generated code often reads smoothly to human reviewers while silently breaking dependent invariants. Every patch requires automated tests.</p>
+        </li>
+        <li class="principle-item rule pt-5" data-inspect-label="principle-02">
+          <h3 class="display-4">Code in isolation.</h3>
+          <p class="mt-3 text-secondary">Edits execute in an ephemeral Git worktree. Dirty patches never contaminate your working repository before passing verification.</p>
+        </li>
+        <li class="principle-item rule pt-5" data-inspect-label="principle-03">
+          <h3 class="display-4">Failure is information.</h3>
+          <p class="mt-3 text-secondary">When a regression occurs, PatchPilot performs an atomic rollback to baseline SHA, extracts the failure traceback, and replans Attempt #2.</p>
+        </li>
+        <li class="principle-item rule pt-5" data-inspect-label="principle-04">
+          <h3 class="display-4">Cryptographic proof.</h3>
+          <p class="mt-3 text-secondary">Every verified repair outputs an auditable run dossier and Neatlogs trace ID. No manufactured benchmarks, no fake completion claims.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- --------------------------------------------------------------------
+         PHASE 5 — THE POINTER-RESPONSIVE "FAN" CAPABILITIES ACCORDION
+         -------------------------------------------------------------------- -->
+    <section class="shell py-24 md:py-40" id="capabilities-section" aria-labelledby="capabilities-title" data-inspect-label="capabilities-section">
+      <div class="mb-12 md:mb-16">
+        <div class="measure text-accent font-semibold mb-2">PRODUCT CAPABILITIES</div>
+        <h2 class="display-2 max-w-[22ch]" id="capabilities-title">
+          The surgical engine.<br>
+          <span class="text-secondary">Seven autonomous stages of software repair.</span>
+        </h2>
+      </div>
+
+      <!-- The Responsive Fan: Expands under pointer, contracts inactive cards -->
+      <div class="capabilities-fan-container" id="capabilities-fan">
+        <ul class="fan-list" role="list">
+          
+          <!-- Fan Item 01: Repository Inspection -->
+          <li class="fan-card is-active" data-fan="1" tabindex="0">
+            <span class="fan-vertical-label" aria-hidden="true">
+              <span class="measure">01</span>
+              <span class="display-4 vertical-title">Inspection</span>
+            </span>
+            <div class="fan-card-body">
+              <div class="fan-body-header">
+                <span class="measure text-secondary">01 / CAPABILITY</span>
+                <h3 class="display-4">Repository Inspection</h3>
+                <p class="mt-2 text-secondary">AST parsing and symbol dependency mapping across your codebase.</p>
+              </div>
+              <div class="fan-body-evidence">
+                <div class="fan-chip">Entire Graph AST</div>
+                <div class="fan-chip">Candidate Resolver</div>
+              </div>
+            </div>
+          </li>
+
+          <!-- Fan Item 02: Bug Reproduction -->
+          <li class="fan-card" data-fan="2" tabindex="0">
+            <span class="fan-vertical-label" aria-hidden="true">
+              <span class="measure">02</span>
+              <span class="display-4 vertical-title">Reproduction</span>
+            </span>
+            <div class="fan-card-body">
+              <div class="fan-body-header">
+                <span class="measure text-secondary">02 / CAPABILITY</span>
+                <h3 class="display-4">Baseline Reproduction</h3>
+                <p class="mt-2 text-secondary">Executes targeted reproduction commands. Confirms exit code != 0 before editing.</p>
+              </div>
+              <div class="fan-body-evidence">
+                <div class="fan-chip text-accent">Exit Code 1 Confirmed</div>
+                <div class="fan-chip">Subprocess Runner</div>
+              </div>
+            </div>
+          </li>
+
+          <!-- Fan Item 03: Patch Generation -->
+          <li class="fan-card" data-fan="3" tabindex="0">
+            <span class="fan-vertical-label" aria-hidden="true">
+              <span class="measure">03</span>
+              <span class="display-4 vertical-title">Synthesis</span>
+            </span>
+            <div class="fan-card-body">
+              <div class="fan-body-header">
+                <span class="measure text-secondary">03 / CAPABILITY</span>
+                <h3 class="display-4">Patch Synthesis</h3>
+                <p class="mt-2 text-secondary">Bounded surgical diff generation. Validates file path boundaries against traversal attacks.</p>
+              </div>
+              <div class="fan-body-evidence">
+                <div class="fan-chip">Traversal Guard</div>
+                <div class="fan-chip">Minimal Surgery</div>
+              </div>
+            </div>
+          </li>
+
+          <!-- Fan Item 04: Test Execution -->
+          <li class="fan-card" data-fan="4" tabindex="0">
+            <span class="fan-vertical-label" aria-hidden="true">
+              <span class="measure">04</span>
+              <span class="display-4 vertical-title">Testing</span>
+            </span>
+            <div class="fan-card-body">
+              <div class="fan-body-header">
+                <span class="measure text-secondary">04 / CAPABILITY</span>
+                <h3 class="display-4">Isolated Test Runner</h3>
+                <p class="mt-2 text-secondary">Executes acceptance tests first, then triggers regression test suites with timeout budgets.</p>
+              </div>
+              <div class="fan-body-evidence">
+                <div class="fan-chip">60s Timeout Budget</div>
+                <div class="fan-chip">Env Scrubbing</div>
+              </div>
+            </div>
+          </li>
+
+          <!-- Fan Item 05: Failure Recovery -->
+          <li class="fan-card" data-fan="5" tabindex="0">
+            <span class="fan-vertical-label" aria-hidden="true">
+              <span class="measure">05</span>
+              <span class="display-4 vertical-title">Recovery</span>
+            </span>
+            <div class="fan-card-body">
+              <div class="fan-body-header">
+                <span class="measure text-secondary">05 / CAPABILITY</span>
+                <h3 class="display-4">Failure Recovery</h3>
+                <p class="mt-2 text-secondary">On test regression, auto-restores clean baseline SHA and replans using traceback context.</p>
+              </div>
+              <div class="fan-body-evidence">
+                <div class="fan-chip text-accent">Atomic Rollback</div>
+                <div class="fan-chip">Traceback Injection</div>
+              </div>
+            </div>
+          </li>
+
+          <!-- Fan Item 06: Independent Verification -->
+          <li class="fan-card" data-fan="6" tabindex="0">
+            <span class="fan-vertical-label" aria-hidden="true">
+              <span class="measure">06</span>
+              <span class="display-4 vertical-title">Verification</span>
+            </span>
+            <div class="fan-card-body">
+              <div class="fan-body-header">
+                <span class="measure text-secondary">06 / CAPABILITY</span>
+                <h3 class="display-4">Dual Gate Verification</h3>
+                <p class="mt-2 text-secondary">Requires 100% exit code 0 across reproduction and regression suites simultaneously.</p>
+              </div>
+              <div class="fan-body-evidence">
+                <div class="fan-chip text-verified">Dual-Suite Gate</div>
+                <div class="fan-chip text-verified">100% Pass Required</div>
+              </div>
+            </div>
+          </li>
+
+          <!-- Fan Item 07: Evidence Reporting -->
+          <li class="fan-card" data-fan="7" tabindex="0">
+            <span class="fan-vertical-label" aria-hidden="true">
+              <span class="measure">07</span>
+              <span class="display-4 vertical-title">Evidence</span>
+            </span>
+            <div class="fan-card-body">
+              <div class="fan-body-header">
+                <span class="measure text-secondary">07 / CAPABILITY</span>
+                <h3 class="display-4">Cryptographic Evidence</h3>
+                <p class="mt-2 text-secondary">Exports run telemetry to Neatlogs, archives git patch diffs, and drafts unmerged PRs.</p>
+              </div>
+              <div class="fan-body-evidence">
+                <div class="fan-chip">Neatlogs Telemetry</div>
+                <div class="fan-chip">Draft PR Dossier</div>
+              </div>
+            </div>
+          </li>
+
+        </ul>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------
+         PHASE 6C & 6D — THE REAL DIFF & EVIDENCE TRAIL
+         -------------------------------------------------------------------- -->
+    <section class="shell py-24 md:py-36" id="evidence-section" data-inspect-label="evidence-section">
+      <div class="mb-12">
+        <div class="measure text-accent font-semibold mb-2">EMPIRICAL PROOF</div>
+        <h2 class="display-2 max-w-[20ch]">
+          The evidence trail.<br>
+          <span class="text-secondary">Inspect the diff and verify the telemetry.</span>
+        </h2>
+      </div>
+
+      <div class="evidence-split-grid">
+        <!-- Interactive Code Diff Box -->
+        <div class="diff-card-box" data-inspect-label="diff-viewer">
+          <div class="diff-bar-top">
+            <div class="diff-nav-tabs">
+              <button class="btn-diff-tab active" data-view="verified" id="tab-v">Verified Patch (#2)</button>
+              <button class="btn-diff-tab" data-view="defective" id="tab-d">Defective (Before)</button>
+              <button class="btn-diff-tab" data-view="regression" id="tab-r">Attempt #1 (Regression)</button>
+            </div>
+            <span class="measure text-secondary" id="diff-status-indicator">pricing.py:15 · +2 lines</span>
+          </div>
+
+          <div class="diff-view-pane" id="diff-view-pane">
+            <!-- Dynamically populated via app.js -->
+          </div>
         </div>
+
+        <!-- Telemetry Trail Box -->
+        <div class="telemetry-card-box" data-inspect-label="telemetry-box">
+          <div class="tel-bar-top">
+            <span class="measure font-medium">GENUINE RUN RECORD // RUN-648AB230</span>
+            <span class="tel-badge-verified text-verified">DUAL PASS</span>
+          </div>
+          
+          <div class="tel-content">
+            <div class="tel-row">
+              <span class="tel-label">NEATLOGS TRACE ID</span>
+              <div class="tel-copy-row">
+                <code class="tel-code" id="trace-id-val">16578e5ee3829a5a6f053c7cbeabd88f</code>
+                <button class="btn-copy-sm" id="btn-copy-trace-id" title="Copy Trace ID">Copy</button>
+              </div>
+            </div>
+            <div class="tel-row">
+              <span class="tel-label">SUBPROCESS COMMAND</span>
+              <code class="tel-code">pytest -q tests/test_pricing.py &amp;&amp; pytest -q tests/test_regression.py</code>
+            </div>
+            <div class="tel-row">
+              <span class="tel-label">EXECUTION DURATION</span>
+              <span class="tel-val">0.42 seconds in isolated worktree</span>
+            </div>
+            <div class="tel-row">
+              <span class="tel-label">ATOMIC ROLLBACK RECORD</span>
+              <span class="tel-val">Restored clean baseline SHA <code>e4f892a</code> on Attempt #1 regression</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------------------
+         PHASE 7 — LIVE DRAFT BRIEFING EXPERIENCE
+         -------------------------------------------------------------------- -->
+    <section class="shell py-24 md:py-40" id="repair-brief-section" aria-labelledby="brief-title" data-inspect-label="brief-section">
+      <div class="mb-12">
+        <div class="measure text-accent font-semibold mb-2">LIVE DRAFT GENERATOR</div>
+        <h2 class="display-2 max-w-[24ch]" id="brief-title">
+          Prepare your repair brief.<br>
+          <span class="text-secondary">Watch the CLI execution brief construct as you type.</span>
+        </h2>
+      </div>
+
+      <div class="brief-split-layout">
+        
+        <!-- Left: The Interactive Form -->
+        <form class="brief-form" id="brief-form" novalidate onsubmit="return false;" data-inspect-label="brief-form">
+          
+          <div class="form-step-block">
+            <h3 class="display-4 form-step-head">
+              <span class="measure text-accent">01</span> Target Repository
+            </h3>
+            <div class="field-group">
+              <label for="f-repo" class="field-label">Repository URL or Local Path <span class="text-accent">*</span></label>
+              <input type="text" id="f-repo" class="field-input" placeholder="https://github.com/Quantum-Ark/patchai or ." value="https://github.com/Quantum-Ark/patchai" required>
+            </div>
+          </div>
+
+          <div class="form-step-block">
+            <h3 class="display-4 form-step-head">
+              <span class="measure text-accent">02</span> Issue Description
+            </h3>
+            <div class="field-group">
+              <label for="f-issue" class="field-label">Issue Specification / Error Trace <span class="text-accent">*</span></label>
+              <textarea id="f-issue" class="field-input resize-y" rows="4" placeholder="Describe the failure or paste pytest output...">ValueError: negative volume input in pricing.py produces negative customer billing total.</textarea>
+            </div>
+          </div>
+
+          <div class="form-step-block">
+            <h3 class="display-4 form-step-head">
+              <span class="measure text-accent">03</span> Execution Constraints
+            </h3>
+            <div class="grid gap-4 sm-grid-cols-2">
+              <div class="field-group">
+                <label for="f-test-cmd" class="field-label">Reproduction Test Command</label>
+                <input type="text" id="f-test-cmd" class="field-input" placeholder="pytest -k test_negative_input" value="pytest tests/test_pricing.py">
+              </div>
+              <div class="field-group">
+                <label for="f-max-attempts" class="field-label">Max Recovery Attempts</label>
+                <select id="f-max-attempts" class="field-input">
+                  <option value="1">1 attempt (Zero retry)</option>
+                  <option value="2">2 attempts</option>
+                  <option value="3" selected>3 attempts (Recommended)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions-row">
+            <button type="button" class="btn btn-primary" id="btn-copy-cli-command">
+              <span class="btn-glow" aria-hidden="true"></span>
+              <span id="btn-copy-label">Copy CLI Command</span>
+              <span class="btn-dot">📋</span>
+            </button>
+            <span class="measure text-secondary" id="form-feedback-status">Ready to execute locally</span>
+          </div>
+
+        </form>
+
+        <!-- Right: The Live Updating Draft Browser Box -->
+        <aside class="brief-draft-aside" data-inspect-label="brief-draft">
+          <div class="brief-draft-card sticky top-28">
+            <div class="draft-card-header">
+              <div>
+                <div class="measure">The draft</div>
+                <div class="measure text-primary font-medium">Draws along while you write.</div>
+              </div>
+              <div class="text-right">
+                <div class="measure text-secondary">Brief Completion</div>
+                <div class="draft-count-val tabular-nums" id="draft-pct-display">100%</div>
+              </div>
+            </div>
+
+            <!-- Terminal Browser Frame -->
+            <div class="draft-terminal-frame">
+              <div class="terminal-bar">
+                <span class="terminal-dots"><i></i><i></i><i></i></span>
+                <span class="terminal-title">patchpilot-cli · bash</span>
+              </div>
+              <div class="terminal-code-body">
+                <div class="term-line"><span class="term-dim"># Real Execution Command:</span></div>
+                <div class="term-command" id="live-cli-preview">
+                  patchpilot run --repo https://github.com/Quantum-Ark/patchai --issue "ValueError: negative volume input in pricing.py" --test "pytest tests/test_pricing.py" --max-attempts 3
+                </div>
+              </div>
+            </div>
+
+            <div class="draft-summary-meta">
+              <div class="meta-row">
+                <span class="measure text-secondary">Isolation</span>
+                <span class="measure text-primary font-medium">Ephemeral Worktree</span>
+              </div>
+              <div class="meta-row">
+                <span class="measure text-secondary">Rollback Mode</span>
+                <span class="measure text-primary font-medium">Atomic Baseline Reset</span>
+              </div>
+              <div class="meta-row">
+                <span class="measure text-secondary">Auditing</span>
+                <span class="measure text-verified font-medium">Neatlogs Spans Enabled</span>
+              </div>
+            </div>
+          </div>
+        </aside>
 
       </div>
     </section>
@@ -613,18 +784,52 @@ Exit code: 1. Atomic rollback initiated.</code></pre>
   </main>
 
   <!-- ======================================================================
-       09 — MINIMAL EDITORIAL FOOTER
+       FOOTER: RESTRAINED CRAFTSMANSHIP
        ====================================================================== -->
-  <footer class="metic-footer" data-component="footer">
-    <div class="metic-grid-container footer-flex-row">
-      <div class="footer-left">
-        <span class="brand-name">PatchPilot<span class="brand-sub">/ai</span></span>
-        <span class="footer-dim">Autonomous Code Repair &amp; Empirical Proof Engine</span>
+  <footer class="metic-footer rule" data-inspect-label="site-footer">
+    <div class="shell">
+      <div class="footer-grid">
+        <div class="footer-col-main">
+          <a href="#" class="brand-link" aria-label="PatchPilot AI home">
+            <span class="brand-text display-1">PatchPilot<span class="text-accent">.</span></span>
+          </a>
+          <p class="mt-4 max-w-xs text-secondary text-sm">
+            Autonomous software repair &amp; empirical verification engine. Handcrafted for software teams that trust evidence over hallucination.
+          </p>
+          <p class="measure text-secondary mt-3">
+            v1.2 · Distributed under MIT License · neatHacks 2026.
+          </p>
+        </div>
+
+        <div class="footer-col-nav">
+          <p class="measure text-primary font-semibold mb-4">Chapters</p>
+          <ul class="footer-links-list">
+            <li><a href="#hero">Intro</a></li>
+            <li><a href="#build-sequence">The Build (8 Stages)</a></li>
+            <li><a href="#principle-section">The Principle</a></li>
+            <li><a href="#capabilities-section">Capabilities</a></li>
+            <li><a href="#evidence-section">Evidence Trail</a></li>
+            <li><a href="#repair-brief-section">Run Repair</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col-code">
+          <p class="measure text-primary font-semibold mb-4">Open Source</p>
+          <ul class="footer-links-list">
+            <li><a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer">Quantum-Ark/patchai</a></li>
+            <li><a href="https://github.com/Quantum-Ark/patchai/blob/main/SUBMISSION_EVIDENCE.md" target="_blank" rel="noopener noreferrer">Submission Dossier</a></li>
+            <li><a href="https://github.com/Quantum-Ark/patchai/blob/main/docs/architecture.md" target="_blank" rel="noopener noreferrer">Architecture Spec</a></li>
+            <li><a href="https://github.com/Quantum-Ark/patchai/blob/main/docs/security.md" target="_blank" rel="noopener noreferrer">Security Policy</a></li>
+          </ul>
+        </div>
       </div>
-      <div class="footer-right">
-        <span class="footer-dim">MIT License · neatHacks 2026</span>
-        <a href="https://github.com/Quantum-Ark/patchai" target="_blank" class="footer-link">GitHub Repository</a>
-        <a href="https://github.com/Quantum-Ark/patchai/blob/main/SUBMISSION_EVIDENCE.md" target="_blank" class="footer-link">Submission Dossier</a>
+
+      <div class="footer-bottom-bar rule mt-12 pt-6">
+        <p class="measure text-secondary">© 2026 PatchPilot AI · Autonomous Code Repair Engine</p>
+        <ul class="footer-legal-links">
+          <li><span class="measure text-secondary">26/26 Tests Passing</span></li>
+          <li><span class="measure text-verified">Neatlogs HTTP 200</span></li>
+        </ul>
       </div>
     </div>
   </footer>
