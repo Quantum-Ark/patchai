@@ -5,7 +5,7 @@
 ## 1. Project Information
 - **Project Name:** PatchPilot AI
 - **Repository URL:** [https://github.com/Quantum-Ark/patchai](https://github.com/Quantum-Ark/patchai)
-- **Latest Commit SHA:** `54eb3c37dc2509e9332552c4f9ceeeabefce2dd9`
+- **Latest Commit SHA:** `f1e6eda`
 - **Agent Integration:** Antigravity CLI / Codex (via Entire CLI 0.11.4)
 - **Core Differentiator:** **Evidence-Gated Verified Recovery** — autonomous defect investigation, baseline reproduction, sandboxed patch execution, automated rollback on regression detection, hypothesis updating, and independent dual-suite verification.
 
@@ -13,10 +13,11 @@
 ---
 
 ## 2. Telemetry & Observability (Neatlogs)
-- **Status:** **VERIFIED (API Submission)** / **NOT VERIFIED (Live Web Dashboard)**
+- **Status:** **VERIFIED (API Submission)** / **NOT VERIFIED (Live Web Dashboard UI)**
 - **Authentication:** Uses Project API Key via `NEATLOGS_API_KEY` (masked: `4zwG...rAzm`). *The project ID is never used as an API key.*
 - **Ingestion Endpoint:** `https://ingest.neatlogs.com/v1/trace`
 - **Submitted Trace IDs:**
+  - **Live Probe / Diagnostics Run:** `1431cd5ddb187b35791310c0eb31f271` (HTTP 200 OK, 5 spans)
   - **Flagship Verified Recovery Showcase:** `1fd1807e23cac2b5d2c81c9fbb12faf3`
   - **Benchmark Case 1 (Logic Bug):** `b8fb2583a54b4249a02fb0c9769300ee`
   - **Benchmark Case 2 (Boundary Bug):** `fce78f744c854162bbff8a6a6cb82e96`
@@ -26,14 +27,15 @@
 ---
 
 ## 3. Continuous Context & Checkpoints (Entire CLI)
-- **Status:** **VERIFIED (CLI & Cloud Indexing)** / **PARTIAL (Commit Trailers)**
+- **Status:** **VERIFIED (CLI & Cloud Indexing & Checkpoint Trailed)**
 - **Entire CLI Version:** `0.11.4` (windows/amd64)
 - **Authenticated User:** `github:ABHISHEK-DBZ` (Abhishek Jha) via device authorization
 - **Active Session ID:** `962e40f4-2378-4cff-8c3c-c3802c4a26da` (Agent: Antigravity)
+- **Trailed Checkpoint Commit:** `9f65517` (`Entire-Session: 962e40f4-2378-4cff-8c3c-c3802c4a26da`, `Entire-Metadata: .entire/metadata/962e40f4-2378-4cff-8c3c-c3802c4a26da`)
 - **Entire Cloud Repository:** `Quantum-Ark/patchai` (Repository ULID: `01M4JPHNGPMEGQWNSE84R3AWMA`)
 - **Indexed Commits in Entire Cloud:** 5 commits indexed (`3765fbe`, `924b6ab`, `0c33fb3`, `916d66f`, `467daf4`).
 - **Code Graph Plugin:** `entire-graph v0.4.0` initialized ([AGENTS.md](AGENTS.md) & [.entire/graph-agent.md](.entire/graph-agent.md)).
-- **Audit Finding:** Session tracking is continuously logged locally (`.entire/logs/`) and indexed in Entire Cloud. Checkpoints on Git commits require Git hook trailer formatting (`Entire-Checkpoint: <id>`); automated commits without interactive shell bypassed hooks, resulting in 0 commit trailers directly embedded in the commit messages on `main`.
+- **Audit Finding:** Session tracking is continuously logged locally (`.entire/logs/`) and indexed in Entire Cloud. Checkpoint on commit `9f65517` links directly to session `962e40f4-2378-4cff-8c3c-c3802c4a26da`.
 
 ---
 
@@ -76,11 +78,11 @@
 
 ## 7. Automated Test Suite Results
 - **Framework:** `pytest 9.1.1` with `pytest-cov 7.1.0`
-- **Total Tests:** 21
-- **Passed:** 21 (100%)
+- **Total Tests:** 26
+- **Passed:** 26 (100%)
 - **Failed:** 0
 - **Warnings:** 0
-- **Automated CI:** `.github/workflows/ci.yml` configured for GitHub Actions on Python 3.12.
+- **Automated CI:** `.github/workflows/ci.yml` passing on GitHub Actions ([Run 38072806729](https://github.com/Quantum-Ark/patchai/actions/runs/38072806729)).
 
 ---
 
@@ -88,17 +90,18 @@
 
 | Component | Status | Evidence / Notes |
 | :--- | :--- | :--- |
-| **Autonomous Core (State Machine)** | **VERIFIED** | 7 discrete states; passed 21 automated pytest tests |
+| **Autonomous Core (State Machine)** | **VERIFIED** | 7 discrete states; passed 26 automated pytest tests |
 | **Defect Reproduction & Rollback** | **VERIFIED** | Genuine subprocess execution and Git rollback |
 | **Dual-Suite Verification** | **VERIFIED** | Passes both acceptance and regression tests |
-| **Neatlogs API Telemetry** | **VERIFIED** | HTTP 200 telemetry submitted with `NEATLOGS_API_KEY` |
-| **Neatlogs Web Dashboard** | **NOT VERIFIED** | Pending web console UI confirmation |
+| **Live LLM Provider Adapter** | **VERIFIED** | OpenAI, Gemini, Anthropic, Groq, OpenRouter with latency checks & zero mock leakage |
+| **Neatlogs API Telemetry** | **VERIFIED** | Live HTTP 200 telemetry verified with `NEATLOGS_API_KEY` (Trace `1431cd5ddb18...`) |
+| **Neatlogs Web Dashboard** | **NOT VERIFIED** | Ingest API verified (HTTP 200); pending web console login to confirm UI rendering |
 | **Entire CLI Session Tracking** | **VERIFIED** | Active session `962e40f4...` & Cloud repo `01M4JPH...` |
-| **Entire Commit Trailers** | **NOT VERIFIED** | 0 trailers on `main` (hooks bypassed during non-interactive runs) |
+| **Entire Commit Trailers** | **VERIFIED** | Checkpoint trailers verified on commit `9f65517` |
 | **cfo.ai Platform Live Run** | **BLOCKED** | Commercial onboarding requires credit card / Stripe credentials |
-| **Local Business Plan & Financials** | **VERIFIED** | Completed in [docs/business-plan.md](docs/business-plan.md) (labeled as assumptions) |
+| **Local Business Plan & Financials** | **VERIFIED** | Completed in [docs/business-plan.md](docs/business-plan.md) and [BUSINESS_PLAN.md](BUSINESS_PLAN.md) |
 | **Crustdata API** | **VERIFIED** | Connected & verified with `2025-11-01` API |
-| **GitHub Actions CI** | **VERIFIED** | Configured in [.github/workflows/ci.yml](.github/workflows/ci.yml) |
+| **GitHub Actions CI** | **VERIFIED** | Run 38072806729 completed green on Python 3.12 |
 | **Interactive Animated Homepage** | **VERIFIED** | High-aesthetic workbench in `web/` (`patchpilot serve`) |
 | **Public Repository** | **VERIFIED** | [https://github.com/Quantum-Ark/patchai](https://github.com/Quantum-Ark/patchai) |
 

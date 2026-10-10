@@ -2,7 +2,7 @@
 
 [![neatHacks 2026](https://img.shields.io/badge/neatHacks-2026-6366f1.svg)](https://hack.entire.io/neathacks-2026/)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%20%7C%203.14-blue.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-18%20passed%20%7C%20100%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/tests-26%20passed%20%7C%20100%25-brightgreen.svg)]()
 [![Observability](https://img.shields.io/badge/Neatlogs-Instrumented-blueviolet.svg)](https://docs.neatlogs.com/)
 [![Continuous Memory](https://img.shields.io/badge/Entire-Enabled-black.svg)](https://entire.io/)
 
@@ -59,7 +59,7 @@ patchpilotai/
 │   ├── orchestrator.py        # Central autonomous verified recovery loop
 │   ├── state_machine.py       # Deterministic state transitions & guards
 │   ├── llm/
-│   │   └── provider.py        # Interchangeable adapters (OpenAI, Mock offline)
+│   │   └── provider.py        # Production adapters (OpenAI, Gemini, Anthropic, Groq, OpenRouter, Mock)
 │   ├── tools/
 │   │   ├── github.py          # Issue intake parser
 │   │   ├── repository.py      # Safe file discovery & AST inspection
@@ -85,7 +85,7 @@ patchpilotai/
 │   ├── index.html             # Semantic workbench UI, diff viewer, and ROI model
 │   ├── style.css              # Cyber-engineering glassmorphism design system
 │   └── app.js                 # Particle mesh canvas, cursor effect, live simulator
-├── tests/                     # 21 automated unit and integration tests
+├── tests/                     # 26 automated unit and integration tests
 ├── pyproject.toml             # Package configuration
 └── .env.example               # Environment variables template
 ```
