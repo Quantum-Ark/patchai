@@ -4,516 +4,534 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PatchPilot AI — Autonomous Software Repair with Verified Recovery</title>
-  <meta name="description" content="Autonomous GitHub issue-to-verified-fix agent for neatHacks 2026. Reproduces defects, rolls back regressions in isolated sandboxes, and verifies patches with tamper-evident proof.">
+  <meta name="description" content="Autonomous GitHub issue-to-fix agent. Reproduces baseline defects in isolated sandboxes, executes automated rollbacks upon regression, and outputs tamper-evident audit traces.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="dark-theme">
-  <!-- Interactive Particle Background Canvas -->
-  <canvas id="bg-canvas"></canvas>
+<body>
 
-  <!-- Glowing Custom Cursor -->
-  <div id="cursor-glow" class="cursor-glow"></div>
-  <div id="cursor-dot" class="cursor-dot"></div>
-
-  <!-- Ambient Light Orbs -->
-  <div class="ambient-glow orb-1"></div>
-  <div class="ambient-glow orb-2"></div>
-  <div class="ambient-glow orb-3"></div>
-
-  <!-- Header / Navigation -->
-  <header class="navbar" id="navbar">
-    <div class="nav-container">
-      <a href="#" class="nav-brand">
-        <div class="brand-icon">
-          <span class="icon-pulse"></span>
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- Precision Top Navigation -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="#" class="brand">
+          <svg class="brand-logo" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
           </svg>
-        </div>
-        <div class="brand-text">
-          <span class="brand-name">PatchPilot<span class="accent-text">.ai</span></span>
-          <span class="brand-tag">neatHacks 2026</span>
-        </div>
-      </a>
+          <span class="brand-title">PatchPilot<span class="brand-dim">/ai</span></span>
+        </a>
+        <span class="version-badge">v1.0.0</span>
+      </div>
 
-      <nav class="nav-links">
-        <a href="#simulator" class="nav-link">Interactive Simulator</a>
-        <a href="#why-patchpilot" class="nav-link">Why Verified Recovery</a>
-        <a href="#architecture" class="nav-link">Architecture</a>
-        <a href="#diff-inspector" class="nav-link">Diff Inspector</a>
-        <a href="#telemetry" class="nav-link">Telemetry</a>
-        <a href="#calculator" class="nav-link">Economics</a>
+      <nav class="nav-menu">
+        <a href="#workbench" class="nav-item">Interactive Workbench</a>
+        <a href="#comparison" class="nav-item">Verified Recovery</a>
+        <a href="#diff-viewer" class="nav-item">Diff Auditing</a>
+        <a href="#architecture" class="nav-item">Architecture</a>
+        <a href="#telemetry" class="nav-item">Integrations</a>
+        <a href="#economics" class="nav-item">Economics</a>
       </nav>
 
-      <div class="nav-actions">
-        <div class="status-indicator">
-          <span class="status-dot"></span>
-          <span class="status-label">ENGINE ONLINE</span>
+      <div class="header-right">
+        <div class="system-status">
+          <span class="status-indicator"></span>
+          <span class="status-text">Engine Online</span>
         </div>
-        <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn btn-outline" id="github-btn">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="btn-github">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
           </svg>
-          <span>GitHub</span>
+          <span>Quantum-Ark/patchai</span>
         </a>
       </div>
     </div>
   </header>
 
   <!-- Hero Section -->
-  <section class="hero-section" id="hero">
-    <div class="hero-container">
-      <div class="badge-pill">
-        <span class="badge-spark"></span>
-        <span>neatHacks 2026 Autonomous Repair Agent</span>
-        <span class="badge-arrow">→</span>
+  <section class="hero-container">
+    <div class="hero-content">
+      <div class="announcement-pill">
+        <span class="pill-tag">neatHacks 2026</span>
+        <span class="pill-divider">/</span>
+        <span class="pill-text">Autonomous Software Repair Infrastructure</span>
       </div>
 
-      <h1 class="hero-title">
-        Autonomous Software Repair with <br>
-        <span class="gradient-text">Verified Recovery</span>
+      <h1 class="hero-headline">
+        Autonomous software repair that refuses to break production.
       </h1>
 
-      <p class="hero-subtitle">
-        Most AI coding agents hallucinate success and introduce silent regressions into production. 
-        <strong>PatchPilot AI</strong> reproduces baseline defects first, rolls back errors in isolated sandboxes, 
-        and refuses to promote a pull request until 100% of checks pass with verifiable evidence.
+      <p class="hero-lead">
+        Conventional coding assistants generate plausible code without accountability, frequently merging silent regressions. 
+        <strong>PatchPilot AI</strong> reproduces defects in disposable sandbox worktrees, detects regressions, executes automated rollbacks, 
+        and verifies patches against dual test suites before proposing a pull request.
       </p>
 
-      <div class="hero-cta-group">
-        <a href="#simulator" class="btn btn-primary" id="launch-sim-btn">
-          <span class="btn-glow"></span>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="hero-actions">
+        <a href="#workbench" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
-          <span>Run Interactive Simulator</span>
+          <span>Run Interactive Workbench</span>
         </a>
-        <a href="#diff-inspector" class="btn btn-secondary" id="view-diff-btn">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
-          <span>Inspect Verified Diffs</span>
-        </a>
+        <div class="quick-command" id="quick-copy-cmd">
+          <span class="cmd-prefix">$</span>
+          <span class="cmd-text">pip install -e . &amp;&amp; patchpilot evaluate</span>
+          <button class="copy-btn" title="Copy to clipboard">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <!-- Live Metric Badges -->
-      <div class="hero-metrics">
-        <div class="metric-card">
-          <span class="metric-number">100%</span>
-          <span class="metric-label">Dual-Suite Verification</span>
+      <!-- Real Benchmark Metrics Bar -->
+      <div class="kpi-grid">
+        <div class="kpi-cell">
+          <div class="kpi-value">100%</div>
+          <div class="kpi-label">Dual-Suite Test Verification</div>
         </div>
-        <div class="metric-card">
-          <span class="metric-number">0%</span>
-          <span class="metric-label">Silent Regressions Merged</span>
+        <div class="kpi-cell">
+          <div class="kpi-value">0%</div>
+          <div class="kpi-label">Silent Regressions Merged</div>
         </div>
-        <div class="metric-card">
-          <span class="metric-number">&lt; 5s</span>
-          <span class="metric-label">Mean Autonomous MTTR</span>
+        <div class="kpi-cell">
+          <div class="kpi-value">7.28s</div>
+          <div class="kpi-label">Autonomous MTTR (Case 3)</div>
         </div>
-        <div class="metric-card">
-          <span class="metric-number">$0.045</span>
-          <span class="metric-label">Inference COGS per Fix</span>
+        <div class="kpi-cell">
+          <div class="kpi-value">$0.045</div>
+          <div class="kpi-label">Inference COGS per Fix</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Interactive Simulator Workbench -->
-  <section class="section simulator-section" id="simulator">
-    <div class="section-header">
-      <div class="section-tag">LIVE AGENT WORKBENCH</div>
-      <h2 class="section-title">Experience Verified Recovery in Real Time</h2>
-      <p class="section-desc">Select an actual bug fixture to watch the 7-stage state machine investigate, fail, roll back, pivot strategy, and independently verify.</p>
+  <!-- Interactive Workbench (Linear/Datadog style) -->
+  <section class="section-container" id="workbench">
+    <div class="section-meta">
+      <span class="section-eyebrow">Interactive Environment</span>
+      <h2 class="section-heading">Verified Recovery Live Simulation</h2>
+      <p class="section-summary">
+        Observe the 7-stage deterministic state machine autonomously intake a defect, reproduce failure, test a candidate patch, detect an unexpected regression, execute a clean Git rollback, and re-verify with zero human intervention.
+      </p>
     </div>
 
-    <div class="simulator-wrapper">
-      <!-- Case Selector Tabs -->
-      <div class="case-tabs">
-        <button class="case-tab active" data-case="case3" id="tab-case3">
-          <div class="tab-badge regression">MULTI-ATTEMPT RECOVERY</div>
-          <div class="tab-title">Case 3: Pricing Engine Regression</div>
-          <div class="tab-desc">Naive patch fixes input but breaks VIP discounts. Watch agent rollback and adapt!</div>
+    <!-- Case Selector Controls -->
+    <div class="workbench-card">
+      <div class="workbench-tabs">
+        <button class="tab-item active" data-case="case3">
+          <span class="tab-status-dot status-warning"></span>
+          <div class="tab-text">
+            <span class="tab-title">Case 3: Pricing Engine Regression</span>
+            <span class="tab-sub">Multi-attempt recovery · Rollback &amp; Strategy pivot</span>
+          </div>
         </button>
 
-        <button class="case-tab" data-case="case1" id="tab-case1">
-          <div class="tab-badge logic">DIRECT LOGIC FIX</div>
-          <div class="tab-title">Case 1: Division by Zero</div>
-          <div class="tab-desc">Unhandled ZeroDivisionError in calculation pipeline.</div>
+        <button class="tab-item" data-case="case1">
+          <span class="tab-status-dot status-success"></span>
+          <div class="tab-text">
+            <span class="tab-title">Case 1: Division by Zero</span>
+            <span class="tab-sub">Single attempt · Arithmetic guard clause</span>
+          </div>
         </button>
 
-        <button class="case-tab" data-case="case2" id="tab-case2">
-          <div class="tab-badge boundary">BOUNDARY FIX</div>
-          <div class="tab-title">Case 2: Empty Pagination IndexError</div>
-          <div class="tab-desc">Off-by-one boundary defect on empty query response sets.</div>
+        <button class="tab-item" data-case="case2">
+          <span class="tab-status-dot status-success"></span>
+          <div class="tab-text">
+            <span class="tab-title">Case 2: Pagination IndexError</span>
+            <span class="tab-sub">Single attempt · Boundary condition resolution</span>
+          </div>
         </button>
       </div>
 
-      <!-- Terminal / Agent Lifecycle Display -->
-      <div class="terminal-container">
-        <div class="terminal-header">
-          <div class="terminal-dots">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
-          </div>
-          <div class="terminal-title" id="terminal-case-title">benchmarks/case_3_regression_recovery/pricing.py</div>
-          <div class="terminal-actions">
-            <button class="action-btn" id="play-sim-btn">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      <!-- State Machine Lifecycle Stepper -->
+      <div class="stepper-track">
+        <div class="step-item" id="step-inspecting">
+          <div class="step-circle">1</div>
+          <span class="step-text">Intake &amp; Inspect</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="step-reproducing">
+          <div class="step-circle">2</div>
+          <span class="step-text">Reproduce Bug</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="step-patching">
+          <div class="step-circle">3</div>
+          <span class="step-text">Generate Patch</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="step-testing">
+          <div class="step-circle">4</div>
+          <span class="step-text">Sandbox Test</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item alert-step" id="step-recovering">
+          <div class="step-circle">5</div>
+          <span class="step-text">Detect &amp; Rollback</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="step-verifying">
+          <div class="step-circle">6</div>
+          <span class="step-text">Dual Verify</span>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item" id="step-completed">
+          <div class="step-circle">7</div>
+          <span class="step-text">Evidence PR</span>
+        </div>
+      </div>
+
+      <!-- Console Terminal & Telemetry Split Screen -->
+      <div class="workbench-body">
+        <div class="terminal-panel">
+          <div class="terminal-bar">
+            <div class="window-controls">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="terminal-target" id="terminal-target-label">
+              benchmarks/case_3_regression_recovery/pricing.py
+            </div>
+            <button class="btn-replay" id="replay-btn">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
               </svg>
-              <span>Replay Cycle</span>
+              <span>Re-run Cycle</span>
             </button>
           </div>
-        </div>
 
-        <!-- Animated State Machine Stepper -->
-        <div class="stepper-bar">
-          <div class="step-node" id="step-inspecting">
-            <span class="node-dot"></span>
-            <span class="node-label">INSPECTING</span>
-          </div>
-          <div class="step-line"></div>
-          <div class="step-node" id="step-reproducing">
-            <span class="node-dot"></span>
-            <span class="node-label">REPRODUCING</span>
-          </div>
-          <div class="step-line"></div>
-          <div class="step-node" id="step-patching">
-            <span class="node-dot"></span>
-            <span class="node-label">PATCHING</span>
-          </div>
-          <div class="step-line"></div>
-          <div class="step-node" id="step-testing">
-            <span class="node-dot"></span>
-            <span class="node-label">TESTING</span>
-          </div>
-          <div class="step-line"></div>
-          <div class="step-node alert-node" id="step-recovering">
-            <span class="node-dot"></span>
-            <span class="node-label">RECOVERING</span>
-          </div>
-          <div class="step-line"></div>
-          <div class="step-node" id="step-verifying">
-            <span class="node-dot"></span>
-            <span class="node-label">VERIFYING</span>
-          </div>
-          <div class="step-line"></div>
-          <div class="step-node" id="step-completed">
-            <span class="node-dot"></span>
-            <span class="node-label">COMPLETED</span>
+          <div class="terminal-screen" id="terminal-screen">
+            <!-- Populated via high-performance JS stream -->
           </div>
         </div>
 
-        <!-- Terminal Output Screen -->
-        <div class="terminal-body" id="terminal-output">
-          <!-- Populated by JavaScript with rich colored logs -->
-        </div>
+        <!-- Realtime Telemetry Sidebar -->
+        <div class="telemetry-panel">
+          <div class="telemetry-header">
+            <span>Execution Telemetry</span>
+            <span class="badge-live">LIVE AUDIT</span>
+          </div>
 
-        <!-- Live Telemetry Bar -->
-        <div class="terminal-footer">
-          <div class="telemetry-item">
-            <span class="tel-label">ATTEMPT:</span>
-            <span class="tel-val" id="tel-attempt">2 / 3</span>
+          <div class="telemetry-rows">
+            <div class="tel-row">
+              <span class="tel-label">Current Attempt</span>
+              <span class="tel-value" id="tel-attempt">2 / 3 (Recovered)</span>
+            </div>
+            <div class="tel-row">
+              <span class="tel-label">Neatlogs Trace ID</span>
+              <span class="tel-value mono" id="tel-trace">16578e5ee3829a5a</span>
+            </div>
+            <div class="tel-row">
+              <span class="tel-label">Entire Session</span>
+              <span class="tel-value mono">962e40f4-2378...</span>
+            </div>
+            <div class="tel-row">
+              <span class="tel-label">Crustdata Intelligence</span>
+              <span class="tel-value status-ok">Connected (2025-11-01)</span>
+            </div>
+            <div class="tel-row">
+              <span class="tel-label">Sandbox Isolation</span>
+              <span class="tel-value">Subprocess (60s budget)</span>
+            </div>
+            <div class="tel-row">
+              <span class="tel-label">Rollback Mechanism</span>
+              <span class="tel-value">Git Reset / File Mirror</span>
+            </div>
           </div>
-          <div class="telemetry-item">
-            <span class="tel-label">NEATLOGS TRACE:</span>
-            <span class="tel-val code" id="tel-trace">fa7426780f2d4838b90a61cfb8813ecb</span>
-          </div>
-          <div class="telemetry-item">
-            <span class="tel-label">SANDBOX:</span>
-            <span class="tel-val success" id="tel-sandbox">Subprocess Isolated (Timeout 60s)</span>
-          </div>
-          <div class="telemetry-item">
-            <span class="tel-label">ENTIRE SESSION:</span>
-            <span class="tel-val code">962e40f4...</span>
+
+          <div class="audit-status-card" id="audit-status-card">
+            <div class="status-card-header">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <span id="audit-title">State: Verified Complete</span>
+            </div>
+            <p id="audit-desc">Both acceptance test and complete regression suite passed with exit code 0. Zero uncommitted changes.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Why Verified Recovery (Comparison Matrix) -->
-  <section class="section comparison-section" id="why-patchpilot">
-    <div class="section-header">
-      <div class="section-tag">THE PROBLEM & SOLUTION</div>
-      <h2 class="section-title">Why Other AI Coding Agents Fail</h2>
-      <p class="section-desc">Conventional coding tools generate syntax but have zero accountability. Here is how PatchPilot changes the paradigm.</p>
+  <!-- Precision Code Diff Viewer -->
+  <section class="section-container" id="diff-viewer">
+    <div class="section-meta">
+      <span class="section-eyebrow">Audited Code Surgery</span>
+      <h2 class="section-heading">Surgical Patch Inspection</h2>
+      <p class="section-summary">
+        Compare the naive attempt (which passed input tests but broke business logic) against the verified precision patch produced after automated recovery.
+      </p>
     </div>
 
-    <div class="comparison-grid">
-      <div class="comparison-card naive">
-        <div class="card-header">
-          <div class="icon-wrap bad">✕</div>
-          <h3>Naive AI Coding Agents</h3>
-          <p>Copilot, Cursor bots, Sweep</p>
+    <div class="diff-card">
+      <div class="diff-topbar">
+        <div class="diff-switcher">
+          <button class="diff-tab-btn active" id="btn-attempt2">
+            Attempt #2: Precision Patch (Verified &amp; Green)
+          </button>
+          <button class="diff-tab-btn" id="btn-attempt1">
+            Attempt #1: Naive Broken Patch (Caused Regression)
+          </button>
         </div>
-        <ul class="comparison-list">
-          <li>
-            <strong>Blind Patch Proposals:</strong> Edits code without running baseline reproduction commands to confirm the defect exists.
-          </li>
-          <li>
-            <strong>Silent Regressions:</strong> Modifies code that breaks existing edge cases, then claims completion because syntax is valid.
-          </li>
-          <li>
-            <strong>No Rollback Safety:</strong> Leaves contaminated edits in your repository when a test run errors.
-          </li>
-          <li>
-            <strong>Hallucinated Verification:</strong> Declares "Fix Complete!" merely because the LLM generated plausible text.
-          </li>
-          <li>
-            <strong>Opaque Telemetry:</strong> Black-box execution loops with zero granular observability or audit trail.
-          </li>
-        </ul>
+
+        <div class="diff-info">
+          <span class="diff-file">pricing.py</span>
+          <span class="diff-stats" id="diff-stats">+3 -1 lines</span>
+        </div>
       </div>
 
-      <div class="comparison-card patchpilot">
-        <div class="card-badge">THE PATCHPILOT ADVANTAGE</div>
-        <div class="card-header">
-          <div class="icon-wrap good">✓</div>
-          <h3>PatchPilot AI</h3>
-          <p>Evidence-Gated Verified Recovery</p>
-        </div>
-        <ul class="comparison-list">
-          <li>
-            <strong>Strict Baseline Reproduction:</strong> First creates and executes a targeted test to reproduce the exact failure (Exit Code != 0).
-          </li>
-          <li>
-            <strong>Automated Rollback & Adaptive Recovery:</strong> If Attempt #1 triggers a regression, it restores the clean baseline and pivots strategy.
-          </li>
-          <li>
-            <strong>Dual-Suite Verification:</strong> Fix must pass both the new acceptance test AND the complete regression test suite.
-          </li>
-          <li>
-            <strong>Evidence-Gated Outcomes:</strong> Never marks an issue verified without real command outputs and test execution hashes.
-          </li>
-          <li>
-            <strong>Immutable Neatlogs & Entire Traces:</strong> Every attempt, span, and decision is cryptographically tracked in continuous memory.
-          </li>
-        </ul>
+      <div class="diff-lines-container" id="diff-content">
+        <!-- Diff rows rendered cleanly by JS -->
       </div>
     </div>
   </section>
 
-  <!-- Interactive Diff Inspector -->
-  <section class="section diff-section" id="diff-inspector">
-    <div class="section-header">
-      <div class="section-tag">CODE SURGERY</div>
-      <h2 class="section-title">Audited Minimal Patches</h2>
-      <p class="section-desc">Toggle between the Naive Attempt (which introduced a regression) and the Verified Precision Patch.</p>
+  <!-- Technical Comparison Matrix -->
+  <section class="section-container" id="comparison">
+    <div class="section-meta">
+      <span class="section-eyebrow">Architecture Comparison</span>
+      <h2 class="section-heading">Why Verified Recovery Changes the Paradigm</h2>
+      <p class="section-summary">
+        Evaluating the differences between naive generative AI coding tools and PatchPilot's evidence-gated verification loop.
+      </p>
     </div>
 
-    <div class="diff-container">
-      <div class="diff-header">
-        <div class="diff-tabs">
-          <button class="diff-tab active" id="diff-tab-attempt2">Attempt #2: Verified Precision Patch (Passing)</button>
-          <button class="diff-tab" id="diff-tab-attempt1">Attempt #1: Naive Broken Patch (Caused Regression)</button>
-        </div>
-        <div class="diff-meta">
-          <span class="file-tag">pricing.py</span>
-          <span class="hash-tag">hash: 916d66f...</span>
-        </div>
+    <div class="table-card">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th style="width: 28%;">Capability / Dimension</th>
+            <th style="width: 36%;">Naive AI Coding Tools (Copilot, Cursor, Sweep)</th>
+            <th style="width: 36%;" class="highlight-col">PatchPilot AI (Verified Recovery)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="dim-label">Defect Confirmation</td>
+            <td class="dim-bad">Blind generation. Does not execute reproduction commands before editing code.</td>
+            <td class="dim-good highlight-col">Strict baseline reproduction. First proves the failure reproduces with non-zero exit code.</td>
+          </tr>
+          <tr>
+            <td class="dim-label">Regression Safety</td>
+            <td class="dim-bad">Silent failures. Frequently breaks existing logic while solving immediate issue.</td>
+            <td class="dim-good highlight-col">Dual-suite verification. Must pass both acceptance and comprehensive regression suite.</td>
+          </tr>
+          <tr>
+            <td class="dim-label">Rollback on Failure</td>
+            <td class="dim-bad">Leaves contaminated edits in the repository when tests fail.</td>
+            <td class="dim-good highlight-col">Atomic rollback. Instantly restores clean Git baseline and updates hypotheses.</td>
+          </tr>
+          <tr>
+            <td class="dim-label">Execution Guardrails</td>
+            <td class="dim-bad">Unbounded execution prompts or raw unchecked shell commands.</td>
+            <td class="dim-good highlight-col">Allow-listed command binaries, environment secret scrub, strict 60s timeout.</td>
+          </tr>
+          <tr>
+            <td class="dim-label">Telemetry &amp; Audit Trail</td>
+            <td class="dim-bad">Opaque LLM chat logs with zero structured runtime metadata.</td>
+            <td class="dim-good highlight-col">Immutable Neatlogs HTTP traces, Entire session memory, and Crustdata enrichment.</td>
+          </tr>
+          <tr>
+            <td class="dim-label">Pull Request Promotion</td>
+            <td class="dim-bad">Claims completion purely because code syntax was emitted.</td>
+            <td class="dim-good highlight-col">Evidence-gated dossier. Never promotes without real command outputs and test execution proof.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7-Stage State Machine Blueprint -->
+  <section class="section-container" id="architecture">
+    <div class="section-meta">
+      <span class="section-eyebrow">Deterministic Control Plane</span>
+      <h2 class="section-heading">The 7-Stage State Machine</h2>
+      <p class="section-summary">
+        PatchPilot replaces hallucinating open loops with a formal finite state machine backed by SQLite checkpointing.
+      </p>
+    </div>
+
+    <div class="arch-grid">
+      <div class="arch-card">
+        <div class="arch-num">01</div>
+        <h3 class="arch-title">Intake</h3>
+        <p class="arch-desc">Parses GitHub issue URL or Markdown spec. Extracts stack traces and candidate file hints.</p>
+        <div class="arch-meta">Input: Issue URL · Output: Issue Spec</div>
       </div>
 
-      <div class="diff-viewer" id="diff-viewer-content">
-        <!-- Rendered by JS -->
+      <div class="arch-card">
+        <div class="arch-num">02</div>
+        <h3 class="arch-title">Inspect</h3>
+        <p class="arch-desc">Clones disposable sandbox worktree, validates repository boundaries, records baseline Git SHA.</p>
+        <div class="arch-meta">Tool: Entire Graph AST map</div>
+      </div>
+
+      <div class="arch-card">
+        <div class="arch-num">03</div>
+        <h3 class="arch-title">Reproduce</h3>
+        <p class="arch-desc">Executes targeted reproduction command in isolated subprocess. Confirms baseline defect exit code != 0.</p>
+        <div class="arch-meta">Tool: TestRunner (Timeout 60s)</div>
+      </div>
+
+      <div class="arch-card">
+        <div class="arch-num">04</div>
+        <h3 class="arch-title">Patch</h3>
+        <p class="arch-desc">Generates minimal unified diff via configured LLM (OpenAI, Anthropic, Gemini). Validates syntax tree.</p>
+        <div class="arch-meta">Tool: PatchTool (Backup Mirror)</div>
+      </div>
+
+      <div class="arch-card highlight-card">
+        <div class="arch-num">05</div>
+        <h3 class="arch-title">Recovery</h3>
+        <p class="arch-desc">On test regression or syntax error, auto-rolls back to clean baseline SHA, categorizes failure, and replans.</p>
+        <div class="arch-meta">Policy: RetryPolicy (Max 3 tries)</div>
+      </div>
+
+      <div class="arch-card">
+        <div class="arch-num">06</div>
+        <h3 class="arch-title">Verify</h3>
+        <p class="arch-desc">Executes both reproduction test AND complete test suite. Requires 100% exit code 0 confirmation.</p>
+        <div class="arch-meta">Gate: Dual-Suite Acceptance</div>
+      </div>
+
+      <div class="arch-card">
+        <div class="arch-num">07</div>
+        <h3 class="arch-title">Report &amp; PR</h3>
+        <p class="arch-desc">Compiles Markdown dossier with test logs, links Neatlogs trace ID, and opens audited GitHub Pull Request.</p>
+        <div class="arch-meta">Output: PR Dossier + JSON Audit</div>
       </div>
     </div>
   </section>
 
-  <!-- 7-Stage State Machine Architecture -->
-  <section class="section arch-section" id="architecture">
-    <div class="section-header">
-      <div class="section-tag">SYSTEM BLUEPRINT</div>
-      <h2 class="section-title">Deterministic State Machine</h2>
-      <p class="section-desc">No runaway loops. Every transition is governed by explicit guardrails, rollback handlers, and retry ceilings.</p>
+  <!-- Integrations Grid -->
+  <section class="section-container" id="telemetry">
+    <div class="section-meta">
+      <span class="section-eyebrow">Ecosystem Architecture</span>
+      <h2 class="section-heading">Production Observability &amp; Context Stack</h2>
+      <p class="section-summary">
+        Instrumented with enterprise hackathon partners for end-to-end tracing and developer intelligence.
+      </p>
     </div>
 
-    <div class="pipeline-grid">
-      <div class="pipeline-card" data-num="01">
-        <div class="pipe-icon">📥</div>
-        <h4>1. Intake</h4>
-        <p>Parses GitHub issue URL or local Markdown spec. Generates unique Run ID.</p>
+    <div class="integrations-deck">
+      <div class="int-card">
+        <div class="int-badge status-ok">HTTP INGESTION ACTIVE</div>
+        <h3 class="int-name">Neatlogs Observability</h3>
+        <p class="int-info">
+          Full execution lifecycle traced via the official HTTP ingestion endpoint. Every span tracks attempt iterations, token consumption, latency, and rollback decisions without exposing secrets.
+        </p>
+        <pre class="int-code"><code>POST https://ingest.neatlogs.com/v1/trace
+Authorization: Bearer $NEATLOGS_API_KEY</code></pre>
       </div>
-      <div class="pipeline-card" data-num="02">
-        <div class="pipe-icon">🔍</div>
-        <h4>2. Inspect</h4>
-        <p>Clones disposable worktree, maps AST via Entire Graph, records baseline commit SHA.</p>
+
+      <div class="int-card">
+        <div class="int-badge status-ok">CLI v0.11.4 CONNECTED</div>
+        <h3 class="int-name">Entire Continuous Memory</h3>
+        <p class="int-info">
+          Maintains repository context across developer and agent sessions. Tracks reasoning traces and AST graph maps across Antigravity and Codex sessions.
+        </p>
+        <pre class="int-code"><code>entire enable --agent antigravity
+entire graph init-agents --repo .</code></pre>
       </div>
-      <div class="pipeline-card" data-num="03">
-        <div class="pipe-icon">🧪</div>
-        <h4>3. Reproduce</h4>
-        <p>Runs reproduction command in isolated sandbox. Confirms genuine baseline defect.</p>
-      </div>
-      <div class="pipeline-card" data-num="04">
-        <div class="pipe-icon">⚙️</div>
-        <h4>4. Patch</h4>
-        <p>Generates minimal surgical diff. Validates path traversal & symlink boundaries.</p>
-      </div>
-      <div class="pipeline-card" data-num="05">
-        <div class="pipe-icon">🚨</div>
-        <h4>5. Recovery</h4>
-        <p>On test regression, auto-restores baseline, updates hypothesis, and pivots strategy.</p>
-      </div>
-      <div class="pipeline-card" data-num="06">
-        <div class="pipe-icon">🛡️</div>
-        <h4>6. Verify</h4>
-        <p>Executes dual acceptance and regression suites. Requires 100% exit code 0.</p>
-      </div>
-      <div class="pipeline-card" data-num="07">
-        <div class="pipe-icon">📄</div>
-        <h4>7. Report & PR</h4>
-        <p>Exports Markdown dossier, Neatlogs trace ID, and drafts unmerged PR.</p>
+
+      <div class="int-card">
+        <div class="int-badge status-ok">2025-11-01 REST API</div>
+        <h3 class="int-name">Crustdata Intelligence</h3>
+        <p class="int-info">
+          Enriches repository and issue metadata with developer profiles, repository velocity, and triage analytics via authenticated Crustdata endpoints.
+        </p>
+        <pre class="int-code"><code>GET https://api.crustdata.com/account/endpoints
+Authorization: Bearer $CRUSTDATA_API_KEY</code></pre>
       </div>
     </div>
   </section>
 
-  <!-- Observability & Integrations Showcase -->
-  <section class="section telemetry-section" id="telemetry">
-    <div class="section-header">
-      <div class="section-tag">ECOSYSTEM INTEGRATIONS</div>
-      <h2 class="section-title">Instrumented with Hackathon Standards</h2>
-      <p class="section-desc">Real telemetry, continuous repository memory, and developer data enrichment.</p>
+  <!-- Interactive ROI Economics Calculator -->
+  <section class="section-container" id="economics">
+    <div class="section-meta">
+      <span class="section-eyebrow">Enterprise Value Model</span>
+      <h2 class="section-heading">SaaS Unit Economics &amp; ROI Model</h2>
+      <p class="section-summary">
+        Synthesized using the cfo.ai financial SaaS framework. Calculate senior engineering hours saved and net margin efficiency.
+      </p>
     </div>
 
-    <div class="integrations-grid">
-      <!-- Neatlogs Card -->
-      <div class="integration-card">
-        <div class="int-header">
-          <div class="int-icon neatlogs-logo">🔭</div>
-          <div>
-            <h3>Neatlogs Observability</h3>
-            <span class="int-status live">HTTP 200 INGESTION ACTIVE</span>
-          </div>
+    <div class="roi-card">
+      <div class="slider-row">
+        <div class="slider-info">
+          <label for="bug-slider">Monthly Defects &amp; Regressions Managed:</label>
+          <span class="slider-number" id="slider-val">100 fixes</span>
         </div>
-        <p>Full-lifecycle trace capture via official HTTP trace injection. Every span records model tokens, tool latency, and rollback decisions without leaking secrets.</p>
-        <div class="code-preview">
-          <code>POST https://ingest.neatlogs.com/v1/trace</code>
-          <code>Auth: Bearer $NEATLOGS_API_KEY (Project API Key)</code>
-        </div>
+        <input type="range" id="bug-slider" min="10" max="500" value="100" step="10">
       </div>
 
-      <!-- Entire CLI Card -->
-      <div class="integration-card">
-        <div class="int-header">
-          <div class="int-icon entire-logo">🧠</div>
-          <div>
-            <h3>Entire Continuous Memory</h3>
-            <span class="int-status live">CLI v0.11.4 CONNECTED</span>
-          </div>
+      <div class="metrics-output-grid">
+        <div class="metric-output-cell">
+          <span class="metric-out-val" id="res-hours">320 hrs</span>
+          <span class="metric-out-label">Senior Dev Hours Saved</span>
+          <span class="metric-out-hint">3.2 hours baseline triage/fix per defect</span>
         </div>
-        <p>Integrates Entire Graph and Brain. Captures reasoning traces, decisions, and repository AST maps across Antigravity and Codex agent sessions.</p>
-        <div class="code-preview">
-          <code>entire enable --agent antigravity</code>
-          <code>entire graph init-agents --repo .</code>
-        </div>
-      </div>
 
-      <!-- Crustdata Intelligence Card -->
-      <div class="integration-card">
-        <div class="int-header">
-          <div class="int-icon crustdata-logo">⚡</div>
-          <div>
-            <h3>Crustdata Developer Intelligence</h3>
-            <span class="int-status live">2025-11-01 API AUTHENTICATED</span>
-          </div>
+        <div class="metric-output-cell">
+          <span class="metric-out-val" id="res-cogs">$4.50</span>
+          <span class="metric-out-label">Total LLM Inference COGS</span>
+          <span class="metric-out-hint">$0.045 token consumption per multi-attempt fix</span>
         </div>
-        <p>Live enrichment for repository context, contributor profiles, and issue triage metadata via the authenticated 2025-11-01 Crustdata REST endpoints.</p>
-        <div class="code-preview">
-          <code>Auth: Bearer $CRUSTDATA_API_KEY</code>
-          <code>Endpoint: /account/endpoints (HTTP 200 OK)</code>
+
+        <div class="metric-output-cell">
+          <span class="metric-out-val" id="res-savings">$31,995</span>
+          <span class="metric-out-label">Net Monthly Engineering Savings</span>
+          <span class="metric-out-hint">Calculated at $100/hr blended engineering rate</span>
+        </div>
+
+        <div class="metric-output-cell highlight-cell">
+          <span class="metric-out-val" id="res-margin">95.5%</span>
+          <span class="metric-out-label">Gross Margin Efficiency</span>
+          <span class="metric-out-hint">Sustainable enterprise B2B SaaS profile</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Interactive Financial Economics Calculator (cfo.ai Model) -->
-  <section class="section calculator-section" id="calculator">
-    <div class="section-header">
-      <div class="section-tag">BUSINESS VALIDATION</div>
-      <h2 class="section-title">Interactive ROI & Unit Economics</h2>
-      <p class="section-desc">Based on our synthesized SaaS financial model. See how much engineering bandwidth your team saves.</p>
-    </div>
-
-    <div class="calculator-box">
-      <div class="slider-group">
-        <div class="slider-header">
-          <label for="defect-slider">Monthly Bugs & Regressions Handled:</label>
-          <span class="slider-val" id="slider-display">100 fixes</span>
-        </div>
-        <input type="range" id="defect-slider" min="10" max="500" value="100" step="10">
-      </div>
-
-      <div class="calc-results-grid">
-        <div class="calc-res-item">
-          <span class="res-num" id="calc-hours">320 hrs</span>
-          <span class="res-label">Senior Dev Hours Saved</span>
-        </div>
-        <div class="calc-res-item">
-          <span class="res-num" id="calc-cogs">$4.50</span>
-          <span class="res-label">Total Inference Cost (COGS)</span>
-        </div>
-        <div class="calc-res-item">
-          <span class="res-num" id="calc-savings">$31,995</span>
-          <span class="res-label">Net Team Savings / Month</span>
-        </div>
-        <div class="calc-res-item">
-          <span class="res-num highlight">95.5%</span>
-          <span class="res-label">Gross Margin Efficiency</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Quickstart Terminal Section -->
-  <section class="section quickstart-section" id="quickstart">
-    <div class="section-header">
-      <div class="section-tag">GET STARTED IN SECONDS</div>
-      <h2 class="section-title">Install and Run Locally</h2>
-    </div>
-
-    <div class="quickstart-terminal">
-      <div class="quickstart-header">
-        <span>Terminal — PowerShell / Bash</span>
-        <button class="copy-all-btn" id="copy-quickstart-btn">Copy Commands</button>
-      </div>
-      <pre class="quickstart-code"><span class="c-comment"># 1. Clone repository</span>
-<span class="c-cmd">git clone</span> https://github.com/Quantum-Ark/patchai.git &amp;&amp; <span class="c-cmd">cd</span> patchai
-
-<span class="c-comment"># 2. Run diagnostics &amp; health check</span>
-<span class="c-cmd">patchpilot doctor</span>
-
-<span class="c-comment"># 3. Verify all live integrations (Neatlogs, Entire, LLM, Crustdata)</span>
-<span class="c-cmd">patchpilot verify-integrations</span>
-
-<span class="c-comment"># 4. Run reproducible evaluation benchmarks</span>
-<span class="c-cmd">patchpilot evaluate</span></pre>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-container">
+  <!-- Clean Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
       <div class="footer-left">
-        <div class="footer-brand">PatchPilot<span class="accent-text">.ai</span></div>
-        <p>Autonomous Software Repair with Verified Recovery. Built for neatHacks 2026.</p>
+        <div class="footer-brand">
+          <span class="brand-title">PatchPilot<span class="brand-dim">/ai</span></span>
+        </div>
+        <p class="footer-copy">
+          Autonomous Software Repair Infrastructure with Evidence-Gated Verified Recovery.<br>
+          Engineered for neatHacks 2026. Distributed under MIT License.
+        </p>
       </div>
-      <div class="footer-right">
-        <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
-        <a href="https://github.com/Quantum-Ark/patchai/blob/main/docs/architecture.md" target="_blank">Architecture Spec</a>
-        <a href="https://github.com/Quantum-Ark/patchai/blob/main/BUSINESS_PLAN.md" target="_blank">Business Plan</a>
-        <a href="https://github.com/Quantum-Ark/patchai/blob/main/SUBMISSION_EVIDENCE.md" target="_blank">Evidence Dossier</a>
+
+      <div class="footer-links">
+        <div class="link-col">
+          <span class="link-head">Project</span>
+          <a href="https://github.com/Quantum-Ark/patchai" target="_blank">GitHub Repository</a>
+          <a href="https://github.com/Quantum-Ark/patchai/blob/main/docs/architecture.md" target="_blank">Architecture Spec</a>
+          <a href="https://github.com/Quantum-Ark/patchai/blob/main/docs/security.md" target="_blank">Security Policy</a>
+        </div>
+        <div class="link-col">
+          <span class="link-head">neatHacks 2026</span>
+          <a href="https://github.com/Quantum-Ark/patchai/blob/main/SUBMISSION_EVIDENCE.md" target="_blank">Submission Dossier</a>
+          <a href="https://github.com/Quantum-Ark/patchai/blob/main/BUSINESS_PLAN.md" target="_blank">Business Plan (cfo.ai)</a>
+          <a href="https://github.com/Quantum-Ark/patchai/blob/main/demo/demo-script.md" target="_blank">3-Min Pitch Script</a>
+        </div>
       </div>
     </div>
-    <div class="footer-bottom">
-      <p>© 2026 PatchPilot AI Team. MIT License. All benchmark and trace data verified with real artifacts.</p>
+
+    <div class="footer-sub">
+      <div class="sub-container">
+        <span>Git Commit SHA: <code>0071352</code> · Test Pass Rate: 21/21 (100%)</span>
+        <span>Observability: Neatlogs HTTP API · Memory: Entire CLI 0.11.4</span>
+      </div>
     </div>
   </footer>
 
