@@ -5,10 +5,10 @@
 ## 1. Project Information
 - **Project Name:** PatchPilot AI
 - **Repository URL:** [https://github.com/Quantum-Ark/patchai](https://github.com/Quantum-Ark/patchai)
-- **Git Branch:** `main`
-- **Latest Commit SHA:** `916d66fdc95629c4055c64aad908db62542886cc`
+- **Latest Commit SHA:** `54eb3c37dc2509e9332552c4f9ceeeabefce2dd9`
 - **Agent Integration:** Antigravity CLI / Codex (via Entire CLI 0.11.4)
 - **Core Differentiator:** **Evidence-Gated Verified Recovery** — autonomous defect investigation, baseline reproduction, sandboxed patch execution, automated rollback on regression detection, hypothesis updating, and independent dual-suite verification.
+
 
 ---
 
@@ -99,4 +99,6 @@
 | **Local Business Plan & Financials** | **VERIFIED** | Completed in [docs/business-plan.md](docs/business-plan.md) (labeled as assumptions) |
 | **Crustdata API** | **VERIFIED** | Connected & verified with `2025-11-01` API |
 | **GitHub Actions CI** | **VERIFIED** | Configured in [.github/workflows/ci.yml](.github/workflows/ci.yml) |
+| **Interactive Animated Homepage** | **VERIFIED** | High-aesthetic workbench in `web/` (`patchpilot serve`) |
 | **Public Repository** | **VERIFIED** | [https://github.com/Quantum-Ark/patchai](https://github.com/Quantum-Ark/patchai) |
+
