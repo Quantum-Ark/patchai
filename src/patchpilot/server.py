@@ -22,7 +22,7 @@ if str(_src_dir) not in sys.path:
     sys.path.insert(0, str(_src_dir))
 
 from patchpilot import __version__
-from patchpilot.config import config
+from patchpilot.config import config, verify_api_token
 from patchpilot.models import Issue
 from patchpilot.orchestrator import PatchPilotOrchestrator
 from patchpilot.llm.provider import get_llm_provider, MockLLMProvider
@@ -55,50 +55,99 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
         except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
             pass
 
+    def _cors_origin(self) -> Optional[str]:
+        # Same-origin only unless PATCHPILOT_CORS_ORIGIN is explicitly set.
+        origin = (config.cors_allow_origin or "").strip()
+        return origin or None
+
     def _send_json(self, status_code: int, data: Dict[str, Any]):
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
+        cors = self._cors_origin()
+        if cors:
+            self.send_header("Access-Control-Allow-Origin", cors)
+            self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        # Clickjacking / MIME-sniffing hardening for API responses.
+        self.send_header("X-Content-Type-Options", "nosniff")
         self.end_headers()
         self.wfile.write(json.dumps(data, indent=2).encode("utf-8"))
+
+    def _bearer_token(self) -> str:
+        auth = self.headers.get("Authorization", "")
+        if auth.lower().startswith("bearer "):
+            return auth[7:].strip()
+        return ""
+
+    def _require_api_token(self) -> bool:
+        """Enforce bearer auth on mutating routes. Sends 401/503 on failure."""
+        if not config.api_token:
+            self._send_json(503, {"error": "API auth not initialized"})
+            return False
+        if not verify_api_token(self._bearer_token(), config.api_token):
+            self._send_json(401, {"error": "Unauthorized: valid Bearer token required"})
+            return False
+        return True
+
+    @staticmethod
+    def _parse_int_param(raw: Any, default: int, minimum: int, maximum: int) -> Optional[int]:
+        try:
+            val = int(raw)
+        except (TypeError, ValueError):
+            return None
+        if val < minimum or val > maximum:
+            return None
+        return val
+
+    def _read_json_body(self, max_bytes: int = 65536) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+        try:
+            length = int(self.headers.get("Content-Length", 0) or 0)
+        except ValueError:
+            return None, "Invalid Content-Length"
+        if length <= 0:
+            return {}, None
+        if length > max_bytes:
+            return None, "Request body too large"
+        try:
+            raw = self.rfile.read(length)
+        except Exception:
+            return None, "Failed to read request body"
+        try:
+            data = json.loads(raw.decode("utf-8"))
+        except Exception:
+            return None, "Invalid JSON body"
+        if not isinstance(data, dict):
+            return None, "JSON body must be an object"
+        return data, None
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         query = urllib.parse.parse_qs(parsed.query)
 
-        # 1. Cloud Health Probe (/health)
+        # 1. Cloud Health Probe (/health) — minimal, no version/config leaks.
         if path in ("/health", "/healthz", "/ping"):
             payload = {
                 "status": "healthy",
                 "service": "patchpilot-ai",
-                "version": __version__,
-                "model": config.model,
-                "neatlogs_configured": bool(config.neatlogs_api_key),
             }
             self._send_json(200, payload)
             return
 
-        # 2. System Status Endpoint (/api/status)
+        # 2. System Status Endpoint (/api/status) — redacted, no URLs/paths.
         if path == "/api/status":
             status_payload = {
                 "version": __version__,
                 "neatlogs": {
                     "enabled": bool(config.neatlogs_api_key),
-                    "ingest_url": config.neatlogs_ingest_url,
-                    "project_id": config.neatlogs_project_id,
                 },
                 "llm": {
                     "model": config.model,
                     "max_attempts": config.max_attempts,
                     "timeout_seconds": config.execution_timeout_seconds,
                 },
-                "recovery": {
-                    "checkpoint_db": str(config.checkpoint_db_path),
-                }
             }
             self._send_json(200, status_payload)
             return
@@ -231,30 +280,53 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
                 self._send_json(200, {"issues": issues})
                 return
 
-        # 7. List Repair Runs (/api/runs)
+        # 7. List Repair Runs (/api/runs) — bounded, validated pagination.
         if path == "/api/runs":
             status_filter = query.get("status", [None])[0]
+            if status_filter is not None and len(str(status_filter)) > 32:
+                self._send_json(400, {"error": "Invalid status filter"})
+                return
             search_query = query.get("q", [None])[0]
-            limit = int(query.get("limit", [50])[0])
-            offset = int(query.get("offset", [0])[0])
+            if search_query is not None and len(search_query) > 200:
+                self._send_json(400, {"error": "Search query too long"})
+                return
+            limit = self._parse_int_param(query.get("limit", [50])[0], 50, 1, 100)
+            offset = self._parse_int_param(query.get("offset", [0])[0], 0, 0, 100000)
+            if limit is None or offset is None:
+                self._send_json(400, {"error": "Invalid limit/offset (limit 1..100)"})
+                return
             runs = db.list_runs(limit=limit, offset=offset, status=status_filter, query=search_query)
             self._send_json(200, {"runs": runs, "total": len(runs)})
             return
 
         # 8. Single Run Details (/api/runs/<run_id>)
         if path.startswith("/api/runs/") and not path.endswith("/events") and not path.endswith("/pr"):
-            run_id = path.split("/")[3]
+            parts = path.split("/")
+            if len(parts) != 4 or not parts[3]:
+                self._send_json(404, {"error": "Not found"})
+                return
+            run_id = parts[3]
+            if len(run_id) > 64:
+                self._send_json(400, {"error": "Invalid run id"})
+                return
             run = db.get_run(run_id)
             if not run:
-                self._send_json(404, {"error": f"Run not found: {run_id}"})
+                self._send_json(404, {"error": "Run not found"})
                 return
             self._send_json(200, run)
             return
 
         # 9. Real-Time Run Events (/api/runs/<run_id>/events)
         if path.startswith("/api/runs/") and path.endswith("/events"):
-            run_id = path.split("/")[3]
-            after_id = int(query.get("after", [0])[0])
+            parts = path.split("/")
+            if len(parts) != 5 or not parts[3]:
+                self._send_json(404, {"error": "Not found"})
+                return
+            run_id = parts[3]
+            after_id = self._parse_int_param(query.get("after", [0])[0], 0, 0, 2**63 - 1)
+            if after_id is None or len(run_id) > 64:
+                self._send_json(400, {"error": "Invalid after/run id"})
+                return
             events = db.get_run_events(run_id, after_id=after_id)
             run = db.get_run(run_id)
             is_active = runner.is_running(run_id) or (run and run.get("status") == "RUNNING")
@@ -268,12 +340,15 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
 
         # 10. List Pull Requests (/api/prs)
         if path == "/api/prs":
-            limit = int(query.get("limit", [20])[0])
+            limit = self._parse_int_param(query.get("limit", [20])[0], 20, 1, 100)
+            if limit is None:
+                self._send_json(400, {"error": "Invalid limit (1..100)"})
+                return
             prs = db.list_pull_requests(limit=limit)
             self._send_json(200, {"pull_requests": prs})
             return
 
-        # 11. Settings & Integrations Readiness (/api/settings)
+        # 11. Settings & Integrations Readiness (/api/settings) — redacted.
         if path == "/api/settings":
             auth = db.get_github_auth()
             openai_key = os.getenv("OPENAI_API_KEY", "")
@@ -290,29 +365,20 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
                 "github": {
                     "connected": bool(auth),
                     "username": auth.get("username") if auth else None,
-                    "masked_token": auth.get("masked_token") if auth else None,
                     "scopes": auth.get("scopes") if auth else None
                 },
                 "llm": {
                     "default_model": config.model,
                     "providers": {
-                        "openai": {"configured": has_openai, "model": "gpt-4o"},
-                        "gemini": {"configured": has_gemini, "model": "gemini-1.5-pro"},
-                        "anthropic": {"configured": has_anthropic, "model": "claude-3-5-sonnet-20241022"},
-                        "groq": {"configured": has_groq, "model": "llama-3.3-70b-versatile"},
-                        "ollama": {"configured": True, "model": "llama3"}
+                        "openai": {"configured": has_openai},
+                        "gemini": {"configured": has_gemini},
+                        "anthropic": {"configured": has_anthropic},
+                        "groq": {"configured": has_groq},
                     }
                 },
                 "neatlogs": {
                     "configured": bool(config.neatlogs_api_key),
-                    "project_id": config.neatlogs_project_id or "Not configured",
-                    "ingest_url": config.neatlogs_ingest_url
                 },
-                "entire_code_graph": {
-                    "installed": (Path(".entire").exists()),
-                    "checkpoint_db": str(config.checkpoint_db_path),
-                    "db_healthy": (Path(".patchpilot_state.db").exists())
-                }
             }
             self._send_json(200, payload)
             return
@@ -324,20 +390,22 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
 
-        content_len = int(self.headers.get("Content-Length", 0))
-        post_body = self.rfile.read(content_len).decode("utf-8") if content_len > 0 else "{}"
-        try:
-            data = json.loads(post_body) if post_body.strip() else {}
-        except json.JSONDecodeError:
-            self._send_json(400, {"error": "Invalid JSON payload"})
+        data, body_err = self._read_json_body()
+        if body_err:
+            self._send_json(400, {"error": body_err})
+            return
+
+        # Mutating routes require a valid bearer token (API5:2023 fix).
+        if not self._require_api_token():
             return
 
         # ----------------------------------------------------------------------
         # A. GitHub Connect (/api/github/connect)
         # ----------------------------------------------------------------------
         if path == "/api/github/connect":
-            token = data.get("token", "").strip()
-            if not token:
+            raw_token = data.get("token", "")
+            token = raw_token.strip() if isinstance(raw_token, str) else ""
+            if not token or len(token) > 256:
                 self._send_json(400, {"error": "Token is required"})
                 return
 
@@ -365,7 +433,7 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
                     "username": val["login"],
                     "name": val.get("name") or val["login"],
                     "avatar_url": val.get("avatar_url", ""),
-                    "masked_token": f"ghp_{token[:4]}...{token[-4:]}" if len(token) > 8 else "***"
+                    "masked_token": "****" + (token[-4:] if len(token) > 8 else ""),
                 }
             })
             return
@@ -382,25 +450,56 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
         # C. Token Verification (/api/github/verify-token)
         # ----------------------------------------------------------------------
         if path == "/api/github/verify-token":
-            token = data.get("token", "").strip()
+            raw = data.get("token", "")
+            token = raw.strip() if isinstance(raw, str) else ""
+            if token and len(token) > 256:
+                self._send_json(400, {"error": "Token too long"})
+                return
             if not token:
-                auth = db.get_github_auth()
-                token = auth.get("token") if auth else os.getenv("GITHUB_TOKEN", "")
-            res = GitHubPRTool.verify_token(token)
-            self._send_json(200 if res.get("valid") else 400, res)
+                # Never echo the stored/server token back; require explicit token.
+                self._send_json(400, {"error": "Token is required"})
+                return
+            try:
+                res = GitHubPRTool.verify_token(token)
+            except Exception:
+                res = {"valid": False, "error": "Verification failed"}
+            if res.get("valid"):
+                safe = {"valid": True, "login": res.get("login")}
+                self._send_json(200, safe)
+            else:
+                self._send_json(400, {"valid": False, "error": "Invalid token"})
             return
 
         # ----------------------------------------------------------------------
         # D. Start Repair Job (/api/runs)
         # ----------------------------------------------------------------------
         if path == "/api/runs":
-            benchmark_id = data.get("benchmark_id")
-            issue_url = data.get("issue_url")
-            repo_owner = data.get("repo_owner", "Quantum-Ark")
-            repo_name = data.get("repo_name", "patchai")
-            target_branch = data.get("target_branch", "main")
+            def _str_field(name: str, default: str = "", max_len: int = 200) -> str:
+                v = data.get(name, default)
+                if v is None:
+                    return default
+                if not isinstance(v, str):
+                    return default
+                v = v.strip()
+                return v[:max_len] if len(v) > max_len else v
+
+            benchmark_id = _str_field("benchmark_id", "", 64)
+            issue_url = _str_field("issue_url", "", 512)
+            repo_owner = _str_field("repo_owner", "Quantum-Ark", 100)
+            repo_name = _str_field("repo_name", "patchai", 100)
+            target_branch = _str_field("target_branch", "main", 128)
             reproduction_command = data.get("reproduction_command")
             regression_command = data.get("regression_command")
+            if reproduction_command is not None and (
+                not isinstance(reproduction_command, str) or len(reproduction_command) > 500
+            ):
+                self._send_json(400, {"error": "Invalid reproduction_command"})
+                return
+            if regression_command is not None and (
+                not isinstance(regression_command, str) or len(regression_command) > 500
+            ):
+                self._send_json(400, {"error": "Invalid regression_command"})
+                return
 
             auth = db.get_github_auth()
             github_token = auth.get("token") if auth else os.getenv("GITHUB_TOKEN")
@@ -410,11 +509,18 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
                 try:
                     owner, repo, number = GitHubIssueTool.parse_issue_url(issue_url)
                     repo_owner, repo_name = owner, repo
-                    issue = GitHubIssueTool.load_from_url(issue_url, token=github_token)
+                    # SSRF guard: only the caller's explicit token is used for
+                    # anonymous issue fetch; the server token is NOT forwarded.
+                    caller_token = data.get("token") if isinstance(data.get("token"), str) else ""
+                    caller_token = caller_token.strip()
+                    issue = GitHubIssueTool.load_from_url(issue_url, token=caller_token or None)
                 except Exception as e:
-                    self._send_json(400, {"error": f"Failed to fetch GitHub issue from URL: {e}"})
+                    self._send_json(400, {"error": "Failed to fetch GitHub issue from URL"})
                     return
             elif benchmark_id:
+                if benchmark_id not in ("case_1", "case_2", "case_3"):
+                    self._send_json(400, {"error": "Unknown benchmark_id"})
+                    return
                 case_titles = {
                     "case_1": "ZeroDivisionError in calculate_ratio when denominator is zero",
                     "case_2": "Off-by-one boundary defect in paginator slice calculation",
@@ -427,27 +533,38 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
                     reproduction_command=reproduction_command or f"pytest tests/test_{benchmark_id}.py"
                 )
             else:
-                issue_title = data.get("issue_title") or data.get("title") or "Autonomous Repair Task"
-                issue_body = data.get("issue_body") or data.get("body") or "Investigate and repair defect"
-                issue_id = data.get("issue_id") or f"issue-{os.urandom(3).hex()}"
+                issue_title = _str_field("issue_title", "", 300) or _str_field("title", "", 300) or "Autonomous Repair Task"
+                issue_body = _str_field("issue_body", "", 20000) or _str_field("body", "", 20000) or "Investigate and repair defect"
+                raw_iid = data.get("issue_id") or f"issue-{os.urandom(3).hex()}"
+                issue_id = str(raw_iid)[:64]
                 issue = Issue(
-                    id=str(issue_id),
+                    id=issue_id,
                     title=issue_title,
                     body=issue_body,
                     reproduction_command=reproduction_command
                 )
 
-            # Start asynchronous background repair
-            run_record = runner.start_repair(
-                issue=issue,
-                repo_owner=repo_owner,
-                repo_name=repo_name,
-                target_branch=target_branch,
-                reproduction_command=reproduction_command,
-                regression_command=regression_command,
-                benchmark_id=benchmark_id,
-                github_token=github_token
-            )
+            # Start asynchronous background repair (bounded queue)
+            try:
+                run_record = runner.start_repair(
+                    issue=issue,
+                    repo_owner=repo_owner,
+                    repo_name=repo_name,
+                    target_branch=target_branch,
+                    reproduction_command=reproduction_command,
+                    regression_command=regression_command,
+                    benchmark_id=benchmark_id or None,
+                    github_token=github_token
+                )
+            except ValueError as e:
+                self._send_json(400, {"error": str(e)})
+                return
+            except RuntimeError as e:
+                self._send_json(429, {"error": str(e)})
+                return
+            except Exception:
+                self._send_json(500, {"error": "Failed to start repair"})
+                return
 
             self._send_json(201, {
                 "success": True,
@@ -460,10 +577,17 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
         # E. Create Pull Request from Run (/api/runs/<run_id>/pr)
         # ----------------------------------------------------------------------
         if path.startswith("/api/runs/") and path.endswith("/pr"):
-            run_id = path.split("/")[3]
+            parts = path.split("/")
+            if len(parts) != 5 or not parts[3]:
+                self._send_json(404, {"error": "Not found"})
+                return
+            run_id = parts[3]
+            if len(run_id) > 64:
+                self._send_json(400, {"error": "Invalid run id"})
+                return
             run = db.get_run(run_id)
             if not run:
-                self._send_json(404, {"error": f"Run not found: {run_id}"})
+                self._send_json(404, {"error": "Run not found"})
                 return
 
             # Safety Gate Verification Check
@@ -487,6 +611,16 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
 
             custom_title = data.get("title")
             custom_body = data.get("body")
+            if custom_title is not None and (
+                not isinstance(custom_title, str) or not custom_title.strip() or len(custom_title) > 300
+            ):
+                self._send_json(400, {"error": "Invalid title"})
+                return
+            if custom_body is not None and (
+                not isinstance(custom_body, str) or len(custom_body) > 20000
+            ):
+                self._send_json(400, {"error": "Invalid body"})
+                return
 
             pr_title = custom_title or f"fix({run.get('issue_id')}): {run.get('issue_title')}"
             if not is_verified:
@@ -508,6 +642,9 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
 
             auth = db.get_github_auth()
             token = auth.get("token") if auth else os.getenv("GITHUB_TOKEN")
+            if not token:
+                self._send_json(400, {"error": "GitHub not connected: connect a token first"})
+                return
             repo_root = Path(__file__).resolve().parent.parent.parent
 
             # 1. Push branch to GitHub
@@ -573,23 +710,41 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
         # F. Direct PR Creation (/api/github/create-pr)
         # ----------------------------------------------------------------------
         if path == "/api/github/create-pr":
-            repo_owner = data.get("owner", "Quantum-Ark")
-            repo_name = data.get("repo", "patchai")
-            title = data.get("title", "fix: Autonomous patch by PatchPilot AI")
-            body = data.get("body", "Autonomous PR generated by PatchPilot AI")
-            branch = data.get("branch", f"patchpilot/fix-{os.urandom(3).hex()}")
-            base_branch = data.get("base_branch", "main")
-            token = data.get("token", "").strip() or os.getenv("GITHUB_TOKEN")
+            def _opt(name: str, default: str, max_len: int) -> str:
+                v = data.get(name, default)
+                if not isinstance(v, str) or not v.strip():
+                    return default
+                v = v.strip()
+                return v[:max_len] if len(v) > max_len else v
 
-            pr_result = GitHubPRTool.create_pull_request(
-                repo_owner=repo_owner,
-                repo_name=repo_name,
-                title=title,
-                body=body,
-                head_branch=branch,
-                base_branch=base_branch,
-                token=token
-            )
+            repo_owner = _opt("owner", "Quantum-Ark", 100)
+            repo_name = _opt("repo", "patchai", 100)
+            title = _opt("title", "fix: Autonomous patch by PatchPilot AI", 300)
+            body = _opt("body", "Autonomous PR generated by PatchPilot AI", 20000)
+            branch = _opt("branch", f"patchpilot/fix-{os.urandom(3).hex()}", 128)
+            base_branch = _opt("base_branch", "main", 128)
+            auth = db.get_github_auth()
+            token = auth.get("token") if auth else os.getenv("GITHUB_TOKEN", "")
+            if not token:
+                self._send_json(400, {"error": "GitHub not connected: connect a token first"})
+                return
+
+            try:
+                pr_result = GitHubPRTool.create_pull_request(
+                    repo_owner=repo_owner,
+                    repo_name=repo_name,
+                    title=title,
+                    body=body,
+                    head_branch=branch,
+                    base_branch=base_branch,
+                    token=token
+                )
+            except ValueError as e:
+                self._send_json(400, {"error": str(e)})
+                return
+            except Exception:
+                self._send_json(502, {"error": "PR creation failed"})
+                return
             self._send_json(200, pr_result)
             return
 
@@ -597,16 +752,21 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
         # G. GitHub Issue Fetch (/api/github/fetch-issue)
         # ----------------------------------------------------------------------
         if path == "/api/github/fetch-issue":
-            issue_url = data.get("url", "").strip()
-            auth = db.get_github_auth()
-            token = data.get("token", "").strip() or (auth.get("token") if auth else os.getenv("GITHUB_TOKEN"))
-            if not issue_url:
+            raw_url = data.get("url", "")
+            issue_url = raw_url.strip() if isinstance(raw_url, str) else ""
+            if not issue_url or len(issue_url) > 512:
                 self._send_json(400, {"error": "Missing issue url parameter"})
+                return
+            # SSRF guard: never forward the server token; only caller's token.
+            raw_tok = data.get("token", "")
+            token = raw_tok.strip() if isinstance(raw_tok, str) else ""
+            if token and len(token) > 256:
+                self._send_json(400, {"error": "Token too long"})
                 return
 
             try:
                 owner, repo, number = GitHubIssueTool.parse_issue_url(issue_url)
-                issue = GitHubIssueTool.load_from_url(issue_url, token=token)
+                issue = GitHubIssueTool.load_from_url(issue_url, token=token or None)
                 self._send_json(200, {
                     "owner": owner,
                     "repo": repo,
@@ -618,9 +778,9 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
                     "file_hints": issue.file_hints,
                     "repo_url": issue.repo_url,
                 })
-            except Exception as e:
-                logger.error(f"Failed to fetch GitHub issue: {e}")
-                self._send_json(400, {"error": str(e)})
+            except Exception:
+                logger.error("Failed to fetch GitHub issue")
+                self._send_json(400, {"error": "Failed to fetch GitHub issue"})
             return
 
         self.send_response(404)
@@ -629,7 +789,10 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
     def do_OPTIONS(self):
         """Handle CORS pre-flight requests."""
         self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
+        cors = self._cors_origin()
+        if cors:
+            self.send_header("Access-Control-Allow-Origin", cors)
+            self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE")
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
@@ -640,6 +803,25 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
 
 def run_server(host: str = "0.0.0.0", port: int = 8080):
     """Start the production server."""
+    from patchpilot.config import ensure_api_token
+    token = ensure_api_token(config)
+    if not os.getenv("PATCHPILOT_API_TOKEN"):
+        logger.warning(
+            "PATCHPILOT_API_TOKEN not set — generated ephemeral API token "
+            f"(sha256 {token[:8]}...). Mutating API routes require "
+            "Authorization: Bearer <token>. Set PATCHPILOT_API_TOKEN for persistence."
+        )
+    if not os.getenv("PATCHPILOT_TOKEN_KEY"):
+        logger.warning(
+            "PATCHPILOT_TOKEN_KEY not set — GitHub tokens stored plaintext. "
+            "Set PATCHPILOT_TOKEN_KEY to a Fernet key to encrypt at rest."
+        )
+    # Apply configured repair concurrency cap.
+    try:
+        runner._max_concurrent = config.max_concurrent_repairs
+        runner._sema = __import__("threading").Semaphore(config.max_concurrent_repairs)
+    except Exception:
+        pass
     repo_root = Path(__file__).resolve().parent.parent.parent
     web_dir = repo_root / "web"
     if not web_dir.exists():

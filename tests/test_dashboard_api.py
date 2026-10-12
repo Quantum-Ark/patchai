@@ -54,7 +54,8 @@ def test_github_auth_lifecycle(temp_db):
     assert auth is not None
     assert auth["username"] == "octocat"
     assert auth["name"] == "The Octocat"
-    assert "ghp_1234" in auth["masked_token"]
+    assert "ghp_1234" not in auth["masked_token"]
+    assert auth["masked_token"] == "****1234"
     assert auth["token"] == "ghp_1234567890abcdef1234567890abcdef1234"
 
     temp_db.delete_github_auth()

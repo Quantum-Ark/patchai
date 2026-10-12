@@ -27,9 +27,11 @@ logger = logging.getLogger("patchpilot.runner")
 
 
 class RepairRunner:
-    def __init__(self):
+    def __init__(self, max_concurrent: int = 2):
         self._active_threads: Dict[str, threading.Thread] = {}
         self._lock = threading.Lock()
+        self._sema = threading.Semaphore(max_concurrent)
+        self._max_concurrent = max_concurrent
 
     def is_running(self, run_id: str) -> bool:
         with self._lock:
@@ -62,6 +64,12 @@ class RepairRunner:
         Returns the initial run descriptor.
         """
         run_id = f"run-{uuid.uuid4().hex[:8]}"
+
+        # API4:2023 — bound concurrent repairs; reject when saturated.
+        if not self._sema.acquire(blocking=False):
+            raise RuntimeError(
+                f"Repair queue full ({self._max_concurrent} active). Try again later."
+            )
 
         # Insert run record in database
         run_record = db.create_run(
@@ -320,6 +328,10 @@ class RepairRunner:
             with self._lock:
                 if run_id in self._active_threads:
                     del self._active_threads[run_id]
+            try:
+                self._sema.release()
+            except ValueError:
+                pass
 
             if temp_dir and Path(temp_dir).exists():
                 try:

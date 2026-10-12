@@ -586,11 +586,32 @@ function initGitHubCockpit() {
     });
   }
 
+  // API bearer token (required for all mutating POST routes server-side).
+  // Operator pastes the PATCHPILOT_API_TOKEN value once; stored locally only.
+  function apiToken() {
+    return (localStorage.getItem('patchpilot_api_token') || '').trim();
+  }
+  function authHeaders(extra) {
+    const h = Object.assign({ 'Content-Type': 'application/json' }, extra || {});
+    const t = apiToken();
+    if (t) h['Authorization'] = 'Bearer ' + t;
+    return h;
+  }
+  function requireApiToken() {
+    if (!apiToken()) {
+      const v = prompt('Enter API token (PATCHPILOT_API_TOKEN from server logs):');
+      if (v && v.trim()) localStorage.setItem('patchpilot_api_token', v.trim());
+      return !!(v && v.trim());
+    }
+    return true;
+  }
+
   async function verifyAndSetUser(token) {
     try {
+      if (!requireApiToken()) { userLabel.textContent = 'API token required'; return; }
       const res = await fetch('/api/github/verify-token', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: jsonSafe({ token })
       });
       const data = await res.json();
@@ -693,7 +714,7 @@ function initGitHubCockpit() {
 
         const res = await fetch('/api/repair', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: jsonSafe(payload)
         });
 
@@ -769,7 +790,7 @@ function initGitHubCockpit() {
         try {
           const res = await fetch('/api/github/create-pr', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders(),
             body: jsonSafe({
               title: prInfo.title,
               body: prInfo.body,
@@ -1193,7 +1214,7 @@ function initDeveloperDashboard() {
       try {
         const res = await fetch('/api/github/connect', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({ token: val })
         });
         const data = await res.json();
@@ -1219,7 +1240,7 @@ function initDeveloperDashboard() {
   async function disconnectAccount() {
     if (!confirm('Are you sure you want to disconnect your GitHub credentials?')) return;
     try {
-      await fetch('/api/github/disconnect', { method: 'POST' });
+      await fetch('/api/github/disconnect', { method: 'POST', headers: authHeaders() });
       await checkAuth();
       await loadRepositories();
       await loadDashboardStats();
@@ -1370,7 +1391,7 @@ function initDeveloperDashboard() {
 
       if (wizardRepoSelect) {
         wizardRepoSelect.innerHTML = repos.map(r => `
-          <option value="${r.full_name}">${r.full_name} (${r.default_branch})</option>
+          <option value="${escapeHtml(r.full_name)}">${escapeHtml(r.full_name)} (${escapeHtml(r.default_branch)})</option>
         `).join('');
       }
 
@@ -1386,16 +1407,16 @@ function initDeveloperDashboard() {
       }
 
       reposGrid.innerHTML = repos.map(r => `
-        <div class="repo-card" data-repo-owner="${r.owner}" data-repo-name="${r.name}">
+        <div class="repo-card" data-repo-owner="${escapeHtml(r.owner)}" data-repo-name="${escapeHtml(r.name)}">
           <div class="repo-card-header">
-            <span class="repo-card-name">${r.full_name}</span>
+            <span class="repo-card-name">${escapeHtml(r.full_name)}</span>
             <span class="status-badge ${r.private ? 'status-failed' : 'status-idle'}">
               ${r.private ? 'Private' : 'Public'}
             </span>
           </div>
-          <p class="repo-card-desc">${r.description || 'No description provided.'}</p>
+          <p class="repo-card-desc">${escapeHtml(r.description) || 'No description provided.'}</p>
           <div class="repo-card-meta">
-            <span>🌿 ${r.default_branch}</span>
+            <span>🌿 ${escapeHtml(r.default_branch)}</span>
             <span>⚠️ ${r.open_issues_count || 0} Issues</span>
             <button type="button" class="btn-link-sm btn-browse-issues" style="margin-left:auto;">Browse Issues ↗</button>
           </div>
@@ -1569,7 +1590,7 @@ function initDeveloperDashboard() {
       try {
         const res = await fetch('/api/github/fetch-issue', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify({ url: urlVal })
         });
         const data = await res.json();
@@ -1624,7 +1645,7 @@ function initDeveloperDashboard() {
       try {
         const res = await fetch('/api/runs', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify(payload)
         });
         const data = await res.json();
@@ -1906,7 +1927,7 @@ function initDeveloperDashboard() {
 
         const res = await fetch(`/api/runs/${currentRunData.run_id}/pr`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders(),
           body: JSON.stringify(payload)
         });
         const data = await res.json();

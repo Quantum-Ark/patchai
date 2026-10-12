@@ -41,7 +41,7 @@ def test_orchestrator_recovers_from_regression_in_temp_repo(tmp_path: Path):
         title="ValueError on negative discount percentage",
         body="Negative discount_pct should raise ValueError.",
         file_hints=["src/discount.py"],
-        reproduction_command=f'"{sys.executable}" -m pytest tests/test_discount.py -v',
+        reproduction_command="pytest tests/test_discount.py -v",
     )
 
     # Attempt 1: broken patch that raises RuntimeError

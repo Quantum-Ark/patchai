@@ -216,26 +216,31 @@ class PatchPilotDB:
     # GitHub Authentication Operations
     # --------------------------------------------------------------------------
     def save_github_auth(self, username: str, name: str, avatar_url: str, token: str, scopes: str = "repo"):
+        stored, encrypted = _encrypt_token(token)
         with self._connect() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT OR REPLACE INTO github_auth (id, username, name, avatar_url, token, scopes, connected_at)
-                VALUES (1, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-            """, (username, name, avatar_url, token, scopes))
+                INSERT OR REPLACE INTO github_auth (id, username, name, avatar_url, token, token_encrypted, scopes, connected_at)
+                VALUES (1, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            """, (username, name, avatar_url, stored, 1 if encrypted else 0, scopes))
             conn.commit()
 
     def get_github_auth(self) -> Optional[Dict[str, Any]]:
         with self._connect() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT username, name, avatar_url, token, scopes, connected_at FROM github_auth WHERE id = 1")
+            cursor.execute("SELECT username, name, avatar_url, token, token_encrypted, scopes, connected_at FROM github_auth WHERE id = 1")
             row = cursor.fetchone()
             if row:
+                keys = row.keys()
+                raw = row["token"] or ""
+                enc = bool(row["token_encrypted"]) if "token_encrypted" in keys else False
+                token = _decrypt_token(raw, enc)
                 return {
                     "username": row["username"],
                     "name": row["name"] or row["username"],
                     "avatar_url": row["avatar_url"],
-                    "token": row["token"],
-                    "masked_token": f"{row['token'][:8]}...{row['token'][-4:]}" if len(row['token']) > 12 else "***",
+                    "token": token,
+                    "masked_token": f"****{token[-4:]}" if len(token) > 8 else "***",
                     "scopes": row["scopes"],
                     "connected_at": row["connected_at"]
                 }
