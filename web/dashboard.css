@@ -125,37 +125,29 @@ body.dash-body {
 }
 
 .brand-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   text-decoration: none;
-  color: #FFFFFF;
+  transition: opacity 0.15s ease;
 }
 
-.brand-logo-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: #F04438;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(240, 68, 56, 0.4);
-  transition: transform 0.15s ease;
+.brand-link:hover {
+  opacity: 0.9;
 }
 
-.brand-link:hover .brand-logo-icon {
-  transform: scale(1.04);
-}
-
-.brand-title {
+.brand-text {
   font-family: var(--font-sans);
-  font-size: 17px;
+  font-size: 21px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   color: #FFFFFF;
   line-height: 1;
+}
+
+.brand-text .text-accent {
+  color: var(--accent-primary); /* #F04438 Signal Red */
+  font-weight: 700;
 }
 
 .brand-badge-pill {
@@ -164,11 +156,11 @@ body.dash-body {
   font-weight: 700;
   background: rgba(255, 255, 255, 0.12);
   color: #FFFFFF;
-  padding: 3px 7px;
+  padding: 2px 7px;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   letter-spacing: 0.04em;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 /* Sidebar Navigation */
