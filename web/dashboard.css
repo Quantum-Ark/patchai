@@ -129,38 +129,46 @@ body.dash-body {
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  color: var(--text-inverse);
+  color: #FFFFFF;
 }
 
 .brand-logo-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
-  background: var(--accent-primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #F04438;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FFFFFF;
-  box-shadow: 0 2px 6px rgba(240, 68, 56, 0.35);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(240, 68, 56, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.brand-link:hover .brand-logo-icon {
+  transform: scale(1.04);
 }
 
 .brand-title {
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--text-inverse);
+  color: #FFFFFF;
+  line-height: 1;
 }
 
 .brand-badge-pill {
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  background: rgba(244, 241, 233, 0.12);
-  color: var(--surface-base);
-  padding: 2px 6px;
-  border-radius: 4px;
-  border: 1px solid rgba(244, 241, 233, 0.1);
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  padding: 3px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
 /* Sidebar Navigation */
