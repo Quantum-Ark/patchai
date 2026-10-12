@@ -53,6 +53,23 @@
       });
     });
 
+    // Mobile Drawer Setup
+    const sidebar = document.getElementById('dash-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const toggleBtn = document.getElementById('btn-mobile-sidebar-toggle');
+
+    if (toggleBtn && sidebar && backdrop) {
+      toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('active');
+      });
+
+      backdrop.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('active');
+      });
+    }
+
     // Quick Action Buttons
     document.getElementById('btn-quick-new-repair')?.addEventListener('click', () => switchView('new-repair'));
     document.getElementById('btn-quick-connect-repo')?.addEventListener('click', () => switchView('settings'));
@@ -72,6 +89,12 @@
   function switchView(viewName) {
     currentView = viewName;
     window.location.hash = viewName;
+
+    // Auto-close mobile drawer
+    const sidebar = document.getElementById('dash-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (sidebar) sidebar.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('active');
 
     navItems.forEach(item => {
       if (item.getAttribute('data-view') === viewName) {
