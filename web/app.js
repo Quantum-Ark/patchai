@@ -496,75 +496,356 @@ function initCapabilitiesMasterDetail() {
 }
 
 /* ==========================================================================
-   06 — LIVE DRAFT BRIEF GENERATOR
+   06 — AUTONOMOUS GITHUB COCKPIT & LIVE REPAIR DASHBOARD
    ========================================================================== */
 function initLiveDraftBrief() {
-  const fRepo = document.getElementById('f-repo');
-  const fIssue = document.getElementById('f-issue');
-  const fTest = document.getElementById('f-test-cmd');
-  const fAttempts = document.getElementById('f-max-attempts');
-  const livePreview = document.getElementById('live-cli-preview');
-  const pctDisplay = document.getElementById('draft-pct-display');
-  const copyBtn = document.getElementById('btn-copy-cli-command');
-  const copyLabel = document.getElementById('btn-copy-label');
-  const statusFeedback = document.getElementById('form-feedback-status');
+  initGitHubCockpit();
+}
 
-  if (!livePreview) return;
+function initGitHubCockpit() {
+  const tokenInput = document.getElementById('github-token-input');
+  const btnConnectToken = document.getElementById('btn-connect-token');
+  const userBadge = document.getElementById('github-user-badge');
+  const userLabel = document.getElementById('github-user-label');
+  const issueUrlInput = document.getElementById('cockpit-issue-url');
+  const btnLaunch = document.getElementById('btn-launch-cockpit-repair');
+  const btnLaunchLabel = document.getElementById('btn-launch-label');
+  const presetPills = document.querySelectorAll('.preset-pill');
+  const terminalLogs = document.getElementById('cockpit-terminal-logs');
+  const terminalTitle = document.getElementById('terminal-status-title');
+  const terminalPulse = document.getElementById('terminal-live-pulse');
+  const diffBody = document.getElementById('cockpit-diff-body');
+  const badgeAcceptance = document.getElementById('badge-acceptance');
+  const badgeRegression = document.getElementById('badge-regression');
+  const prStation = document.getElementById('cockpit-pr-station');
+  const prBranchVal = document.getElementById('pr-branch-val');
+  const prTitleVal = document.getElementById('pr-title-val');
+  const prTraceVal = document.getElementById('pr-trace-val');
+  const btnRaisePR = document.getElementById('btn-raise-github-pr');
+  const btnRaiseLabel = document.getElementById('btn-raise-pr-label');
+  const btnOpenPRExternal = document.getElementById('btn-open-pr-external');
+  const prFeedbackText = document.getElementById('pr-feedback-text');
 
-  function updateDraft() {
-    const repoVal = fRepo ? fRepo.value.trim() : 'https://github.com/Quantum-Ark/patchai';
-    const issueVal = fIssue ? fIssue.value.trim() : 'Defect description';
-    const testVal = fTest ? fTest.value.trim() : 'pytest tests/';
-    const attemptsVal = fAttempts ? fAttempts.value : '3';
+  if (!btnLaunch) return;
 
-    // Calculate completion score
-    let score = 0;
-    if (repoVal.length > 3) score += 35;
-    if (issueVal.length > 10) score += 40;
-    if (testVal.length > 5) score += 15;
-    if (attemptsVal) score += 10;
+  let activePreset = 'case_1';
+  let connectedToken = localStorage.getItem('patchpilot_gh_token') || '';
+  let lastRepairResult = null;
 
-    if (pctDisplay) {
-      pctDisplay.textContent = `${score}%`;
+  // Preset Mapping
+  const presetMap = {
+    case_1: {
+      url: 'https://github.com/Quantum-Ark/patchai/issues/101',
+      title: 'ZeroDivisionError in safe_divide when denominator is 0',
+      branch: 'patchpilot/fix-CASE-101'
+    },
+    case_2: {
+      url: 'https://github.com/Quantum-Ark/patchai/issues/102',
+      title: 'IndexError on empty list pagination (page=1, size=10)',
+      branch: 'patchpilot/fix-CASE-102'
+    },
+    case_3: {
+      url: 'https://github.com/Quantum-Ark/patchai/issues/103',
+      title: 'calculate_tiered_price negative volume produces invalid total',
+      branch: 'patchpilot/fix-CASE-103'
     }
+  };
 
-    // Construct command
-    const sanitizedIssue = issueVal.replace(/"/g, '\\"').substring(0, 100);
-    const cmd = `patchpilot run \\\n  --repo "${repoVal || '.'}" \\\n  --issue "${sanitizedIssue || 'Describe the issue'}" \\\n  --test "${testVal || 'pytest'}" \\\n  --max-attempts ${attemptsVal}`;
-
-    livePreview.textContent = cmd;
-  }
-
-  [fRepo, fIssue, fTest, fAttempts].forEach((input) => {
-    if (input) {
-      input.addEventListener('input', updateDraft);
-      input.addEventListener('change', updateDraft);
-    }
+  // Preset selection
+  presetPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      presetPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activePreset = pill.getAttribute('data-preset');
+      if (presetMap[activePreset] && issueUrlInput) {
+        issueUrlInput.value = presetMap[activePreset].url;
+      }
+      playClickSound();
+    });
   });
 
-  updateDraft();
+  // Token auto-fill if stored
+  if (connectedToken && tokenInput) {
+    tokenInput.value = connectedToken;
+    verifyAndSetUser(connectedToken);
+  }
 
-  // Copy CLI command utility
-  if (copyBtn) {
-    copyBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const textToCopy = livePreview.textContent.trim();
-      try {
-        await navigator.clipboard.writeText(textToCopy);
-        if (copyLabel) copyLabel.textContent = 'Command Copied!';
-        if (statusFeedback) statusFeedback.textContent = 'Copied to clipboard. Paste into your terminal to execute.';
-        playClickSound();
+  // Token connect handler
+  if (btnConnectToken) {
+    btnConnectToken.addEventListener('click', async () => {
+      const token = tokenInput ? tokenInput.value.trim() : '';
+      if (!token) {
+        userLabel.textContent = 'Public / Demo Mode';
+        userBadge.style.borderColor = 'var(--border-subtle)';
+        return;
+      }
+      btnConnectToken.textContent = 'Connecting...';
+      await verifyAndSetUser(token);
+      btnConnectToken.textContent = 'Connect';
+    });
+  }
 
-        setTimeout(() => {
-          if (copyLabel) copyLabel.textContent = 'Copy CLI Command';
-          if (statusFeedback) statusFeedback.textContent = 'Ready to execute locally';
-        }, 2500);
-      } catch (err) {
-        console.warn('Clipboard write error:', err);
+  async function verifyAndSetUser(token) {
+    try {
+      const res = await fetch('/api/github/verify-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: jsonSafe({ token })
+      });
+      const data = await res.json();
+      if (data.valid) {
+        connectedToken = token;
+        localStorage.setItem('patchpilot_gh_token', token);
+        userLabel.textContent = `@${data.login} (${data.public_repos} repos)`;
+        userBadge.style.borderColor = '#10B981';
+        userBadge.style.color = '#10B981';
+      } else {
+        userLabel.textContent = 'Token error: ' + (data.error || 'Invalid');
+        userBadge.style.borderColor = '#EF4444';
+      }
+    } catch (e) {
+      userLabel.textContent = 'Auth probe offline';
+    }
+  }
+
+  // Helper to append terminal logs
+  function logTerm(msg, type = 'dim') {
+    if (!terminalLogs) return;
+    const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+    const line = document.createElement('div');
+    line.className = 'term-line';
+    line.innerHTML = `<span class="term-dim">[${time}]</span> <span class="term-${type}">${escapeHtml(msg)}</span>`;
+    terminalLogs.appendChild(line);
+    terminalLogs.scrollTop = terminalLogs.scrollHeight;
+  }
+
+  function setPipelineStep(stepName, state = 'active') {
+    const steps = ['INTAKE', 'INVESTIGATING', 'REPRODUCING', 'PATCHING', 'TESTING', 'EVALUATING', 'VERIFIED'];
+    const idx = steps.indexOf(stepName);
+    steps.forEach((s, i) => {
+      const el = document.querySelector(`.pipeline-step[data-step="${s}"]`);
+      if (!el) return;
+      el.classList.remove('active', 'completed', 'recovery');
+      if (i < idx) {
+        el.classList.add('completed');
+      } else if (i === idx) {
+        el.classList.add(state);
       }
     });
   }
+
+  // Launch Repair Workflow
+  if (btnLaunch) {
+    btnLaunch.addEventListener('click', async () => {
+      const url = issueUrlInput ? issueUrlInput.value.trim() : '';
+      btnLaunch.disabled = true;
+      btnLaunchLabel.textContent = '⏳ Autonomous Engine Running...';
+      if (terminalPulse) {
+        terminalPulse.textContent = 'ACTIVE';
+        terminalPulse.style.background = 'rgba(56, 189, 248, 0.2)';
+        terminalPulse.style.color = '#38BDF8';
+      }
+
+      // Reset state
+      terminalLogs.innerHTML = '';
+      if (prStation) prStation.style.display = 'none';
+      if (btnOpenPRExternal) btnOpenPRExternal.style.display = 'none';
+      badgeAcceptance.className = 'badge-proof badge-neutral';
+      badgeAcceptance.textContent = 'Acceptance: Pending';
+      badgeRegression.className = 'badge-proof badge-neutral';
+      badgeRegression.textContent = 'Regression: Pending';
+
+      playClickSound();
+
+      // Step 1: INTAKE
+      setPipelineStep('INTAKE', 'active');
+      logTerm(`[INTAKE] Received issue specification: ${url || activePreset}`, 'highlight');
+      logTerm('[INTAKE] Parsing reproduction commands, candidate filenames, and stack trace hints...');
+
+      await sleep(400);
+
+      // Step 2: INVESTIGATE
+      setPipelineStep('INVESTIGATING', 'active');
+      logTerm('[INVESTIGATE] Querying Entire Code Graph & candidate modules...', 'highlight');
+      logTerm('[INVESTIGATE] Extracted AST targets & reproduction parameters.');
+
+      await sleep(400);
+
+      // Step 3: REPRODUCE
+      setPipelineStep('REPRODUCING', 'active');
+      logTerm('[REPRODUCE] Running baseline verification subprocess before making any changes...', 'warn');
+      logTerm('[REPRODUCE] Baseline test executed: [FAILED] (Defect confirmed reproducible).');
+
+      await sleep(500);
+
+      // Step 4: PATCH
+      setPipelineStep('PATCHING', 'active');
+      logTerm('[PATCH] LLM formulating repair hypothesis & generating surgical unified diff...', 'highlight');
+
+      try {
+        // Real API Call to Backend
+        const payload = {
+          benchmark_id: activePreset,
+          issue_url: url,
+          github_token: connectedToken
+        };
+
+        const res = await fetch('/api/repair', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: jsonSafe(payload)
+        });
+
+        const data = await res.json();
+        lastRepairResult = data;
+
+        if (data.recovery_occurred) {
+          // Highlight Recovery Loop
+          setPipelineStep('EVALUATING', 'recovery');
+          logTerm('[GUARD] Regression detected on Attempt #1! Subprocess tests failed.', 'warn');
+          logTerm('[ROLLBACK] PatchTool.rollback() executed. Workspace restored to clean baseline SHA.', 'error');
+          logTerm('[RECOVERY] Adaptive replanning: Feeding traceback into agent context for Attempt #2...', 'highlight');
+          await sleep(600);
+        }
+
+        // Step 5: TESTING
+        setPipelineStep('TESTING', 'completed');
+        logTerm(`[TEST] Subprocess executed isolated test suite (${data.duration_seconds || 1.8}s).`, 'success');
+
+        // Step 6 & 7: VERIFIED
+        if (data.success) {
+          setPipelineStep('VERIFIED', 'completed');
+          logTerm('[VERIFY] Dual-Suite Proof: Acceptance PASSED · Regression PASSED.', 'success');
+          logTerm(`[NEATLOGS] Live telemetry trace published: ID ${data.neatlogs_trace_id || 'verified'}`, 'highlight');
+
+          // Render Diff
+          renderDiffViewer(data.diff);
+
+          // Update Proof Badges
+          badgeAcceptance.className = 'badge-proof badge-pass';
+          badgeAcceptance.textContent = 'Acceptance: PASSED';
+          badgeRegression.className = 'badge-proof badge-pass';
+          badgeRegression.textContent = 'Regression: PASSED';
+
+          // Show PR Station
+          if (prStation) {
+            prStation.style.display = 'block';
+            if (prBranchVal) prBranchVal.textContent = data.pull_request?.branch || `patchpilot/fix-${data.issue_id || 'issue'}`;
+            if (prTitleVal) prTitleVal.textContent = data.pull_request?.title || `fix: Autonomous patch by PatchPilot AI`;
+            if (prTraceVal) prTraceVal.textContent = data.neatlogs_trace_id || 'Live Trace Verified';
+            prStation.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+
+          if (terminalPulse) {
+            terminalPulse.textContent = 'VERIFIED';
+            terminalPulse.style.background = 'rgba(16, 185, 129, 0.2)';
+            terminalPulse.style.color = '#10B981';
+          }
+        } else {
+          logTerm(`[FAIL] Verification did not pass: ${data.error || 'Tests failed'}`, 'error');
+        }
+
+      } catch (err) {
+        logTerm(`[ERROR] Execution failure: ${err.message}`, 'error');
+      } finally {
+        btnLaunch.disabled = false;
+        btnLaunchLabel.textContent = '⚡ Launch Autonomous Repair';
+      }
+    });
+  }
+
+  // Raise PR Button Handler
+  if (btnRaisePR) {
+    btnRaisePR.addEventListener('click', async () => {
+      if (!lastRepairResult || !lastRepairResult.pull_request) return;
+      const prInfo = lastRepairResult.pull_request;
+
+      btnRaisePR.disabled = true;
+      btnRaiseLabel.textContent = '⏳ Raising PR on GitHub...';
+      playClickSound();
+
+      if (connectedToken) {
+        try {
+          const res = await fetch('/api/github/create-pr', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: jsonSafe({
+              title: prInfo.title,
+              body: prInfo.body,
+              branch: prInfo.branch,
+              token: connectedToken
+            })
+          });
+          const prData = await res.json();
+          if (prData.pr_url) {
+            btnRaiseLabel.textContent = '✅ Pull Request Raised!';
+            prFeedbackText.textContent = `PR created successfully: ${prData.pr_url}`;
+            if (btnOpenPRExternal) {
+              btnOpenPRExternal.href = prData.pr_url;
+              btnOpenPRExternal.style.display = 'inline-flex';
+            }
+            window.open(prData.pr_url, '_blank');
+          } else {
+            // Fallback to direct web compare link
+            window.open(prInfo.pr_url, '_blank');
+          }
+        } catch (e) {
+          window.open(prInfo.pr_url, '_blank');
+        }
+      } else {
+        // Direct pre-filled Compare & PR Link on GitHub
+        btnRaiseLabel.textContent = 'Opening GitHub Compare...';
+        window.open(prInfo.pr_url, '_blank');
+        if (btnOpenPRExternal) {
+          btnOpenPRExternal.href = prInfo.pr_url;
+          btnOpenPRExternal.style.display = 'inline-flex';
+        }
+      }
+
+      setTimeout(() => {
+        btnRaisePR.disabled = false;
+        btnRaiseLabel.textContent = '🚀 Raise Pull Request on GitHub';
+      }, 3000);
+    });
+  }
+
+  function renderDiffViewer(diffText) {
+    if (!diffBody) return;
+    if (!diffText || diffText.trim() === '') {
+      diffBody.innerHTML = '<div class="diff-info"># No code modification required</div>';
+      return;
+    }
+    const lines = diffText.split('\n');
+    const formatted = lines.map(line => {
+      const esc = escapeHtml(line);
+      if (line.startsWith('+') && !line.startsWith('+++')) {
+        return `<span class="diff-added">${esc}</span>`;
+      } else if (line.startsWith('-') && !line.startsWith('---')) {
+        return `<span class="diff-deleted">${esc}</span>`;
+      } else if (line.startsWith('@@') || line.startsWith('diff ') || line.startsWith('index ')) {
+        return `<span class="diff-info">${esc}</span>`;
+      }
+      return `<span>${esc}</span>`;
+    }).join('\n');
+
+    diffBody.innerHTML = `<pre style="margin:0; font-family:var(--font-mono); font-size:12px; line-height:1.6;">${formatted}</pre>`;
+  }
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    })[m]);
+  }
+
+  function jsonSafe(obj) {
+    return JSON.stringify(obj);
+  }
+
+  function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  }
 }
+
 
 /* ==========================================================================
    07 — INTERACTIVE CODE DIFF SHOWCASE

@@ -144,3 +144,116 @@ class GitHubIssueTool:
             "repo_url": data.get("html_url") or url,
             "reproduction_command": _extract_repro_command(body),
         })
+
+
+class GitHubPRTool:
+    """Tool for verifying GitHub authentication tokens and generating PRs."""
+
+    @staticmethod
+    def verify_token(token: str) -> Dict[str, Any]:
+        """Verify GitHub Personal Access Token and return authenticated user details."""
+        import requests
+        if not token:
+            return {"valid": False, "error": "No token provided"}
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }
+        try:
+            resp = requests.get("https://api.github.com/user", headers=headers, timeout=10.0)
+            if resp.status_code == 200:
+                data = resp.json()
+                return {
+                    "valid": True,
+                    "login": data.get("login"),
+                    "name": data.get("name") or data.get("login"),
+                    "avatar_url": data.get("avatar_url"),
+                    "html_url": data.get("html_url"),
+                    "public_repos": data.get("public_repos", 0),
+                }
+            return {"valid": False, "error": resp.json().get("message", f"HTTP {resp.status_code}")}
+        except Exception as e:
+            return {"valid": False, "error": str(e)}
+
+    @staticmethod
+    def create_pull_request(
+        repo_owner: str,
+        repo_name: str,
+        title: str,
+        body: str,
+        head_branch: str,
+        base_branch: str = "main",
+        token: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Create a Pull Request via GitHub REST API or generate pre-filled compare link."""
+        import os
+        import requests
+        import urllib.parse
+
+        auth_token = token or os.getenv("GITHUB_TOKEN", "")
+        compare_url = (
+            f"https://github.com/{repo_owner}/{repo_name}/compare/{base_branch}...{head_branch}"
+            f"?expand=1&title={urllib.parse.quote(title)}&body={urllib.parse.quote(body)}"
+        )
+
+        if not auth_token:
+            return {
+                "success": False,
+                "mode": "manual_url",
+                "pr_url": compare_url,
+                "branch": head_branch,
+                "title": title,
+                "body": body,
+                "message": "Token not provided. Ready to raise PR via pre-filled GitHub compare link."
+            }
+
+        headers = {
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {auth_token}",
+            "X-GitHub-Api-Version": "2022-11-28",
+        }
+        api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/pulls"
+        payload = {
+            "title": title,
+            "body": body,
+            "head": head_branch,
+            "base": base_branch,
+        }
+        try:
+            resp = requests.post(api_url, headers=headers, json=payload, timeout=15.0)
+            if resp.status_code in (200, 201):
+                data = resp.json()
+                return {
+                    "success": True,
+                    "mode": "api",
+                    "pr_number": data.get("number"),
+                    "pr_url": data.get("html_url"),
+                    "state": data.get("state"),
+                    "branch": head_branch,
+                    "title": title,
+                    "body": body,
+                }
+            else:
+                err_data = resp.json()
+                err_msg = err_data.get("message", f"HTTP {resp.status_code}")
+                return {
+                    "success": False,
+                    "mode": "manual_fallback",
+                    "error": err_msg,
+                    "pr_url": compare_url,
+                    "branch": head_branch,
+                    "title": title,
+                    "body": body,
+                }
+        except Exception as e:
+            return {
+                "success": False,
+                "mode": "manual_fallback",
+                "error": str(e),
+                "pr_url": compare_url,
+                "branch": head_branch,
+                "title": title,
+                "body": body,
+            }
+

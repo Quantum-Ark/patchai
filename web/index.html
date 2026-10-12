@@ -86,8 +86,8 @@
           <span class="theme-label-text" id="theme-icon-label">Dark</span>
         </button>
 
-        <a href="#repair-brief-section" class="nav-item btn-start-nav max-md-hidden" data-inspect-label="link-brief">
-          <span>Run repair</span>
+        <a href="#cockpit-dashboard-section" class="nav-item btn-start-nav max-md-hidden" data-inspect-label="link-brief">
+          <span>GitHub Cockpit</span>
         </a>
 
         <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="nav-item nav-github-link" title="GitHub Repository">
@@ -585,115 +585,188 @@ ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
     </section>
 
     <!-- --------------------------------------------------------------------
-         PHASE 7 — LIVE DRAFT BRIEFING EXPERIENCE
+         PHASE 7 — AUTONOMOUS GITHUB COCKPIT & LIVE REPAIR DASHBOARD
          -------------------------------------------------------------------- -->
-    <section class="shell section-pad" id="repair-brief-section" aria-labelledby="brief-title" data-inspect-label="brief-section">
-      <div class="section-header-block mb-12">
-        <div class="measure text-accent font-semibold mb-2">LIVE DRAFT GENERATOR</div>
-        <h2 class="display-2 max-w-[24ch]" id="brief-title">
-          Prepare your repair brief.<br>
-          <span class="text-secondary">Watch the CLI execution brief construct as you type.</span>
+    <section class="shell section-pad" id="cockpit-dashboard-section" aria-labelledby="cockpit-title" data-inspect-label="cockpit-section">
+      <div class="section-header-block mb-10">
+        <div class="hero-eyebrow mb-2">
+          <span class="measure text-accent">07</span>
+          <span class="measure">AUTONOMOUS GITHUB COCKPIT</span>
+        </div>
+        <h2 class="display-2 max-w-[28ch]" id="cockpit-title">
+          Connect GitHub. Paste your Issue.<br>
+          <span class="text-secondary">Watch PatchPilot autonomously repair, verify, and raise the PR.</span>
         </h2>
       </div>
 
-      <div class="brief-split-layout">
+      <!-- Cockpit Card Container -->
+      <div class="cockpit-card">
         
-        <!-- Left: The Interactive Form -->
-        <form class="brief-form" id="brief-form" novalidate onsubmit="return false;" data-inspect-label="brief-form">
-          
-          <div class="form-step-block">
-            <div class="field-group">
-              <label for="f-repo" class="field-label">Repository URL or Local Path <span class="text-accent">*</span></label>
-              <input type="text" id="f-repo" class="field-input" placeholder="https://github.com/Quantum-Ark/patchai or ." value="https://github.com/Quantum-Ark/patchai" required>
+        <!-- Top Toolbar: GitHub Connection & Presets -->
+        <div class="cockpit-toolbar">
+          <div class="cockpit-auth-row">
+            <div class="auth-input-wrap">
+              <span class="auth-icon">🐙</span>
+              <input type="password" id="github-token-input" class="field-input-sm" placeholder="GitHub Personal Access Token (optional for private/PR)" autocomplete="off">
+              <button type="button" class="btn-sm btn-secondary" id="btn-connect-token">Connect</button>
+            </div>
+            <div class="auth-status-badge" id="github-user-badge">
+              <span class="status-dot"></span>
+              <span id="github-user-label">Public / Demo Mode</span>
             </div>
           </div>
 
-          <div class="form-step-block">
-            <div class="field-group">
-              <label for="f-issue" class="field-label">Issue Specification / Error Trace <span class="text-accent">*</span></label>
-              <textarea id="f-issue" class="field-input resize-y" rows="4" placeholder="Describe the failure or paste pytest output...">ValueError: negative volume input in pricing.py produces negative customer billing total.</textarea>
-            </div>
-          </div>
-
-          <div class="form-step-block">
-            <div class="grid gap-4 sm-grid-cols-2">
-              <div class="field-group">
-                <label for="f-test-cmd" class="field-label">Reproduction Test Command</label>
-                <input type="text" id="f-test-cmd" class="field-input" placeholder="pytest -k test_negative_input" value="pytest tests/test_pricing.py">
-              </div>
-              <div class="field-group">
-                <label for="f-max-attempts" class="field-label">Max Recovery Attempts</label>
-                <select id="f-max-attempts" class="field-input">
-                  <option value="1">1 attempt (Zero retry)</option>
-                  <option value="2">2 attempts</option>
-                  <option value="3" selected>3 attempts (Recommended)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-actions-row">
-            <button type="button" class="btn btn-primary" id="btn-copy-cli-command">
-              <span class="btn-glow" aria-hidden="true"></span>
-              <span id="btn-copy-label">Copy CLI Command</span>
-              <span class="btn-dot">📋</span>
+          <!-- Presets for Instant 1-Click Verification -->
+          <div class="cockpit-presets-row">
+            <span class="measure text-secondary">Quick Fixtures:</span>
+            <button type="button" class="preset-pill active" id="btn-preset-case-1" data-preset="case_1">
+              Case 1: Logic Bug (ZeroDivision)
             </button>
-            <span class="measure text-secondary" id="form-feedback-status">Ready to execute locally</span>
+            <button type="button" class="preset-pill" id="btn-preset-case-2" data-preset="case_2">
+              Case 2: Boundary Bug (Pagination)
+            </button>
+            <button type="button" class="preset-pill" id="btn-preset-case-3" data-preset="case_3">
+              Case 3: Regression Recovery (Multi-Attempt)
+            </button>
+          </div>
+        </div>
+
+        <!-- Intake Bar: Issue URL & Launch Button -->
+        <div class="cockpit-intake-bar">
+          <div class="intake-input-wrap">
+            <label for="cockpit-issue-url" class="sr-only">GitHub Issue URL</label>
+            <input type="url" id="cockpit-issue-url" class="cockpit-url-input" 
+              placeholder="https://github.com/Quantum-Ark/patchai/issues/101 or select a quick fixture above" 
+              value="https://github.com/Quantum-Ark/patchai/issues/101">
+          </div>
+          <button type="button" class="btn btn-primary btn-cockpit-launch" id="btn-launch-cockpit-repair">
+            <span class="btn-glow" aria-hidden="true"></span>
+            <span id="btn-launch-label">⚡ Launch Autonomous Repair</span>
+          </button>
+        </div>
+
+        <!-- 7-Stage Process Lifecycle Pipeline Tracker -->
+        <div class="cockpit-pipeline-tracker" id="cockpit-pipeline-tracker">
+          <div class="pipeline-step" id="step-intake" data-step="INTAKE">
+            <div class="step-num">01</div>
+            <div class="step-label">INTAKE</div>
+            <div class="step-desc">Issue Ingested</div>
+          </div>
+          <div class="pipeline-divider"></div>
+          <div class="pipeline-step" id="step-investigating" data-step="INVESTIGATING">
+            <div class="step-num">02</div>
+            <div class="step-label">INVESTIGATE</div>
+            <div class="step-desc">AST Code Graph</div>
+          </div>
+          <div class="pipeline-divider"></div>
+          <div class="pipeline-step" id="step-reproducing" data-step="REPRODUCING">
+            <div class="step-num">03</div>
+            <div class="step-label">REPRODUCE</div>
+            <div class="step-desc">Baseline Failure</div>
+          </div>
+          <div class="pipeline-divider"></div>
+          <div class="pipeline-step" id="step-patching" data-step="PATCHING">
+            <div class="step-num">04</div>
+            <div class="step-label">PATCH</div>
+            <div class="step-desc">Unified Diff Fix</div>
+          </div>
+          <div class="pipeline-divider"></div>
+          <div class="pipeline-step" id="step-testing" data-step="TESTING">
+            <div class="step-num">05</div>
+            <div class="step-label">TEST</div>
+            <div class="step-desc">Subprocess Isolation</div>
+          </div>
+          <div class="pipeline-divider"></div>
+          <div class="pipeline-step" id="step-evaluating" data-step="EVALUATING">
+            <div class="step-num">06</div>
+            <div class="step-label">GUARD</div>
+            <div class="step-desc">Regression Shield</div>
+          </div>
+          <div class="pipeline-divider"></div>
+          <div class="pipeline-step" id="step-verified" data-step="VERIFIED">
+            <div class="step-num">07</div>
+            <div class="step-label">VERIFIED</div>
+            <div class="step-desc">Dual Pass Proof</div>
+          </div>
+        </div>
+
+        <!-- Dual-Pane Live Execution Workspace -->
+        <div class="cockpit-workspace-grid">
+          
+          <!-- Left: Streaming Live Terminal -->
+          <div class="terminal-card">
+            <div class="terminal-bar">
+              <span class="terminal-dots"><i></i><i></i><i></i></span>
+              <span class="terminal-title" id="terminal-status-title">patchpilot-orchestrator · live</span>
+              <span class="terminal-live-badge" id="terminal-live-pulse">READY</span>
+            </div>
+            <div class="terminal-code-body" id="cockpit-terminal-logs">
+              <div class="term-line"><span class="term-dim">[SYSTEM] PatchPilot AI Orchestrator initialized.</span></div>
+              <div class="term-line"><span class="term-dim">[NEATLOGS] Live telemetry pipeline active (https://ingest.neatlogs.com/v1/trace).</span></div>
+              <div class="term-line"><span class="term-dim">[ENTIRE] Session tracker attached (962e40f4-2378-4cff-8c3c-c3802c4a26da).</span></div>
+              <div class="term-line"><span class="term-highlight">&gt; Select a benchmark fixture or enter a GitHub issue link above to begin.</span></div>
+            </div>
           </div>
 
-        </form>
-
-        <!-- Right: The Live Updating Draft Browser Box -->
-        <aside class="brief-draft-aside" data-inspect-label="brief-draft">
-          <div class="brief-draft-card sticky top-28">
-            <div class="draft-card-header">
-              <div>
-                <div class="measure text-accent font-semibold">THE LIVE BRIEF</div>
-                <div class="measure text-primary font-medium">Constructs as you write.</div>
-              </div>
-              <div class="text-right">
-                <div class="measure text-secondary">Brief Completion</div>
-                <div class="draft-count-val tabular-nums" id="draft-pct-display">100%</div>
+          <!-- Right: Interactive Unified Diff & Verification Proof -->
+          <div class="diff-card">
+            <div class="diff-card-header">
+              <span class="measure font-medium" id="diff-card-title">UNIFIED DIFF // EVIDENCE</span>
+              <div class="diff-badges" id="diff-badges">
+                <span class="badge-proof badge-neutral" id="badge-acceptance">Acceptance: Pending</span>
+                <span class="badge-proof badge-neutral" id="badge-regression">Regression: Pending</span>
               </div>
             </div>
-
-            <!-- Terminal Browser Frame -->
-            <div class="draft-terminal-frame">
-              <div class="terminal-bar">
-                <span class="terminal-dots"><i></i><i></i><i></i></span>
-                <span class="terminal-title">patchpilot-cli · bash</span>
-              </div>
-              <div class="terminal-code-body">
-                <div class="term-line"><span class="term-dim"># Real Execution Command:</span></div>
-                <div class="term-command" id="live-cli-preview">
-                  patchpilot run --repo https://github.com/Quantum-Ark/patchai --issue "ValueError: negative volume input in pricing.py" --test "pytest tests/test_pricing.py" --max-attempts 3
-                </div>
+            <div class="diff-code-body" id="cockpit-diff-body">
+              <div class="diff-placeholder">
+                <span class="diff-placeholder-icon">🛡️</span>
+                <p>Run a repair to generate verified code diff.</p>
+                <p class="text-xs text-secondary">Fixes are strictly gated on passing both acceptance &amp; regression suites.</p>
               </div>
             </div>
-
-            <!-- Execution Parameters Disclosure -->
-            <details class="draft-details-disclosure mt-4" open>
-              <summary class="measure text-secondary cursor-pointer py-1 select-none">Execution Parameters &amp; Isolation</summary>
-              <div class="draft-summary-meta mt-3">
-                <div class="meta-row">
-                  <span class="measure text-secondary">Isolation</span>
-                  <span class="measure text-primary font-medium">Ephemeral Worktree</span>
-                </div>
-                <div class="meta-row">
-                  <span class="measure text-secondary">Rollback Mode</span>
-                  <span class="measure text-primary font-medium">Atomic Baseline Reset</span>
-                </div>
-                <div class="meta-row">
-                  <span class="measure text-secondary">Auditing</span>
-                  <span class="measure text-verified font-medium">Neatlogs Spans Enabled</span>
-                </div>
-              </div>
-            </details>
           </div>
-        </aside>
+
+        </div>
+
+        <!-- Pull Request (PR) Raise Station -->
+        <div class="cockpit-pr-station" id="cockpit-pr-station">
+          <div class="pr-station-header">
+            <div>
+              <span class="measure text-accent font-semibold">STAGE 08 // AUDITED EVIDENCE DISPATCH</span>
+              <h3 class="display-3 mt-1" id="pr-station-title">Fix Verified. Ready to Open GitHub Pull Request.</h3>
+            </div>
+            <div class="pr-telemetry-badge" id="pr-trace-badge">
+              <span class="measure text-secondary">Neatlogs Trace:</span>
+              <code id="pr-trace-val">Local Verified</code>
+            </div>
+          </div>
+
+          <div class="pr-details-box">
+            <div class="pr-row">
+              <span class="pr-label">Target Branch:</span>
+              <code class="pr-code" id="pr-branch-val">patchpilot/fix-issue-101</code>
+            </div>
+            <div class="pr-row">
+              <span class="pr-label">PR Title:</span>
+              <span class="pr-title-text" id="pr-title-val">fix: Autonomous verified patch by PatchPilot AI</span>
+            </div>
+          </div>
+
+          <div class="pr-actions-bar">
+            <button type="button" class="btn btn-primary" id="btn-raise-github-pr">
+              <span class="btn-glow" aria-hidden="true"></span>
+              <span id="btn-raise-pr-label">🚀 Raise Pull Request on GitHub</span>
+            </button>
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" id="btn-open-pr-external" style="display:none;">
+              <span>Open PR on GitHub ↗</span>
+            </a>
+            <span class="measure text-secondary" id="pr-feedback-text">Automated diff, reproduction logs, and test evidence attached.</span>
+          </div>
+        </div>
 
       </div>
     </section>
+
 
   </main>
 
