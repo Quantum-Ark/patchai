@@ -73,10 +73,11 @@ class PatchPilotDB:
         with self._connect() as conn:
             cursor = conn.cursor()
 
-            # 1. GitHub Authentication Table
+            # 1. GitHub Authentication Table (per-tenant: one PAT per tenant_id)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS github_auth (
                     id INTEGER PRIMARY KEY CHECK (id = 1),
+                    tenant_id TEXT DEFAULT 'default',
                     username TEXT NOT NULL,
                     name TEXT,
                     avatar_url TEXT,
@@ -86,19 +87,28 @@ class PatchPilotDB:
                     connected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
-            # Migration for DBs created before token_encrypted existed.
-            try:
-                cursor.execute("SELECT token_encrypted FROM github_auth LIMIT 1")
-            except Exception:
+            # Migrations for DBs created before these columns existed.
+            for _col, _ddl in (
+                ("token_encrypted", "ALTER TABLE github_auth ADD COLUMN token_encrypted INTEGER DEFAULT 0"),
+                ("tenant_id", "ALTER TABLE github_auth ADD COLUMN tenant_id TEXT DEFAULT 'default'"),
+            ):
                 try:
-                    cursor.execute("ALTER TABLE github_auth ADD COLUMN token_encrypted INTEGER DEFAULT 0")
+                    cursor.execute(f"SELECT {_col} FROM github_auth LIMIT 1")
                 except Exception:
-                    pass
+                    try:
+                        cursor.execute(_ddl)
+                    except Exception:
+                        pass
+            try:
+                cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_github_auth_tenant ON github_auth(tenant_id)")
+            except Exception:
+                pass
 
             # 2. Repair Runs Table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS runs (
                     run_id TEXT PRIMARY KEY,
+                    tenant_id TEXT DEFAULT 'default',
                     issue_id TEXT NOT NULL,
                     issue_title TEXT NOT NULL,
                     repo_owner TEXT NOT NULL,
@@ -131,11 +141,16 @@ class PatchPilotDB:
                 ("target_branch", "TEXT DEFAULT 'main'"),
                 ("reproduction_command", "TEXT DEFAULT ''"),
                 ("diff_text", "TEXT DEFAULT ''"),
-                ("updated_at", "TEXT DEFAULT ''")
+                ("updated_at", "TEXT DEFAULT ''"),
+                ("tenant_id", "TEXT DEFAULT 'default'"),
             ]
             for col_name, col_def in columns_to_add:
                 if col_name not in existing_columns:
                     cursor.execute(f"ALTER TABLE runs ADD COLUMN {col_name} {col_def};")
+            try:
+                cursor.execute("CREATE INDEX IF NOT EXISTS idx_runs_tenant ON runs(tenant_id)")
+            except Exception:
+                pass
 
             # Backfill status for existing records
             cursor.execute("UPDATE runs SET status = CASE WHEN success = 1 THEN 'VERIFIED' ELSE 'FAILED' END WHERE status IS NULL OR status = '' OR status = 'RUNNING';")
@@ -193,13 +208,15 @@ class PatchPilotDB:
                 );
             """)
 
-            # 6. Repository Cache Table
+            # 6. Repository Cache Table (scoped per tenant so cached private
+            # repo metadata from tenant A is never served to tenant B)
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS repositories (
                     id INTEGER PRIMARY KEY,
+                    tenant_id TEXT DEFAULT 'default',
                     owner TEXT NOT NULL,
                     name TEXT NOT NULL,
-                    full_name TEXT NOT NULL UNIQUE,
+                    full_name TEXT NOT NULL,
                     default_branch TEXT DEFAULT 'main',
                     private INTEGER DEFAULT 0,
                     description TEXT,
@@ -208,6 +225,18 @@ class PatchPilotDB:
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
+            try:
+                cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_repos_tenant_full ON repositories(tenant_id, full_name)")
+            except Exception:
+                pass
+            # Migration: repositories table predates tenant_id; add + backfill.
+            try:
+                cursor.execute("PRAGMA table_info(repositories)")
+                repo_cols = {row["name"] for row in cursor.fetchall()}
+                if "tenant_id" not in repo_cols:
+                    cursor.execute("ALTER TABLE repositories ADD COLUMN tenant_id TEXT DEFAULT 'default'")
+            except Exception:
+                pass
 
             conn.commit()
             logger.info("Database schema initialized successfully.")
@@ -215,21 +244,40 @@ class PatchPilotDB:
     # --------------------------------------------------------------------------
     # GitHub Authentication Operations
     # --------------------------------------------------------------------------
-    def save_github_auth(self, username: str, name: str, avatar_url: str, token: str, scopes: str = "repo"):
+    def save_github_auth(self, username: str, name: str, avatar_url: str, token: str, scopes: str = "repo", tenant_id: str = "default"):
         stored, encrypted = _encrypt_token(token)
+        tid = (tenant_id or "default")[:64]
         with self._connect() as conn:
             cursor = conn.cursor()
-            cursor.execute("""
-                INSERT OR REPLACE INTO github_auth (id, username, name, avatar_url, token, token_encrypted, scopes, connected_at)
-                VALUES (1, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-            """, (username, name, avatar_url, stored, 1 if encrypted else 0, scopes))
+            # Per-tenant upsert: at most one PAT per tenant.
+            cursor.execute("SELECT id FROM github_auth WHERE tenant_id = ?", (tid,))
+            row = cursor.fetchone()
+            if row:
+                cursor.execute("""
+                    UPDATE github_auth SET username=?, name=?, avatar_url=?, token=?,
+                        token_encrypted=?, scopes=?, connected_at=CURRENT_TIMESTAMP
+                    WHERE tenant_id=?
+                """, (username, name, avatar_url, stored, 1 if encrypted else 0, scopes, tid))
+            else:
+                cursor.execute("""
+                    INSERT INTO github_auth (tenant_id, username, name, avatar_url, token, token_encrypted, scopes, connected_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                """, (tid, username, name, avatar_url, stored, 1 if encrypted else 0, scopes))
             conn.commit()
 
-    def get_github_auth(self) -> Optional[Dict[str, Any]]:
+    def get_github_auth(self, tenant_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
         with self._connect() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT username, name, avatar_url, token, token_encrypted, scopes, connected_at FROM github_auth WHERE id = 1")
-            row = cursor.fetchone()
+            if tenant_id is None:
+                # Back-compat: legacy single-tenant callers get the default row.
+                cursor.execute("SELECT username, name, avatar_url, token, token_encrypted, scopes, connected_at, tenant_id FROM github_auth WHERE tenant_id = 'default' LIMIT 1")
+                row = cursor.fetchone()
+                if row is None:
+                    cursor.execute("SELECT username, name, avatar_url, token, token_encrypted, scopes, connected_at, tenant_id FROM github_auth LIMIT 1")
+                    row = cursor.fetchone()
+            else:
+                cursor.execute("SELECT username, name, avatar_url, token, token_encrypted, scopes, connected_at, tenant_id FROM github_auth WHERE tenant_id = ? LIMIT 1", ((tenant_id or "default")[:64],))
+                row = cursor.fetchone()
             if row:
                 keys = row.keys()
                 raw = row["token"] or ""
@@ -246,34 +294,51 @@ class PatchPilotDB:
                 }
             return None
 
-    def delete_github_auth(self):
+    def delete_github_auth(self, tenant_id: Optional[str] = None):
         with self._connect() as conn:
-            conn.execute("DELETE FROM github_auth WHERE id = 1")
+            if tenant_id is None:
+                conn.execute("DELETE FROM github_auth WHERE tenant_id = 'default'")
+            else:
+                conn.execute("DELETE FROM github_auth WHERE tenant_id = ?", ((tenant_id or "default")[:64],))
             conn.commit()
 
     # --------------------------------------------------------------------------
     # Dashboard Aggregation & Statistics
     # --------------------------------------------------------------------------
-    def get_dashboard_stats(self) -> Dict[str, Any]:
+    def get_dashboard_stats(self, tenant_id: Optional[str] = None) -> Dict[str, Any]:
         with self._connect() as conn:
             cursor = conn.cursor()
+            scope = ""
+            params: List[Any] = []
+            if tenant_id is not None:
+                scope = " WHERE tenant_id = ?"
+                params = [(tenant_id or "default")[:64]]
 
-            cursor.execute("SELECT COUNT(*) FROM runs")
+            cursor.execute(f"SELECT COUNT(*) FROM runs{scope}", params)
             total_runs = cursor.fetchone()[0]
 
-            cursor.execute("SELECT COUNT(*) FROM runs WHERE status = 'RUNNING'")
+            cursor.execute(f"SELECT COUNT(*) FROM runs WHERE status = 'RUNNING'{(' AND tenant_id = ?') if tenant_id is not None else ''}", params)
             running_jobs = cursor.fetchone()[0]
 
-            cursor.execute("SELECT COUNT(*) FROM runs WHERE status = 'VERIFIED'")
+            cursor.execute(f"SELECT COUNT(*) FROM runs WHERE status = 'VERIFIED'{(' AND tenant_id = ?') if tenant_id is not None else ''}", params)
             verified_repairs = cursor.fetchone()[0]
 
-            cursor.execute("SELECT COUNT(*) FROM runs WHERE status IN ('FAILED', 'UNVERIFIED', 'BLOCKED')")
+            cursor.execute(f"SELECT COUNT(*) FROM runs WHERE status IN ('FAILED', 'UNVERIFIED', 'BLOCKED'){(' AND tenant_id = ?') if tenant_id is not None else ''}", params)
             failed_repairs = cursor.fetchone()[0]
 
-            cursor.execute("SELECT COUNT(*) FROM pull_requests")
+            if tenant_id is not None:
+                cursor.execute("""
+                    SELECT COUNT(*) FROM pull_requests
+                    WHERE run_id IN (SELECT run_id FROM runs WHERE tenant_id = ?)
+                """, params)
+            else:
+                cursor.execute("SELECT COUNT(*) FROM pull_requests")
             total_prs = cursor.fetchone()[0]
 
-            cursor.execute("SELECT COUNT(DISTINCT repo_owner || '/' || repo_name) FROM runs")
+            if tenant_id is not None:
+                cursor.execute("SELECT COUNT(DISTINCT repo_owner || '/' || repo_name) FROM runs WHERE tenant_id = ?", params)
+            else:
+                cursor.execute("SELECT COUNT(DISTINCT repo_owner || '/' || repo_name) FROM runs")
             active_repos = cursor.fetchone()[0]
 
             return {
@@ -297,17 +362,19 @@ class PatchPilotDB:
         repo_name: str,
         repo_url: Optional[str] = None,
         target_branch: str = "main",
-        reproduction_command: Optional[str] = None
+        reproduction_command: Optional[str] = None,
+        tenant_id: str = "default"
     ) -> Dict[str, Any]:
+        tid = (tenant_id or "default")[:64]
         with self._connect() as conn:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO runs (
-                    run_id, issue_id, issue_title, repo_owner, repo_name,
+                    run_id, tenant_id, issue_id, issue_title, repo_owner, repo_name,
                     repo_url, target_branch, reproduction_command, final_state, status
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'INTAKE', 'RUNNING')
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'INTAKE', 'RUNNING')
             """, (
-                run_id, issue_id, issue_title, repo_owner, repo_name,
+                run_id, tid, issue_id, issue_title, repo_owner, repo_name,
                 repo_url, target_branch, reproduction_command
             ))
             conn.commit()
@@ -324,7 +391,12 @@ class PatchPilotDB:
             cursor.execute("UPDATE runs SET final_state = ?, updated_at = CURRENT_TIMESTAMP WHERE run_id = ?", (state, run_id))
             conn.commit()
 
-    def get_run_events(self, run_id: str, after_id: int = 0) -> List[Dict[str, Any]]:
+    def get_run_events(self, run_id: str, after_id: int = 0, tenant_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        if tenant_id is not None:
+            # Ownership check: events are only visible to the owning tenant.
+            owner = self.get_run(run_id, tenant_id=tenant_id)
+            if owner is None:
+                return []
         with self._connect() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -388,10 +460,13 @@ class PatchPilotDB:
             ))
             conn.commit()
 
-    def get_run(self, run_id: str) -> Optional[Dict[str, Any]]:
+    def get_run(self, run_id: str, tenant_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
         with self._connect() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM runs WHERE run_id = ?", (run_id,))
+            if tenant_id is None:
+                cursor.execute("SELECT * FROM runs WHERE run_id = ?", (run_id,))
+            else:
+                cursor.execute("SELECT * FROM runs WHERE run_id = ? AND tenant_id = ?", (run_id, (tenant_id or "default")[:64]))
             row = cursor.fetchone()
             if not row:
                 return None
@@ -408,11 +483,15 @@ class PatchPilotDB:
 
             return run_dict
 
-    def list_runs(self, limit: int = 50, offset: int = 0, status: Optional[str] = None, query: Optional[str] = None) -> List[Dict[str, Any]]:
+    def list_runs(self, limit: int = 50, offset: int = 0, status: Optional[str] = None, query: Optional[str] = None, tenant_id: Optional[str] = None) -> List[Dict[str, Any]]:
         with self._connect() as conn:
             cursor = conn.cursor()
             sql = "SELECT * FROM runs WHERE 1=1"
             params: List[Any] = []
+
+            if tenant_id is not None:
+                sql += " AND tenant_id = ?"
+                params.append((tenant_id or "default")[:64])
 
             if status:
                 sql += " AND status = ?"
@@ -474,25 +553,35 @@ class PatchPilotDB:
                 "title": title
             }
 
-    def list_pull_requests(self, limit: int = 20) -> List[Dict[str, Any]]:
+    def list_pull_requests(self, limit: int = 20, tenant_id: Optional[str] = None) -> List[Dict[str, Any]]:
         with self._connect() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM pull_requests ORDER BY created_at DESC LIMIT ?", (limit,))
+            if tenant_id is None:
+                cursor.execute("SELECT * FROM pull_requests ORDER BY created_at DESC LIMIT ?", (limit,))
+            else:
+                cursor.execute("""
+                    SELECT pr.* FROM pull_requests pr
+                    JOIN runs r ON r.run_id = pr.run_id
+                    WHERE r.tenant_id = ?
+                    ORDER BY pr.created_at DESC LIMIT ?
+                """, ((tenant_id or "default")[:64], limit))
             return [dict(row) for row in cursor.fetchall()]
 
     # --------------------------------------------------------------------------
     # Repositories Cache Operations
     # --------------------------------------------------------------------------
-    def cache_repositories(self, repos: List[Dict[str, Any]]):
+    def cache_repositories(self, repos: List[Dict[str, Any]], tenant_id: str = "default"):
+        tid = (tenant_id or "default")[:64]
         with self._connect() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM repositories")
+            cursor.execute("DELETE FROM repositories WHERE tenant_id = ?", (tid,))
             for r in repos:
                 cursor.execute("""
                     INSERT OR REPLACE INTO repositories (
-                        owner, name, full_name, default_branch, private, description, open_issues_count, html_url
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        tenant_id, owner, name, full_name, default_branch, private, description, open_issues_count, html_url
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
+                    tid,
                     r.get("owner", {}).get("login") if isinstance(r.get("owner"), dict) else r.get("owner", ""),
                     r.get("name", ""),
                     r.get("full_name", ""),
@@ -504,12 +593,18 @@ class PatchPilotDB:
                 ))
             conn.commit()
 
-    def get_cached_repositories(self, query: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_cached_repositories(self, query: Optional[str] = None, tenant_id: Optional[str] = None) -> List[Dict[str, Any]]:
         with self._connect() as conn:
             cursor = conn.cursor()
-            if query:
+            tid = (tenant_id or "default")[:64] if tenant_id is not None else None
+            if query and tid is not None:
+                like_q = f"%{query}%"
+                cursor.execute("SELECT * FROM repositories WHERE tenant_id = ? AND (full_name LIKE ? OR description LIKE ?) ORDER BY name ASC", (tid, like_q, like_q))
+            elif query:
                 like_q = f"%{query}%"
                 cursor.execute("SELECT * FROM repositories WHERE full_name LIKE ? OR description LIKE ? ORDER BY name ASC", (like_q, like_q))
+            elif tid is not None:
+                cursor.execute("SELECT * FROM repositories WHERE tenant_id = ? ORDER BY name ASC", (tid,))
             else:
                 cursor.execute("SELECT * FROM repositories ORDER BY name ASC")
             return [dict(row) for row in cursor.fetchall()]

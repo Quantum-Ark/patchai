@@ -86,8 +86,8 @@
           <span class="theme-label-text" id="theme-icon-label">Dark</span>
         </button>
 
-        <a href="#cockpit-dashboard-section" class="nav-item btn-start-nav max-md-hidden" data-inspect-label="link-brief">
-          <span>GitHub Cockpit</span>
+        <a href="/dashboard.html" class="nav-item btn-start-nav max-md-hidden" data-inspect-label="link-dashboard">
+          <span>Dashboard ↗</span>
         </a>
 
         <a href="https://github.com/Quantum-Ark/patchai" target="_blank" rel="noopener noreferrer" class="nav-item nav-github-link" title="GitHub Repository">
@@ -147,9 +147,9 @@
             </div>
 
             <div class="hero-actions">
-              <a href="#build-sequence" class="btn btn-primary" id="hero-cta-build" data-inspect-label="btn-build">
+              <a href="/dashboard.html" class="btn btn-primary" id="hero-cta-dashboard" data-inspect-label="btn-dashboard">
                 <span class="btn-glow" aria-hidden="true"></span>
-                <span>See the build</span>
+                <span>Open Developer Dashboard</span>
                 <span class="btn-dot">
                   <svg viewBox="0 0 256 256" width="14" height="14" fill="currentColor">
                     <path d="M204,64V168a12,12,0,0,1-24,0V93L72.49,200.49a12,12,0,0,1-17-17L163,76H88a12,12,0,0,1,0-24H192A12,12,0,0,1,204,64Z"/>
@@ -157,14 +157,9 @@
                 </span>
               </a>
 
-              <a href="#repair-brief-section" class="btn btn-secondary" id="hero-cta-brief" data-inspect-label="btn-brief">
+              <a href="#build-sequence" class="btn btn-secondary" id="hero-cta-build" data-inspect-label="btn-build">
                 <span class="btn-glow" aria-hidden="true"></span>
-                <span>Prepare a repair brief</span>
-                <span class="btn-dot">
-                  <svg viewBox="0 0 256 256" width="14" height="14" fill="currentColor">
-                    <path d="M204,64V168a12,12,0,0,1-24,0V93L72.49,200.49a12,12,0,0,1-17-17L163,76H88a12,12,0,0,1,0-24H192A12,12,0,0,1,204,64Z"/>
-                  </svg>
-                </span>
+                <span>See the build</span>
               </a>
             </div>
           </div>
@@ -585,691 +580,115 @@ ACTION: Executing atomic git rollback to baseline e4f892a</code></pre>
     </section>
 
     <!-- --------------------------------------------------------------------
-         PHASE 7 — AUTONOMOUS GITHUB DEVELOPER DASHBOARD & PR WORKBENCH
+         PHASE 7 — LIVE DRAFT BRIEFING EXPERIENCE
          -------------------------------------------------------------------- -->
-    <section class="shell section-pad" id="cockpit-dashboard-section" aria-labelledby="dashboard-title" data-inspect-label="dashboard-workbench">
-      <div class="section-header-block mb-8">
-        <div class="hero-eyebrow mb-2">
-          <span class="measure text-accent">07</span>
-          <span class="measure">AUTONOMOUS DEVELOPER DASHBOARD</span>
-        </div>
-        <h2 class="display-2 max-w-[32ch]" id="dashboard-title">
-          Connect GitHub. Track Every Repair.<br>
-          <span class="text-secondary">Dual-suite verification and 1-click Pull Request publishing.</span>
+    <section class="shell section-pad" id="repair-brief-section" aria-labelledby="brief-title" data-inspect-label="brief-section">
+      <div class="section-header-block mb-12">
+        <div class="measure text-accent font-semibold mb-2">LIVE DRAFT GENERATOR</div>
+        <h2 class="display-2 max-w-[24ch]" id="brief-title">
+          Prepare your repair brief.<br>
+          <span class="text-secondary">Watch the CLI execution brief construct as you type.</span>
         </h2>
       </div>
 
-      <!-- Main Developer Dashboard Container -->
-      <div class="dash-container" id="dash-container">
+      <div class="brief-split-layout">
         
-        <!-- Sidebar Navigation -->
-        <aside class="dash-sidebar" id="dash-sidebar" aria-label="Dashboard Navigation">
-          <div class="dash-sidebar-header">
-            <span class="dash-brand-icon">🛡️</span>
-            <div class="dash-brand-meta">
-              <span class="dash-brand-title">PatchPilot Cockpit</span>
-              <span class="dash-brand-sub" id="dash-conn-status">Checking auth...</span>
+        <!-- Left: The Interactive Form -->
+        <form class="brief-form" id="brief-form" novalidate onsubmit="return false;" data-inspect-label="brief-form">
+          
+          <div class="form-step-block">
+            <div class="field-group">
+              <label for="f-repo" class="field-label">Repository URL or Local Path <span class="text-accent">*</span></label>
+              <input type="text" id="f-repo" class="field-input" placeholder="https://github.com/Quantum-Ark/patchai or ." value="https://github.com/Quantum-Ark/patchai" required>
             </div>
           </div>
 
-          <nav class="dash-nav-menu" role="tablist">
-            <button type="button" class="dash-nav-item active" id="tab-btn-overview" role="tab" aria-selected="true" data-tab="overview">
-              <span class="nav-icon">📊</span>
-              <span class="nav-text">Dashboard</span>
-            </button>
-
-            <button type="button" class="dash-nav-item" id="tab-btn-repos" role="tab" aria-selected="false" data-tab="repos">
-              <span class="nav-icon">📦</span>
-              <span class="nav-text">Repositories</span>
-              <span class="nav-badge" id="badge-repo-count">0</span>
-            </button>
-
-            <button type="button" class="dash-nav-item" id="tab-btn-wizard" role="tab" aria-selected="false" data-tab="wizard">
-              <span class="nav-icon">⚡</span>
-              <span class="nav-text">New Repair</span>
-            </button>
-
-            <button type="button" class="dash-nav-item" id="tab-btn-workspace" role="tab" aria-selected="false" data-tab="workspace">
-              <span class="nav-icon">🔬</span>
-              <span class="nav-text">Live Workspace</span>
-              <span class="pulse-dot" id="live-pulse-dot" style="display:none;"></span>
-            </button>
-
-            <button type="button" class="dash-nav-item" id="tab-btn-history" role="tab" aria-selected="false" data-tab="history">
-              <span class="nav-icon">📜</span>
-              <span class="nav-text">Repair History</span>
-            </button>
-
-            <button type="button" class="dash-nav-item" id="tab-btn-settings" role="tab" aria-selected="false" data-tab="settings">
-              <span class="nav-icon">⚙️</span>
-              <span class="nav-text">Settings</span>
-            </button>
-          </nav>
-
-          <!-- Connected User Profile Widget -->
-          <div class="dash-user-widget" id="dash-user-widget">
-            <div class="dash-user-avatar-wrap">
-              <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="Avatar" id="dash-user-avatar" class="dash-avatar-img">
+          <div class="form-step-block">
+            <div class="field-group">
+              <label for="f-issue" class="field-label">Issue Specification / Error Trace <span class="text-accent">*</span></label>
+              <textarea id="f-issue" class="field-input resize-y" rows="4" placeholder="Describe the failure or paste pytest output...">ValueError: negative volume input in pricing.py produces negative customer billing total.</textarea>
             </div>
-            <div class="dash-user-info">
-              <span class="dash-user-name" id="dash-user-name">Not connected</span>
-              <span class="dash-user-token" id="dash-user-token">Public Demo</span>
+          </div>
+
+          <div class="form-step-block">
+            <div class="grid gap-4 sm-grid-cols-2">
+              <div class="field-group">
+                <label for="f-test-cmd" class="field-label">Reproduction Test Command</label>
+                <input type="text" id="f-test-cmd" class="field-input" placeholder="pytest -k test_negative_input" value="pytest tests/test_pricing.py">
+              </div>
+              <div class="field-group">
+                <label for="f-max-attempts" class="field-label">Max Recovery Attempts</label>
+                <select id="f-max-attempts" class="field-input">
+                  <option value="1">1 attempt (Zero retry)</option>
+                  <option value="2">2 attempts</option>
+                  <option value="3" selected>3 attempts (Recommended)</option>
+                </select>
+              </div>
             </div>
-            <button type="button" class="btn-icon-disconnect" id="btn-dash-disconnect" title="Disconnect GitHub" style="display:none;">
-              ✕
+          </div>
+
+          <div class="form-actions-row">
+            <button type="button" class="btn btn-primary" id="btn-copy-cli-command">
+              <span class="btn-glow" aria-hidden="true"></span>
+              <span id="btn-copy-label">Copy CLI Command</span>
+              <span class="btn-dot">📋</span>
             </button>
+            <span class="measure text-secondary" id="form-feedback-status">Ready to execute locally</span>
+          </div>
+
+        </form>
+
+        <!-- Right: The Live Updating Draft Browser Box -->
+        <aside class="brief-draft-aside" data-inspect-label="brief-draft">
+          <div class="brief-draft-card sticky top-28">
+            <div class="draft-card-header">
+              <div>
+                <div class="measure text-accent font-semibold">THE LIVE BRIEF</div>
+                <div class="measure text-primary font-medium">Constructs as you write.</div>
+              </div>
+              <div class="text-right">
+                <div class="measure text-secondary">Brief Completion</div>
+                <div class="draft-count-val tabular-nums" id="draft-pct-display">100%</div>
+              </div>
+            </div>
+
+            <!-- Terminal Browser Frame -->
+            <div class="draft-terminal-frame">
+              <div class="terminal-bar">
+                <span class="terminal-dots"><i></i><i></i><i></i></span>
+                <span class="terminal-title">patchpilot-cli · bash</span>
+              </div>
+              <div class="terminal-code-body">
+                <div class="term-line"><span class="term-dim"># Real Execution Command:</span></div>
+                <div class="term-command" id="live-cli-preview">
+                  patchpilot run --repo https://github.com/Quantum-Ark/patchai --issue "ValueError: negative volume input in pricing.py" --test "pytest tests/test_pricing.py" --max-attempts 3
+                </div>
+              </div>
+            </div>
+
+            <!-- Execution Parameters Disclosure -->
+            <details class="draft-details-disclosure mt-4" open>
+              <summary class="measure text-secondary cursor-pointer py-1 select-none">Execution Parameters &amp; Isolation</summary>
+              <div class="draft-summary-meta mt-3">
+                <div class="meta-row">
+                  <span class="measure text-secondary">Isolation</span>
+                  <span class="measure text-primary font-medium">Ephemeral Worktree</span>
+                </div>
+                <div class="meta-row">
+                  <span class="measure text-secondary">Rollback Mode</span>
+                  <span class="measure text-primary font-medium">Atomic Baseline Reset</span>
+                </div>
+                <div class="meta-row">
+                  <span class="measure text-secondary">Auditing</span>
+                  <span class="measure text-verified font-medium">Neatlogs Spans Enabled</span>
+                </div>
+              </div>
+            </details>
           </div>
         </aside>
 
-        <!-- Main Views Body -->
-        <main class="dash-main" id="dash-main">
-
-          <!-- =================================================================
-               VIEW 1: DASHBOARD OVERVIEW (HOME)
-               ================================================================= -->
-          <section class="dash-view active" id="view-overview" role="tabpanel" aria-labelledby="tab-btn-overview">
-            
-            <!-- Quick Connect Bar if unauthenticated -->
-            <div class="dash-banner-auth" id="dash-banner-auth">
-              <div class="banner-auth-text">
-                <strong>Connect GitHub Account</strong>
-                <p>Authenticate to access private repositories, inspect open issues, and push verified PRs.</p>
-              </div>
-              <div class="banner-auth-form">
-                <input type="password" id="input-quick-token" class="dash-input-sm" placeholder="Paste GitHub Personal Access Token (repo scope)" autocomplete="off">
-                <button type="button" class="btn btn-primary btn-sm" id="btn-quick-connect">Connect</button>
-              </div>
-            </div>
-
-            <!-- KPI Metric Cards Grid (From Real SQLite DB) -->
-            <div class="dash-kpi-grid">
-              <div class="kpi-card">
-                <div class="kpi-label">TOTAL REPAIRS</div>
-                <div class="kpi-val" id="kpi-total-runs">0</div>
-                <div class="kpi-sub text-secondary">Historical executions</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">ACTIVE JOBS</div>
-                <div class="kpi-val text-accent" id="kpi-running-jobs">0</div>
-                <div class="kpi-sub text-secondary">Currently running</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">VERIFIED FIXES</div>
-                <div class="kpi-val text-verified" id="kpi-verified-repairs">0</div>
-                <div class="kpi-sub text-secondary">Dual-suite confirmed</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">FAILED / BLOCKED</div>
-                <div class="kpi-val text-secondary" id="kpi-failed-repairs">0</div>
-                <div class="kpi-sub text-secondary">Exhausted budget</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">PULL REQUESTS</div>
-                <div class="kpi-val" id="kpi-total-prs">0</div>
-                <div class="kpi-sub text-secondary">Dispatched to GitHub</div>
-              </div>
-              <div class="kpi-card">
-                <div class="kpi-label">CONNECTED REPOS</div>
-                <div class="kpi-val" id="kpi-active-repos">1</div>
-                <div class="kpi-sub text-secondary">Accessible workspaces</div>
-              </div>
-            </div>
-
-            <!-- Action Quick-Launch Row -->
-            <div class="dash-quick-row mt-6">
-              <div class="quick-title-wrap">
-                <h3 class="display-3">Recent Repair Activity</h3>
-                <span class="measure text-secondary">Empirical records from persistent SQLite store</span>
-              </div>
-              <div class="quick-btns">
-                <button type="button" class="btn btn-secondary btn-sm" id="btn-goto-wizard">
-                  <span>+ New Repair</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Two-Column Grid: Recent Runs & Pull Requests -->
-            <div class="dash-split-grid mt-4">
-              
-              <!-- Recent Runs Table -->
-              <div class="dash-panel">
-                <div class="panel-header">
-                  <span class="measure font-medium">RECENT REPAIR RUNS</span>
-                  <button type="button" class="btn-link-sm" id="btn-see-all-runs">View All ↗</button>
-                </div>
-                <div class="panel-body" id="overview-recent-runs">
-                  <!-- Dynamically rendered or empty state -->
-                  <div class="dash-empty-state">
-                    <span class="empty-icon">📂</span>
-                    <p class="font-medium">No repair runs recorded yet</p>
-                    <p class="text-sm text-secondary">Launch a repair wizard or run a benchmark fixture to populate.</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Created Pull Requests -->
-              <div class="dash-panel">
-                <div class="panel-header">
-                  <span class="measure font-medium">PULL REQUESTS CREATED</span>
-                  <span class="measure text-secondary" id="overview-prs-count">0 Opened</span>
-                </div>
-                <div class="panel-body" id="overview-prs-list">
-                  <div class="dash-empty-state">
-                    <span class="empty-icon">🔀</span>
-                    <p class="font-medium">No Pull Requests created yet</p>
-                    <p class="text-sm text-secondary">Verified repairs can be published as real GitHub PRs with 1 click.</p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </section>
-
-          <!-- =================================================================
-               VIEW 2: REPOSITORIES BROWSER
-               ================================================================= -->
-          <section class="dash-view" id="view-repos" role="tabpanel" aria-labelledby="tab-btn-repos">
-            <div class="view-header">
-              <div>
-                <h3 class="display-3">Connected Repositories</h3>
-                <p class="text-secondary text-sm">Select an accessible repository to inspect issues or trigger repairs.</p>
-              </div>
-              <div class="repo-search-wrap">
-                <input type="text" id="repo-search-input" class="dash-input-sm" placeholder="Search repositories...">
-                <button type="button" class="btn btn-secondary btn-sm" id="btn-refresh-repos">↻ Refresh</button>
-              </div>
-            </div>
-
-            <!-- Repositories List Grid -->
-            <div class="repos-grid mt-6" id="repos-grid">
-              <!-- Dynamically populated from /api/github/repos -->
-              <div class="dash-loading-card">
-                <span>Loading repositories from GitHub...</span>
-              </div>
-            </div>
-
-            <!-- Issues Drawer (Appears when repository selected) -->
-            <div class="repo-issues-panel mt-8" id="repo-issues-panel" style="display:none;">
-              <div class="panel-header">
-                <div>
-                  <span class="measure text-accent font-semibold">SELECTED REPOSITORY</span>
-                  <h4 class="display-3" id="selected-repo-title">owner/repo</h4>
-                </div>
-                <button type="button" class="btn-close-sm" id="btn-close-issues">✕ Close</button>
-              </div>
-              <div class="panel-body mt-4" id="selected-repo-issues-list">
-                <div class="dash-loading-card">Loading repository issues...</div>
-              </div>
-            </div>
-          </section>
-
-          <!-- =================================================================
-               VIEW 3: NEW REPAIR WIZARD (5 STEPS)
-               ================================================================= -->
-          <section class="dash-view" id="view-wizard" role="tabpanel" aria-labelledby="tab-btn-wizard">
-            <div class="view-header">
-              <div>
-                <h3 class="display-3">Autonomous Repair Wizard</h3>
-                <p class="text-secondary text-sm">Configure defect intake, baseline reproduction, and test constraints before execution.</p>
-              </div>
-            </div>
-
-            <!-- Quick Benchmark Presets Banner -->
-            <div class="wizard-presets-box mt-4">
-              <span class="measure text-secondary">Instant Curated Benchmarks:</span>
-              <div class="presets-btn-group">
-                <button type="button" class="preset-pill active" id="btn-wizard-case-1" data-preset="case_1">
-                  Case 1: Logic Bug (ZeroDivision)
-                </button>
-                <button type="button" class="preset-pill" id="btn-wizard-case-2" data-preset="case_2">
-                  Case 2: Boundary Bug (Paginator)
-                </button>
-                <button type="button" class="preset-pill" id="btn-wizard-case-3" data-preset="case_3">
-                  Case 3: Regression Recovery (Multi-Attempt)
-                </button>
-              </div>
-            </div>
-
-            <!-- 5-Step Form Container -->
-            <div class="wizard-steps-container mt-6">
-              
-              <!-- Step 1: Select Repository -->
-              <div class="wizard-step-card">
-                <div class="wizard-step-header">
-                  <span class="step-badge">STEP 01</span>
-                  <h4>Target Repository</h4>
-                </div>
-                <div class="wizard-step-content">
-                  <div class="form-row-grid">
-                    <div class="form-field">
-                      <label for="wizard-repo-select">Connected Repository</label>
-                      <select id="wizard-repo-select" class="dash-select">
-                        <option value="Quantum-Ark/patchai">Quantum-Ark/patchai (Current Workspace)</option>
-                      </select>
-                    </div>
-                    <div class="form-field">
-                      <label for="wizard-target-branch">Target Base Branch</label>
-                      <input type="text" id="wizard-target-branch" class="dash-input" value="main">
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Step 2: Choose Issue or Defect Description -->
-              <div class="wizard-step-card">
-                <div class="wizard-step-header">
-                  <span class="step-badge">STEP 02</span>
-                  <h4>Defect Details &amp; Issue</h4>
-                </div>
-                <div class="wizard-step-content">
-                  <div class="form-field">
-                    <label for="wizard-issue-url">GitHub Issue URL (Optional)</label>
-                    <div class="input-with-button">
-                      <input type="url" id="wizard-issue-url" class="dash-input" placeholder="https://github.com/Quantum-Ark/patchai/issues/101">
-                      <button type="button" class="btn btn-secondary btn-sm" id="btn-fetch-wizard-issue">Fetch</button>
-                    </div>
-                  </div>
-                  <div class="form-field mt-3">
-                    <label for="wizard-issue-title">Issue Title / Summary</label>
-                    <input type="text" id="wizard-issue-title" class="dash-input" value="ZeroDivisionError in compute_metrics when dataset is empty">
-                  </div>
-                  <div class="form-field mt-3">
-                    <label for="wizard-issue-body">Issue Description &amp; Stacktrace</label>
-                    <textarea id="wizard-issue-body" class="dash-textarea" rows="3">Target file: calc.py. Division by zero when y=0 in compute_metrics.</textarea>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Step 3: Acceptance Criteria & Test Command -->
-              <div class="wizard-step-card">
-                <div class="wizard-step-header">
-                  <span class="step-badge">STEP 03</span>
-                  <h4>Acceptance Criteria &amp; Reproduction Command</h4>
-                </div>
-                <div class="wizard-step-content">
-                  <div class="form-row-grid">
-                    <div class="form-field">
-                      <label for="wizard-repro-cmd">Reproduction / Test Command</label>
-                      <input type="text" id="wizard-repro-cmd" class="dash-input" value="pytest tests/test_calc.py -v">
-                      <span class="field-hint">Executed in subprocess to confirm baseline failure and verify patch.</span>
-                    </div>
-                    <div class="form-field">
-                      <label for="wizard-regression-cmd">Regression Suite Command (Optional)</label>
-                      <input type="text" id="wizard-regression-cmd" class="dash-input" value="pytest tests/ -v">
-                      <span class="field-hint">Guards against unintended behavior changes.</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Step 4: Execution Review & Constraints -->
-              <div class="wizard-step-card">
-                <div class="wizard-step-header">
-                  <span class="step-badge">STEP 04</span>
-                  <h4>Execution Review &amp; Safety Constraints</h4>
-                </div>
-                <div class="wizard-step-content">
-                  <div class="review-meta-box">
-                    <div class="review-item">
-                      <span class="review-label">Execution Environment:</span>
-                      <span class="review-val">Isolated Worktree / Temporary Sandbox</span>
-                    </div>
-                    <div class="review-item">
-                      <span class="review-label">State Machine:</span>
-                      <span class="review-val">Strict 7-Stage Progression with Atomic Rollback</span>
-                    </div>
-                    <div class="review-item">
-                      <span class="review-label">Dual-Suite Gate:</span>
-                      <span class="review-val">PR creation strictly requires Acceptance + Regression passes</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Step 5: Start Repair Action -->
-              <div class="wizard-action-bar mt-6">
-                <button type="button" class="btn btn-primary btn-lg" id="btn-start-wizard-repair">
-                  <span class="btn-glow" aria-hidden="true"></span>
-                  <span id="btn-wizard-launch-text">⚡ Start Autonomous Repair</span>
-                </button>
-                <span class="measure text-secondary ml-4">Repair job will be dispatched asynchronously to the orchestrator.</span>
-              </div>
-
-            </div>
-          </section>
-
-          <!-- =================================================================
-               VIEW 4: LIVE WORKSPACE (7-STAGE TRACKER, LOGS, DIFF & PR STATION)
-               ================================================================= -->
-          <section class="dash-view" id="view-workspace" role="tabpanel" aria-labelledby="tab-btn-workspace">
-            
-            <!-- Live Run Metadata Header -->
-            <div class="workspace-header-bar">
-              <div class="workspace-meta-left">
-                <div class="run-id-pill" id="ws-run-id-pill">RUN-ID: None</div>
-                <span class="repo-tag" id="ws-repo-tag">Quantum-Ark/patchai</span>
-                <span class="branch-tag" id="ws-branch-tag">main</span>
-              </div>
-              <div class="workspace-meta-right">
-                <span class="measure text-secondary">Elapsed:</span>
-                <span class="timer-ticker" id="ws-timer-ticker">00:00s</span>
-                <span class="status-badge status-idle" id="ws-status-badge">READY</span>
-              </div>
-            </div>
-
-            <!-- Issue Title Banner -->
-            <div class="workspace-issue-banner mt-3">
-              <span class="measure text-secondary" id="ws-issue-id-label">Issue #101:</span>
-              <h4 class="workspace-issue-title" id="ws-issue-title">Autonomous repair task waiting for dispatch</h4>
-            </div>
-
-            <!-- 7-Stage Process Lifecycle Pipeline Tracker -->
-            <div class="cockpit-pipeline-tracker mt-5" id="ws-pipeline-tracker">
-              <div class="pipeline-step" id="step-intake" data-step="INTAKE">
-                <div class="step-num">01</div>
-                <div class="step-label">INTAKE</div>
-                <div class="step-desc">Issue Ingested</div>
-              </div>
-              <div class="pipeline-divider"></div>
-              <div class="pipeline-step" id="step-investigating" data-step="INVESTIGATING">
-                <div class="step-num">02</div>
-                <div class="step-label">INVESTIGATE</div>
-                <div class="step-desc">Code Analysis</div>
-              </div>
-              <div class="pipeline-divider"></div>
-              <div class="pipeline-step" id="step-reproducing" data-step="REPRODUCING">
-                <div class="step-num">03</div>
-                <div class="step-label">REPRODUCE</div>
-                <div class="step-desc">Baseline Failure</div>
-              </div>
-              <div class="pipeline-divider"></div>
-              <div class="pipeline-step" id="step-patching" data-step="PATCHING">
-                <div class="step-num">04</div>
-                <div class="step-label">PATCH</div>
-                <div class="step-desc">Unified Diff Fix</div>
-              </div>
-              <div class="pipeline-divider"></div>
-              <div class="pipeline-step" id="step-testing" data-step="TESTING">
-                <div class="step-num">05</div>
-                <div class="step-label">TEST</div>
-                <div class="step-desc">Subprocess Isolation</div>
-              </div>
-              <div class="pipeline-divider"></div>
-              <div class="pipeline-step" id="step-evaluating" data-step="EVALUATING">
-                <div class="step-num">06</div>
-                <div class="step-label">GUARD</div>
-                <div class="step-desc">Regression Shield</div>
-              </div>
-              <div class="pipeline-divider"></div>
-              <div class="pipeline-step" id="step-verified" data-step="VERIFIED">
-                <div class="step-num">07</div>
-                <div class="step-label">VERIFIED</div>
-                <div class="step-desc">Dual Pass Proof</div>
-              </div>
-            </div>
-
-            <!-- Dual-Pane Live Execution Workspace Grid -->
-            <div class="cockpit-workspace-grid mt-6">
-              
-              <!-- Left: Real-time Terminal Stream -->
-              <div class="terminal-card">
-                <div class="terminal-bar">
-                  <span class="terminal-dots"><i></i><i></i><i></i></span>
-                  <span class="terminal-title" id="terminal-status-title">patchpilot-orchestrator · real-time log</span>
-                  <span class="terminal-live-badge" id="terminal-live-pulse">IDLE</span>
-                </div>
-                <div class="terminal-code-body" id="cockpit-terminal-logs">
-                  <div class="term-line"><span class="term-dim">[SYSTEM] PatchPilot AI Orchestrator initialized.</span></div>
-                  <div class="term-line"><span class="term-dim">[DB] SQLite persistence active (.patchpilot_state.db).</span></div>
-                  <div class="term-line"><span class="term-highlight">&gt; Select or launch a repair run to stream live execution events.</span></div>
-                </div>
-              </div>
-
-              <!-- Right: Interactive Unified Diff & Verification Proof -->
-              <div class="diff-card">
-                <div class="diff-card-header">
-                  <span class="measure font-medium" id="diff-card-title">UNIFIED DIFF // EVIDENCE</span>
-                  <div class="diff-badges" id="diff-badges">
-                    <span class="badge-proof badge-neutral" id="badge-acceptance">Acceptance: Pending</span>
-                    <span class="badge-proof badge-neutral" id="badge-regression">Regression: Pending</span>
-                  </div>
-                </div>
-                <div class="diff-code-body" id="cockpit-diff-body">
-                  <div class="diff-placeholder">
-                    <span class="diff-placeholder-icon">🛡️</span>
-                    <p>Run a repair to generate verified code diff.</p>
-                    <p class="text-xs text-secondary">Fixes are strictly gated on passing both acceptance &amp; regression suites.</p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Pull Request Management & Safety Gate Station -->
-            <div class="cockpit-pr-station mt-8" id="cockpit-pr-station">
-              <div class="pr-station-header">
-                <div>
-                  <span class="measure text-accent font-semibold" id="pr-station-stage-label">STAGE 08 // AUDITED EVIDENCE DISPATCH</span>
-                  <h3 class="display-3 mt-1" id="pr-station-title">Fix Verified. Ready to Open GitHub Pull Request.</h3>
-                </div>
-                <div class="pr-telemetry-badge" id="pr-trace-badge">
-                  <span class="measure text-secondary">Neatlogs Trace:</span>
-                  <code id="pr-trace-val">Local Verified</code>
-                </div>
-              </div>
-
-              <!-- Safety Gate Warning Box (Shown when unverified) -->
-              <div class="safety-gate-warning-box" id="safety-gate-warning" style="display:none;">
-                <div class="safety-warning-icon">⚠️</div>
-                <div class="safety-warning-content">
-                  <strong>PULL REQUEST SAFETY GATE ACTIVE</strong>
-                  <p>This repair did not satisfy dual-suite verification. Standard PR publishing is disabled to prevent shipping broken code.</p>
-                  <label class="override-checkbox-wrap">
-                    <input type="checkbox" id="check-override-unverified">
-                    <span>I understand this patch failed verification and want to publish with an [UNVERIFIED] warning label.</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- PR Details Review Box -->
-              <div class="pr-details-box mt-4">
-                <div class="pr-row">
-                  <span class="pr-label">Target Repository:</span>
-                  <code class="pr-code" id="pr-repo-val">Quantum-Ark/patchai</code>
-                </div>
-                <div class="pr-row">
-                  <span class="pr-label">Base Branch:</span>
-                  <code class="pr-code" id="pr-base-val">main</code>
-                </div>
-                <div class="pr-row">
-                  <span class="pr-label">Source Branch:</span>
-                  <code class="pr-code" id="pr-branch-val">patchpilot/fix-101-a1b2c3</code>
-                </div>
-                <div class="pr-row">
-                  <span class="pr-label">PR Title:</span>
-                  <input type="text" id="pr-title-input" class="dash-input-sm" value="fix: Autonomous verified patch by PatchPilot AI">
-                </div>
-                <div class="pr-row">
-                  <span class="pr-label">Draft PR Option:</span>
-                  <label class="draft-checkbox-label">
-                    <input type="checkbox" id="check-pr-draft">
-                    <span>Create as GitHub Draft Pull Request</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="pr-actions-bar mt-5">
-                <button type="button" class="btn btn-primary" id="btn-raise-github-pr">
-                  <span class="btn-glow" aria-hidden="true"></span>
-                  <span id="btn-raise-pr-label">🚀 Raise Pull Request on GitHub</span>
-                </button>
-                <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" id="btn-open-pr-external" style="display:none;">
-                  <span>Open PR on GitHub ↗</span>
-                </a>
-                <button type="button" class="btn btn-secondary btn-sm" id="btn-download-report">
-                  <span>Download Report JSON</span>
-                </button>
-                <span class="measure text-secondary ml-3" id="pr-feedback-text">Pushes isolated branch and opens Pull Request via GitHub REST API.</span>
-              </div>
-            </div>
-
-          </section>
-
-          <!-- =================================================================
-               VIEW 5: SEARCHABLE REPAIR HISTORY
-               ================================================================= -->
-          <section class="dash-view" id="view-history" role="tabpanel" aria-labelledby="tab-btn-history">
-            <div class="view-header">
-              <div>
-                <h3 class="display-3">Repair Run History</h3>
-                <p class="text-secondary text-sm">Empirical record of all autonomous repairs, test outcomes, and Pull Requests.</p>
-              </div>
-              <div class="history-filter-bar">
-                <input type="text" id="history-search-input" class="dash-input-sm" placeholder="Search by issue or run ID...">
-                <select id="history-status-filter" class="dash-select-sm">
-                  <option value="">All Statuses</option>
-                  <option value="VERIFIED">Verified</option>
-                  <option value="FAILED">Failed</option>
-                  <option value="RUNNING">Running</option>
-                </select>
-                <button type="button" class="btn btn-secondary btn-sm" id="btn-refresh-history">↻ Refresh</button>
-              </div>
-            </div>
-
-            <!-- History Table -->
-            <div class="history-table-wrap mt-6">
-              <table class="dash-table" id="history-runs-table">
-                <thead>
-                  <tr>
-                    <th>RUN ID</th>
-                    <th>REPOSITORY</th>
-                    <th>ISSUE</th>
-                    <th>OUTCOME</th>
-                    <th>ATTEMPTS</th>
-                    <th>DURATION</th>
-                    <th>PULL REQUEST</th>
-                    <th>ACTIONS</th>
-                  </tr>
-                </thead>
-                <tbody id="history-runs-tbody">
-                  <!-- Dynamically rendered -->
-                  <tr>
-                    <td colspan="8" class="text-center text-secondary py-8">Loading history...</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <!-- =================================================================
-               VIEW 6: SETTINGS & INTEGRATIONS
-               ================================================================= -->
-          <section class="dash-view" id="view-settings" role="tabpanel" aria-labelledby="tab-btn-settings">
-            <div class="view-header">
-              <div>
-                <h3 class="display-3">Settings &amp; Integrations</h3>
-                <p class="text-secondary text-sm">Manage GitHub access, LLM providers, Neatlogs telemetry, and system health.</p>
-              </div>
-            </div>
-
-            <div class="settings-cards-grid mt-6">
-              
-              <!-- GitHub Integration Card -->
-              <div class="settings-card">
-                <div class="settings-card-header">
-                  <span class="settings-icon">🐙</span>
-                  <h4>GitHub Authentication</h4>
-                </div>
-                <div class="settings-card-body">
-                  <div class="settings-info-row">
-                    <span class="settings-label">Status:</span>
-                    <span class="status-chip" id="settings-gh-status">Checking...</span>
-                  </div>
-                  <div class="settings-info-row mt-2">
-                    <span class="settings-label">Account:</span>
-                    <span class="settings-val" id="settings-gh-username">Not connected</span>
-                  </div>
-                  <div class="settings-info-row mt-2">
-                    <span class="settings-label">Token:</span>
-                    <span class="settings-val font-mono" id="settings-gh-token">***</span>
-                  </div>
-                  <div class="settings-actions mt-4">
-                    <button type="button" class="btn btn-secondary btn-sm" id="btn-settings-disconnect">Disconnect Account</button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- LLM Provider Readiness -->
-              <div class="settings-card">
-                <div class="settings-card-header">
-                  <span class="settings-icon">🧠</span>
-                  <h4>LLM Provider Readiness</h4>
-                </div>
-                <div class="settings-card-body">
-                  <div class="settings-info-row">
-                    <span class="settings-label">Default Model:</span>
-                    <span class="settings-val font-mono" id="settings-model-val">gpt-4o</span>
-                  </div>
-                  <div class="provider-status-list mt-3" id="settings-provider-list">
-                    <div class="prov-row"><span>OpenAI (GPT-4o)</span><span class="badge-proof badge-neutral" id="prov-openai">Detecting...</span></div>
-                    <div class="prov-row"><span>Google Gemini</span><span class="badge-proof badge-neutral" id="prov-gemini">Detecting...</span></div>
-                    <div class="prov-row"><span>Anthropic Claude</span><span class="badge-proof badge-neutral" id="prov-anthropic">Detecting...</span></div>
-                    <div class="prov-row"><span>Groq (Llama 3.3)</span><span class="badge-proof badge-neutral" id="prov-groq">Detecting...</span></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Neatlogs Telemetry Health -->
-              <div class="settings-card">
-                <div class="settings-card-header">
-                  <span class="settings-icon">📡</span>
-                  <h4>Neatlogs Telemetry</h4>
-                </div>
-                <div class="settings-card-body">
-                  <div class="settings-info-row">
-                    <span class="settings-label">Ingest Pipeline:</span>
-                    <span class="settings-val font-mono">https://ingest.neatlogs.com/v1/trace</span>
-                  </div>
-                  <div class="settings-info-row mt-2">
-                    <span class="settings-label">Project ID:</span>
-                    <span class="settings-val font-mono" id="settings-neatlogs-project">Configured</span>
-                  </div>
-                  <div class="settings-info-row mt-2">
-                    <span class="settings-label">Health:</span>
-                    <span class="status-chip chip-green" id="settings-neatlogs-health">HTTP 200 Ready</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Entire Code Graph Engine -->
-              <div class="settings-card">
-                <div class="settings-card-header">
-                  <span class="settings-icon">🗺️</span>
-                  <h4>Entire Code Graph Engine</h4>
-                </div>
-                <div class="settings-card-body">
-                  <div class="settings-info-row">
-                    <span class="settings-label">Code Graph:</span>
-                    <span class="status-chip chip-green" id="settings-entire-status">Installed (.entire)</span>
-                  </div>
-                  <div class="settings-info-row mt-2">
-                    <span class="settings-label">State Store:</span>
-                    <span class="settings-val font-mono">.patchpilot_state.db (SQLite WAL)</span>
-                  </div>
-                  <div class="settings-info-row mt-2">
-                    <span class="settings-label">Atomic Rollback:</span>
-                    <span class="status-chip chip-green">Active (Zero Data Loss)</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </section>
-
-        </main>
       </div>
     </section>
-
 
   </main>
 

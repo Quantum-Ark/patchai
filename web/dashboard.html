@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PatchPilot AI — Autonomous Developer Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body class="dash-body">
+
+  <div class="dash-layout">
+    
+    <!-- ====================================================================
+         LEFT DARK SIDEBAR
+         ==================================================================== -->
+    <aside class="dash-sidebar" id="dash-sidebar">
+      
+      <!-- Top Brand -->
+      <div class="dash-brand">
+        <a href="/" class="brand-link" title="Return to Home">
+          <div class="brand-logo-icon">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5h-2v-2h2v2zm0-4h-2V7h2v5.5z"/>
+            </svg>
+          </div>
+          <span class="brand-title">PatchPilot</span>
+          <span class="brand-badge-pill">AI</span>
+        </a>
+      </div>
+
+      <!-- Main Navigation -->
+      <nav class="sidebar-nav">
+        <button type="button" class="nav-item active" data-view="dashboard">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>Dashboard</span>
+        </button>
+
+        <button type="button" class="nav-item" data-view="new-repair">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          <span>New Repair</span>
+        </button>
+
+        <button type="button" class="nav-item" data-view="repositories">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span>Repositories</span>
+        </button>
+
+        <button type="button" class="nav-item" data-view="scanner">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>Bug &amp; Security Scanner</span>
+          <span class="nav-badge-new">NEW</span>
+        </button>
+
+        <button type="button" class="nav-item" data-view="issues">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span>Issues</span>
+        </button>
+
+        <button type="button" class="nav-item" data-view="history">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span>Repair History</span>
+        </button>
+
+        <button type="button" class="nav-item" data-view="pull-requests">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="18" r="3"/>
+            <circle cx="6" cy="6" r="3"/>
+            <path d="M13 6h3a2 2 0 0 1 2 2v7"/>
+            <line x1="6" y1="9" x2="6" y2="21"/>
+          </svg>
+          <span>Pull Requests</span>
+        </button>
+
+        <button type="button" class="nav-item" data-view="settings">
+          <svg class="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Settings &amp; LLMs</span>
+        </button>
+      </nav>
+
+      <!-- Bottom Usage Widget -->
+      <div class="sidebar-footer">
+        <div class="usage-card">
+          <div class="usage-header">
+            <span class="usage-label">Usage</span>
+            <span class="usage-val" id="usage-runs-val">32 / 100 runs</span>
+          </div>
+          <div class="usage-progress-bar">
+            <div class="usage-progress-fill" id="usage-progress-fill" style="width: 32%;"></div>
+          </div>
+          <a href="#settings" class="upgrade-link" id="link-upgrade-plan">Upgrade Plan &rarr;</a>
+        </div>
+
+        <div class="sidebar-help-links">
+          <span class="help-heading">Need help?</span>
+          <a href="https://github.com/Quantum-Ark/patchai" target="_blank" class="help-link">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span>Documentation</span>
+          </a>
+          <a href="mailto:support@patchpilot.ai" class="help-link">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Contact Support</span>
+          </a>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ====================================================================
+         MAIN CONTENT AREA
+         ==================================================================== -->
+    <div class="dash-main-wrap">
+      
+      <!-- Top Bar -->
+      <header class="dash-topbar">
+        <div class="search-box-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="global-search-input" placeholder="Search repositories, issues, or runs..." autocomplete="off">
+          <span class="search-kbd-badge">&#x2318; K</span>
+        </div>
+
+        <div class="topbar-actions">
+          <!-- Notification Bell -->
+          <button type="button" class="btn-icon-topbar" id="btn-topbar-notifs" title="Notifications">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span class="notif-badge-dot"></span>
+          </button>
+
+          <!-- User Profile -->
+          <div class="user-profile-menu-wrap" id="user-profile-menu-wrap">
+            <div class="user-avatar-pill" id="user-avatar-trigger" tabindex="0">
+              <div class="avatar-circle" id="user-avatar-circle">
+                <span id="user-initials">AK</span>
+              </div>
+              <div class="user-details-col">
+                <span class="user-name-text" id="user-display-name">Abhishek Kumar</span>
+                <span class="user-handle-text" id="user-display-handle">@abhishek-dev</span>
+              </div>
+              <svg class="chevron-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+
+            <!-- Profile Dropdown -->
+            <div class="profile-dropdown-card" id="profile-dropdown-card">
+              <div class="dropdown-header">
+                <strong id="dropdown-full-name">Abhishek Kumar</strong>
+                <span id="dropdown-email">Connected via GitHub</span>
+              </div>
+              <div class="dropdown-divider"></div>
+              <button type="button" class="dropdown-item" id="btn-switch-account">
+                <span>Connect GitHub Account</span>
+              </button>
+              <button type="button" class="dropdown-item" id="btn-open-settings">
+                <span>API &amp; LLM Settings</span>
+              </button>
+              <div class="dropdown-divider"></div>
+              <button type="button" class="dropdown-item text-danger" id="btn-sign-out">
+                <span>Disconnect Credentials</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Main View Container -->
+      <main class="dash-content-body">
+
+        <!-- ================================================================
+             VIEW 1: DASHBOARD HOME (Matching attached design mock)
+             ================================================================ -->
+        <section class="dash-view-section active" id="view-dashboard">
+          
+          <!-- Welcome Banner -->
+          <div class="welcome-header-row">
+            <div class="welcome-text-col">
+              <span class="welcome-greeting">Good morning &#x1F44B;</span>
+              <h1 class="welcome-heading">Let AI fix your bugs, end to end.</h1>
+              <p class="welcome-subtext">Connect a repository, pick an issue, and let PatchPilot investigate, fix, test, and create a pull request.</p>
+            </div>
+            <div class="welcome-actions-col">
+              <button type="button" class="btn btn-dark-action" id="btn-quick-new-repair">
+                <span>+ New Repair</span>
+              </button>
+              <button type="button" class="btn btn-outline-action" id="btn-quick-connect-repo">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+                <span>Connect Repository</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 KPI Metrics Cards -->
+          <div class="kpi-cards-grid">
+            
+            <!-- KPI 1 -->
+            <div class="kpi-card">
+              <div class="kpi-icon-circle icon-pink">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#E11D48" stroke-width="2">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                  <path d="M8 12h8M12 8v8"/>
+                </svg>
+              </div>
+              <div class="kpi-data-col">
+                <span class="kpi-num" id="kpi-repairs-count">12</span>
+                <span class="kpi-label">Repairs Completed</span>
+                <div class="kpi-trend trend-up">
+                  <span>&uarr; 3 this week</span>
+                </div>
+              </div>
+              <div class="kpi-sparkline">
+                <svg viewBox="0 0 70 28" fill="none" stroke="#E11D48" stroke-width="2" stroke-linecap="round">
+                  <path d="M2 20 Q 20 22, 35 12 T 68 8"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- KPI 2 -->
+            <div class="kpi-card">
+              <div class="kpi-icon-circle icon-purple">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+              </div>
+              <div class="kpi-data-col">
+                <span class="kpi-num" id="kpi-prs-count">8</span>
+                <span class="kpi-label">Pull Requests Created</span>
+                <div class="kpi-trend trend-up">
+                  <span>&uarr; 2 this week</span>
+                </div>
+              </div>
+              <div class="kpi-sparkline">
+                <svg viewBox="0 0 70 28" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round">
+                  <path d="M2 24 Q 25 18, 45 19 T 68 10"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- KPI 3 -->
+            <div class="kpi-card">
+              <div class="kpi-icon-circle icon-green">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#16A34A" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <div class="kpi-data-col">
+                <span class="kpi-num" id="kpi-success-rate">94%</span>
+                <span class="kpi-label">Success Rate</span>
+                <div class="kpi-trend trend-up">
+                  <span>&uarr; 12% vs last month</span>
+                </div>
+              </div>
+              <div class="kpi-sparkline">
+                <svg viewBox="0 0 70 28" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round">
+                  <path d="M2 22 Q 20 20, 38 14 T 68 6"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- KPI 4 -->
+            <div class="kpi-card">
+              <div class="kpi-icon-circle icon-blue">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+              <div class="kpi-data-col">
+                <span class="kpi-num" id="kpi-avg-time">28 min</span>
+                <span class="kpi-label">Avg. Time to Fix</span>
+                <div class="kpi-trend trend-up">
+                  <span>&darr; 40% faster</span>
+                </div>
+              </div>
+              <div class="kpi-sparkline">
+                <svg viewBox="0 0 70 28" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round">
+                  <path d="M2 12 Q 22 16, 42 10 T 68 18"/>
+                </svg>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Two-Column Main Grid -->
+          <div class="dash-two-col-grid">
+            
+            <!-- LEFT COLUMN -->
+            <div class="dash-col-left">
+              
+              <!-- Recent Repair Runs Card -->
+              <div class="panel-card">
+                <div class="panel-header-row">
+                  <h2 class="panel-title">Recent Repair Runs</h2>
+                  <button type="button" class="btn-link-action" id="btn-view-all-runs">View all &rarr;</button>
+                </div>
+                
+                <div class="table-responsive">
+                  <table class="dash-table" id="table-recent-runs">
+                    <thead>
+                      <tr>
+                        <th>Issue</th>
+                        <th>Repository</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                        <th>PR</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-recent-runs">
+                      <!-- Live rendered rows -->
+                      <tr>
+                        <td><strong>#42</strong> Fix login redirect loop</td>
+                        <td><span class="repo-inline-tag"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg> nextjs-starter</span></td>
+                        <td><span class="badge badge-verified">&#x2713; Verified</span></td>
+                        <td>28 min</td>
+                        <td><a href="#" class="pr-link">#128</a></td>
+                        <td>&rsaquo;</td>
+                      </tr>
+                      <tr>
+                        <td><strong>#17</strong> Handle null user avatar</td>
+                        <td><span class="repo-inline-tag"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg> saas-dashboard</span></td>
+                        <td><span class="badge badge-running">&#x2022; Running</span></td>
+                        <td>12 min</td>
+                        <td>&mdash;</td>
+                        <td>&rsaquo;</td>
+                      </tr>
+                      <tr>
+                        <td><strong>#89</strong> Fix API rate limit error</td>
+                        <td><span class="repo-inline-tag"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg> api-gateway</span></td>
+                        <td><span class="badge badge-pending">&#x2022; Pending</span></td>
+                        <td>2 min</td>
+                        <td>&mdash;</td>
+                        <td>&rsaquo;</td>
+                      </tr>
+                      <tr>
+                        <td><strong>#23</strong> Resolve build failure</td>
+                        <td><span class="repo-inline-tag"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg> react-components</span></td>
+                        <td><span class="badge badge-failed">&#x2715; Failed</span></td>
+                        <td>18 min</td>
+                        <td>&mdash;</td>
+                        <td>&rsaquo;</td>
+                      </tr>
+                      <tr>
+                        <td><strong>#56</strong> Fix mobile menu overlap</td>
+                        <td><span class="repo-inline-tag"><svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg> marketing-site</span></td>
+                        <td><span class="badge badge-verified">&#x2713; Verified</span></td>
+                        <td>35 min</td>
+                        <td><a href="#" class="pr-link">#127</a></td>
+                        <td>&rsaquo;</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Active Repair Card -->
+              <div class="panel-card active-repair-card">
+                <div class="panel-header-row">
+                  <div class="active-repair-meta-row">
+                    <h2 class="panel-title">Active Repair</h2>
+                    <span class="run-tag" id="active-run-pill">Run #a1b2c3</span>
+                    <span class="elapsed-tag" id="active-run-elapsed">12 min elapsed</span>
+                  </div>
+                  <button type="button" class="btn-sm-action" id="btn-inspect-active-run">Inspect &rarr;</button>
+                </div>
+
+                <div class="active-repair-title-wrap">
+                  <h3 class="active-issue-title" id="active-issue-title">#17 Handle null user avatar in profile page</h3>
+                  <div class="active-issue-tags">
+                    <span class="repo-pill" id="active-issue-repo">
+                      <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                      saas-dashboard
+                    </span>
+                    <span class="branch-pill" id="active-issue-branch">🌿 main</span>
+                  </div>
+                </div>
+
+                <!-- 5-Step Stepper -->
+                <div class="stepper-pipeline" id="stepper-pipeline">
+                  <div class="step-node completed" id="step-node-analyzing">
+                    <span class="node-icon">&#x2713;</span>
+                    <span class="node-label">Analyzing</span>
+                  </div>
+                  <div class="step-connector completed"></div>
+
+                  <div class="step-node active" id="step-node-patching">
+                    <span class="node-icon">&#x2022;</span>
+                    <span class="node-label">Writing patch</span>
+                  </div>
+                  <div class="step-connector"></div>
+
+                  <div class="step-node" id="step-node-testing">
+                    <span class="node-icon">3</span>
+                    <span class="node-label">Running tests</span>
+                  </div>
+                  <div class="step-connector"></div>
+
+                  <div class="step-node" id="step-node-verifying">
+                    <span class="node-icon">4</span>
+                    <span class="node-label">Verifying</span>
+                  </div>
+                  <div class="step-connector"></div>
+
+                  <div class="step-node" id="step-node-ready">
+                    <span class="node-icon">5</span>
+                    <span class="node-label">Ready for PR</span>
+                  </div>
+                </div>
+
+                <!-- Dark Live Terminal Output -->
+                <div class="active-terminal-wrap">
+                  <div class="terminal-body" id="active-terminal-stream">
+                    <div class="term-row"><span class="term-arrow">&gt;</span> <span class="term-text">Analyzing repository structure...</span> <span class="term-time">10:42:11</span></div>
+                    <div class="term-row"><span class="term-arrow">&gt;</span> <span class="term-text">Found relevant files: src/components/Profile.tsx</span> <span class="term-time">10:42:18</span></div>
+                    <div class="term-row"><span class="term-arrow">&gt;</span> <span class="term-text">Generating patch with Claude 3.5...</span> <span class="term-time">10:43:02</span></div>
+                    <div class="term-row"><span class="term-arrow">&gt;</span> <span class="term-text">Applying changes...</span> <span class="term-time">10:43:15</span></div>
+                    <div class="term-row"><span class="term-arrow">&gt;</span> <span class="term-text">Running tests...</span> <span class="term-time">10:43:20</span></div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="dash-col-right">
+              
+              <!-- Connected Repository Card -->
+              <div class="panel-card repo-summary-card">
+                <div class="panel-header-row">
+                  <h2 class="panel-title">Connected Repository</h2>
+                  <button type="button" class="btn-link-action" id="btn-manage-repos">Manage</button>
+                </div>
+
+                <div class="repo-main-info-row">
+                  <div class="repo-avatar-icon">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                  </div>
+                  <div class="repo-meta-col">
+                    <span class="repo-title" id="repo-title-display">nextjs-starter</span>
+                    <span class="repo-owner-tag" id="repo-owner-display">abhishek-dev &bull; Private</span>
+                  </div>
+                  <button type="button" class="btn-refresh-sm" id="btn-refresh-repo" title="Refresh repository">
+                    &#x21bb;
+                  </button>
+                </div>
+
+                <div class="repo-stats-horizontal">
+                  <div class="repo-stat-item">
+                    <span class="stat-icon">&#x26A0;</span>
+                    <span class="stat-text" id="stat-issues-count">124 Issues</span>
+                  </div>
+                  <div class="repo-stat-item">
+                    <span class="stat-icon">&#x2934;</span>
+                    <span class="stat-text" id="stat-prs-count">12 Open PRs</span>
+                  </div>
+                  <div class="repo-stat-item">
+                    <span class="stat-icon">&#x23F1;</span>
+                    <span class="stat-text" id="stat-runs-count">3 Active runs</span>
+                  </div>
+                </div>
+
+                <div class="repo-scanner-cta-wrap">
+                  <button type="button" class="btn btn-scan-repo" id="btn-quick-scan-workspace">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    <span>Scan Workspace for Bugs &amp; Security</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Recent Pull Requests Card -->
+              <div class="panel-card prs-card">
+                <div class="panel-header-row">
+                  <h2 class="panel-title">Recent Pull Requests</h2>
+                  <button type="button" class="btn-link-action" id="btn-view-all-prs">View all &rarr;</button>
+                </div>
+
+                <div class="pr-items-list" id="recent-prs-list">
+                  
+                  <div class="pr-list-item">
+                    <div class="pr-item-icon icon-git-pr">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#16A34A" stroke-width="2">
+                        <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/>
+                        <path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/>
+                      </svg>
+                    </div>
+                    <div class="pr-item-col">
+                      <div class="pr-item-top">
+                        <strong class="pr-num-title">#128 Fix login redirect loop</strong>
+                        <span class="badge badge-pr-open">Open</span>
+                      </div>
+                      <div class="pr-item-bottom">
+                        <span class="pr-branch-name">patchpilot/fix-42-a1b2c3</span>
+                        <span class="pr-time-ago">2 hours ago</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pr-list-item">
+                    <div class="pr-item-icon icon-git-draft">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#6B7280" stroke-width="2">
+                        <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/>
+                        <path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/>
+                      </svg>
+                    </div>
+                    <div class="pr-item-col">
+                      <div class="pr-item-top">
+                        <strong class="pr-num-title">#127 Fix mobile menu overlap</strong>
+                        <span class="badge badge-pr-draft">Draft</span>
+                      </div>
+                      <div class="pr-item-bottom">
+                        <span class="pr-branch-name">patchpilot/fix-56-d4e5f6</span>
+                        <span class="pr-time-ago">1 day ago</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pr-list-item">
+                    <div class="pr-item-icon icon-git-pr">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#16A34A" stroke-width="2">
+                        <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/>
+                        <path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/>
+                      </svg>
+                    </div>
+                    <div class="pr-item-col">
+                      <div class="pr-item-top">
+                        <strong class="pr-num-title">#120 Add error handling</strong>
+                        <span class="badge badge-pr-open">Open</span>
+                      </div>
+                      <div class="pr-item-bottom">
+                        <span class="pr-branch-name">patchpilot/fix-34-g7h8i9</span>
+                        <span class="pr-time-ago">3 days ago</span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Test Results Card -->
+              <div class="panel-card test-results-card">
+                <div class="panel-header-row">
+                  <h2 class="panel-title">Test Results</h2>
+                  <button type="button" class="btn-link-action" id="btn-view-test-details">View details &rarr;</button>
+                </div>
+
+                <div class="test-gauges-row">
+                  
+                  <!-- Baseline Gauge -->
+                  <div class="gauge-col">
+                    <span class="gauge-heading">Baseline</span>
+                    <div class="circular-donut donut-baseline">
+                      <svg viewBox="0 0 36 36" class="donut-svg">
+                        <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        <path class="circle-fill-red" stroke-dasharray="70, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                      </svg>
+                      <div class="donut-center-text" id="gauge-baseline-val">70%</div>
+                    </div>
+                    <div class="gauge-breakdown">
+                      <span class="text-green">&#x2713; 12 passed</span>
+                      <span class="text-red">&#x2715; 3 failed</span>
+                      <span class="text-gray">&bull; 0 skipped</span>
+                    </div>
+                  </div>
+
+                  <!-- After Patch Gauge -->
+                  <div class="gauge-col">
+                    <span class="gauge-heading">After Patch</span>
+                    <div class="circular-donut donut-after">
+                      <svg viewBox="0 0 36 36" class="donut-svg">
+                        <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        <path class="circle-fill-green" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                      </svg>
+                      <div class="donut-center-text text-green" id="gauge-after-val">100%</div>
+                    </div>
+                    <div class="gauge-breakdown">
+                      <span class="text-green">&#x2713; 15 passed</span>
+                      <span class="text-gray">&#x2715; 0 failed</span>
+                      <span class="text-gray">&bull; 0 skipped</span>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="test-status-banner-box">
+                  <div class="banner-icon-green">&#x2713;</div>
+                  <div class="banner-text-col">
+                    <strong>All tests passing</strong>
+                    <p>The patch successfully fixes the issue and all tests are passing.</p>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ================================================================
+             VIEW 2: WORKSPACE BUG & SECURITY SCANNER
+             ================================================================ -->
+        <section class="dash-view-section" id="view-scanner">
+          <div class="section-title-wrap">
+            <h1 class="view-main-title">Autonomous Codebase &amp; Security Scanner</h1>
+            <p class="view-main-desc">Scan your full codebase workspace or connected GitHub repo for syntax errors, unhandled exceptions, zero-division risks, and security vulnerabilities.</p>
+          </div>
+
+          <div class="scanner-action-bar">
+            <div class="scan-input-group">
+              <input type="text" id="scanner-repo-input" class="form-control" placeholder="https://github.com/Quantum-Ark/patchai or local workspace..." value="Quantum-Ark/patchai">
+              <button type="button" class="btn btn-dark-action" id="btn-run-full-scan">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span id="scan-btn-label">Run Full Workspace Scan</span>
+              </button>
+            </div>
+            <div class="scan-summary-stats" id="scan-summary-bar">
+              <span class="badge badge-neutral" id="scan-stat-files">Files Scanned: 42</span>
+              <span class="badge badge-failed" id="scan-stat-critical">Critical Risks: 1</span>
+              <span class="badge badge-pending" id="scan-stat-high">High/Medium Risks: 2</span>
+            </div>
+          </div>
+
+          <div class="panel-card" style="margin-top: 16px;">
+            <div class="panel-header-row">
+              <h2 class="panel-title">Detected Bugs, Edge Cases &amp; Security Findings</h2>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="dash-table" id="table-scanner-results">
+                <thead>
+                  <tr>
+                    <th>Severity</th>
+                    <th>Category</th>
+                    <th>File &amp; Line</th>
+                    <th>Bug Title &amp; Description</th>
+                    <th>Code Snippet</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-scanner-results">
+                  <!-- Dynamically populated from /api/scan-workspace -->
+                  <tr>
+                    <td><span class="badge badge-failed">HIGH</span></td>
+                    <td>Arithmetic Risk</td>
+                    <td><code>calc.py:3</code></td>
+                    <td>
+                      <strong>Unchecked Division Operation</strong>
+                      <p>Division detected without explicit zero-denominator assertion or guard in calculate_ratio.</p>
+                    </td>
+                    <td><code>return x / y</code></td>
+                    <td>
+                      <button type="button" class="btn-sm-action btn-scan-fix" data-benchmark="case_1" data-file="calc.py">
+                        ⚡ Fix with AI
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><span class="badge badge-pending">MEDIUM</span></td>
+                    <td>Boundary Error</td>
+                    <td><code>parser.py:12</code></td>
+                    <td>
+                      <strong>Missing Boundary Index Check</strong>
+                      <p>Array offset access without length validation may cause IndexError.</p>
+                    </td>
+                    <td><code>return items[idx]</code></td>
+                    <td>
+                      <button type="button" class="btn-sm-action btn-scan-fix" data-benchmark="case_2" data-file="parser.py">
+                        ⚡ Fix with AI
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 3: NEW REPAIR WIZARD
+             ================================================================ -->
+        <section class="dash-view-section" id="view-new-repair">
+          <div class="section-title-wrap">
+            <h1 class="view-main-title">Start Autonomous Repair</h1>
+            <p class="view-main-desc">Select an authorized repository, choose an issue or provide bug details, and launch the autonomous repair engine.</p>
+          </div>
+
+          <div class="repair-wizard-container">
+            <div class="wizard-steps-nav">
+              <div class="wiz-step active" data-step="1"><span>1</span> Target Repo</div>
+              <div class="wiz-step" data-step="2"><span>2</span> Issue Details</div>
+              <div class="wiz-step" data-step="3"><span>3</span> Test Command</div>
+              <div class="wiz-step" data-step="4"><span>4</span> Safety &amp; Constraints</div>
+            </div>
+
+            <div class="wizard-step-content" id="wiz-step-content">
+              
+              <!-- Quick Benchmark Presets -->
+              <div class="presets-banner">
+                <span class="presets-title">&#x26A1; Quick Evaluation Presets:</span>
+                <div class="presets-group">
+                  <button type="button" class="preset-pill active" data-preset="case_1">Case 1: ZeroDivision (calc.py)</button>
+                  <button type="button" class="preset-pill" data-preset="case_2">Case 2: Boundary Bug (parser.py)</button>
+                  <button type="button" class="preset-pill" data-preset="case_3">Case 3: Multi-Attempt Regression</button>
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="wiz-repo-select">Target Repository</label>
+                  <select id="wiz-repo-select" class="form-control">
+                    <option value="Quantum-Ark/patchai">Quantum-Ark/patchai (main)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="wiz-branch-input">Target Branch</label>
+                  <input type="text" id="wiz-branch-input" class="form-control" value="main">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="wiz-issue-url">GitHub Issue URL or Issue #</label>
+                <div class="input-btn-combo">
+                  <input type="text" id="wiz-issue-url" class="form-control" placeholder="https://github.com/Quantum-Ark/patchai/issues/1">
+                  <button type="button" class="btn btn-outline-action" id="btn-fetch-wiz-issue">Fetch Issue</button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="wiz-issue-title">Issue Title &amp; Description</label>
+                <input type="text" id="wiz-issue-title" class="form-control" value="ZeroDivisionError in calculate_ratio when denominator is zero">
+                <textarea id="wiz-issue-desc" class="form-control" rows="3" style="margin-top:8px;">When calculate_ratio is invoked with y=0, it raises unhandled ZeroDivisionError instead of ValueError('Division by zero').</textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="wiz-test-cmd">Reproduction Test Command</label>
+                <input type="text" id="wiz-test-cmd" class="form-control" value="pytest tests/test_calc.py -v">
+                <span class="field-hint">Command executed in isolated subprocess with secret scrub &amp; timeout guard.</span>
+              </div>
+
+              <div class="wizard-actions-row">
+                <button type="button" class="btn btn-dark-action btn-lg" id="btn-dispatch-repair">
+                  <span>&#x1F680; Dispatch Autonomous Repair</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 4: REPOSITORIES
+             ================================================================ -->
+        <section class="dash-view-section" id="view-repositories">
+          <div class="section-title-wrap">
+            <h1 class="view-main-title">Connected Repositories</h1>
+            <p class="view-main-desc">Manage GitHub repositories authorized for autonomous inspection and pull request creation.</p>
+          </div>
+
+          <div class="repos-toolbar">
+            <input type="text" id="repo-filter-input" class="form-control" placeholder="Search repositories...">
+            <button type="button" class="btn btn-dark-action" id="btn-refresh-all-repos">&#x21bb; Sync with GitHub</button>
+          </div>
+
+          <div class="repos-card-grid" id="repos-card-grid">
+            <div class="repo-card-box">
+              <div class="repo-card-head">
+                <strong class="repo-card-title">Quantum-Ark/patchai</strong>
+                <span class="badge badge-verified">Connected</span>
+              </div>
+              <p class="repo-card-desc">Autonomous software repair agent with empirical proof and regression shields.</p>
+              <div class="repo-card-footer">
+                <span>🌿 main</span>
+                <button type="button" class="btn-sm-action btn-open-repo-scan">Scan for Bugs</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 5: ISSUES BROWSER
+             ================================================================ -->
+        <section class="dash-view-section" id="view-issues">
+          <div class="section-title-wrap">
+            <h1 class="view-main-title">Repository Issues</h1>
+            <p class="view-main-desc">Open issues discovered across connected repositories available for instant autonomous resolution.</p>
+          </div>
+
+          <div class="panel-card">
+            <div class="table-responsive">
+              <table class="dash-table">
+                <thead>
+                  <tr>
+                    <th>Issue #</th>
+                    <th>Title</th>
+                    <th>Labels</th>
+                    <th>Reported</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-issues-list">
+                  <tr>
+                    <td><strong>#1</strong></td>
+                    <td>ZeroDivisionError in calculate_ratio when denominator is zero</td>
+                    <td><span class="badge badge-failed">bug</span></td>
+                    <td>1 day ago</td>
+                    <td><button type="button" class="btn-sm-action btn-fix-issue-direct" data-issue="1">Repair Issue &rarr;</button></td>
+                  </tr>
+                  <tr>
+                    <td><strong>#2</strong></td>
+                    <td>IndexError in parse_tokens when input string is malformed</td>
+                    <td><span class="badge badge-pending">boundary</span></td>
+                    <td>3 days ago</td>
+                    <td><button type="button" class="btn-sm-action btn-fix-issue-direct" data-issue="2">Repair Issue &rarr;</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 6: REPAIR HISTORY & DIFF INSPECTION
+             ================================================================ -->
+        <section class="dash-view-section" id="view-history">
+          <div class="section-title-wrap">
+            <h1 class="view-main-title">Repair Runs &amp; Evidence History</h1>
+            <p class="view-main-desc">Complete immutable audit trail of all previous autonomous repair runs, test results, and created Pull Requests.</p>
+          </div>
+
+          <div class="panel-card">
+            <div class="table-responsive">
+              <table class="dash-table" id="table-all-history">
+                <thead>
+                  <tr>
+                    <th>Run ID</th>
+                    <th>Issue</th>
+                    <th>Status</th>
+                    <th>Duration</th>
+                    <th>Diff</th>
+                    <th>Pull Request</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-all-history">
+                  <!-- Dynamically populated from /api/runs -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Diff Inspection Modal / Card -->
+          <div class="panel-card" id="history-diff-card" style="margin-top: 16px; display: none;">
+            <div class="panel-header-row">
+              <h2 class="panel-title" id="diff-viewer-title">Unified Diff Inspection</h2>
+              <button type="button" class="btn-sm-action" id="btn-close-diff">Close Diff &times;</button>
+            </div>
+            <pre class="diff-viewer-pre" id="diff-viewer-pre"></pre>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 7: PULL REQUESTS
+             ================================================================ -->
+        <section class="dash-view-section" id="view-pull-requests">
+          <div class="section-title-wrap">
+            <h1 class="view-main-title">Autonomous Pull Requests</h1>
+            <p class="view-main-desc">Pull Requests published directly to GitHub from verified repair runs.</p>
+          </div>
+
+          <div class="panel-card">
+            <div class="table-responsive">
+              <table class="dash-table" id="table-prs-page">
+                <thead>
+                  <tr>
+                    <th>PR #</th>
+                    <th>Title</th>
+                    <th>Branch</th>
+                    <th>Status</th>
+                    <th>Draft</th>
+                    <th>Created At</th>
+                    <th>Link</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-prs-page">
+                  <!-- Dynamically populated from /api/prs -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW 8: SETTINGS & LLM CONFIGURATION
+             ================================================================ -->
+        <section class="dash-view-section" id="view-settings">
+          <div class="section-title-wrap">
+            <h1 class="view-main-title">Settings &amp; Integrations</h1>
+            <p class="view-main-desc">Configure GitHub authorization, custom LLM providers (OpenAI, Gemini, Anthropic, Groq, Ollama), and telemetry.</p>
+          </div>
+
+          <div class="settings-grid">
+            
+            <!-- GitHub Account -->
+            <div class="settings-box">
+              <h3 class="settings-box-title">GitHub Account &amp; Token</h3>
+              <p class="settings-box-desc">Connect a GitHub Personal Access Token (PAT) with repo and pull_requests:write scopes.</p>
+              
+              <div class="form-group" style="margin-top: 12px;">
+                <label class="form-label" for="setting-gh-token">Personal Access Token</label>
+                <div class="input-btn-combo">
+                  <input type="password" id="setting-gh-token" class="form-control" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                  <button type="button" class="btn btn-dark-action" id="btn-save-gh-token">Connect</button>
+                </div>
+                <span class="field-hint" id="gh-token-status-hint">Active Token: ****1234 (Connected)</span>
+              </div>
+            </div>
+
+            <!-- Custom LLM Provider API Keys -->
+            <div class="settings-box">
+              <h3 class="settings-box-title">LLM Provider API Keys</h3>
+              <p class="settings-box-desc">Provide API keys for live repair generation. Keys are securely stored and never exposed in the browser.</p>
+
+              <div class="form-group" style="margin-top: 12px;">
+                <label class="form-label" for="llm-provider-select">Select Provider</label>
+                <select id="llm-provider-select" class="form-control">
+                  <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
+                  <option value="gemini">Google Gemini (Gemini 1.5 Pro / Flash)</option>
+                  <option value="anthropic">Anthropic (Claude 3.5 Sonnet)</option>
+                  <option value="groq">Groq (Llama 3 70B)</option>
+                  <option value="ollama">Ollama (Local LLM)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="llm-api-key-input">API Key / Endpoint</label>
+                <div class="input-btn-combo">
+                  <input type="password" id="llm-api-key-input" class="form-control" placeholder="Enter API key...">
+                  <button type="button" class="btn btn-dark-action" id="btn-save-llm-key">Save Key</button>
+                </div>
+                <span class="field-hint" id="llm-save-status">Status: Configured via environment</span>
+              </div>
+            </div>
+
+            <!-- User Profile Settings -->
+            <div class="settings-box">
+              <h3 class="settings-box-title">Developer Profile</h3>
+              <p class="settings-box-desc">Customize your dashboard display name and GitHub handle.</p>
+
+              <div class="form-group" style="margin-top: 12px;">
+                <label class="form-label" for="prof-name-input">Display Name</label>
+                <input type="text" id="prof-name-input" class="form-control" value="Abhishek Kumar">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="prof-handle-input">Username / Handle</label>
+                <div class="input-btn-combo">
+                  <input type="text" id="prof-handle-input" class="form-control" value="abhishek-dev">
+                  <button type="button" class="btn btn-dark-action" id="btn-save-profile">Save Profile</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Neatlogs & Telemetry -->
+            <div class="settings-box">
+              <h3 class="settings-box-title">Telemetry &amp; Audit</h3>
+              <p class="settings-box-desc">Neatlogs tracing pipeline and Entire AST code graph integration status.</p>
+              
+              <div class="telemetry-status-row">
+                <span>Neatlogs SDK Telemetry:</span>
+                <span class="badge badge-verified" id="telemetry-neatlogs-badge">Active</span>
+              </div>
+              <div class="telemetry-status-row" style="margin-top: 8px;">
+                <span>Entire Code Graph:</span>
+                <span class="badge badge-verified" id="telemetry-entire-badge">Installed</span>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

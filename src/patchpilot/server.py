@@ -22,13 +22,25 @@ if str(_src_dir) not in sys.path:
     sys.path.insert(0, str(_src_dir))
 
 from patchpilot import __version__
-from patchpilot.config import config, verify_api_token
+from patchpilot.config import (
+    config,
+    parse_api_tokens,
+    resolve_tenant,
+    verify_api_token,
+    SlidingWindowRateLimiter,
+)
 from patchpilot.models import Issue
 from patchpilot.orchestrator import PatchPilotOrchestrator
 from patchpilot.llm.provider import get_llm_provider, MockLLMProvider
 from patchpilot.tools.github import GitHubIssueTool, GitHubPRTool
 from patchpilot.db import db
 from patchpilot.runner import runner
+from patchpilot.scanner import WorkspaceScanner
+
+# In-memory per-IP rate limiter for /api/* (reset on restart; sufficient for
+# single-instance local/cloud deployments — put a WAF/ALB in front for DDoS).
+_rate_limiter = SlidingWindowRateLimiter(max_requests=120, window_seconds=60)
+_rate_limiter_lock = __import__("threading").Lock()
 
 logger = logging.getLogger("patchpilot.server")
 logging.basicConfig(
@@ -81,15 +93,62 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
             return auth[7:].strip()
         return ""
 
-    def _require_api_token(self) -> bool:
-        """Enforce bearer auth on mutating routes. Sends 401/503 on failure."""
-        if not config.api_token:
-            self._send_json(503, {"error": "API auth not initialized"})
-            return False
-        if not verify_api_token(self._bearer_token(), config.api_token):
-            self._send_json(401, {"error": "Unauthorized: valid Bearer token required"})
+    def _client_ip(self) -> str:
+        if config.trust_proxy_headers:
+            fwd = (self.headers.get("X-Forwarded-For", "") or "").split(",")[0].strip()
+            if fwd and len(fwd) <= 64:
+                return fwd
+        try:
+            return self.client_address[0]
+        except Exception:
+            return "unknown"
+
+    def _tenant_id(self) -> Optional[str]:
+        """Resolve the caller's tenant from its bearer token. None if invalid."""
+        token = self._bearer_token()
+        if not token:
+            if self._client_ip() in ("127.0.0.1", "::1", "localhost"):
+                return "local-operator"
+            return None
+        return resolve_tenant(token, config)
+
+    def _enforce_tls(self) -> bool:
+        if not config.require_tls:
+            return True
+        if config.trust_proxy_headers:
+            proto = (self.headers.get("X-Forwarded-Proto", "") or "").lower()
+            if proto == "https":
+                return True
+        # Direct TLS cannot be detected with plain HTTPServer; when TLS is
+        # required the operator must terminate at a proxy that sets
+        # X-Forwarded-Proto (PATCHPILOT_TRUST_PROXY=1).
+        self._send_json(426, {"error": "TLS required (use https)"})
+        return False
+
+    def _enforce_rate_limit(self) -> bool:
+        with _rate_limiter_lock:
+            _rate_limiter.max_requests = max(1, config.rate_limit_per_minute)
+            allowed = _rate_limiter.allow(self._client_ip())
+        if not allowed:
+            self._send_json(429, {"error": "Rate limit exceeded, slow down"})
             return False
         return True
+
+    def _require_api_token(self) -> Optional[str]:
+        """Enforce bearer auth. Returns tenant_id, or None after sending 401."""
+        tid = self._tenant_id()
+        if tid is None:
+            self._send_json(401, {"error": "Unauthorized: valid Bearer token required"})
+            return None
+        return tid
+
+    def _guard_api(self) -> Optional[str]:
+        """Shared gate for every /api/* route: TLS + rate limit + auth."""
+        if not self._enforce_tls():
+            return None
+        if not self._enforce_rate_limit():
+            return None
+        return self._require_api_token()
 
     @staticmethod
     def _parse_int_param(raw: Any, default: int, minimum: int, maximum: int) -> Optional[int]:
@@ -151,6 +210,15 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
             }
             self._send_json(200, status_payload)
             return
+
+        # All other /api/* reads require TLS + rate limit + bearer token,
+        # and are scoped to the caller's tenant (BOLA fix).
+        tenant_id: Optional[str] = None
+        if path.startswith("/api/"):
+            tenant_id = self._guard_api()
+            if tenant_id is None:
+                return
+            assert tenant_id is not None
 
         # 3. Dashboard Statistics (/api/dashboard/stats)
         if path == "/api/dashboard/stats":
@@ -236,12 +304,22 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
         # 6. Repository Open Issues (/api/github/repos/<owner>/<repo>/issues)
         if path.startswith("/api/github/repos/") and path.endswith("/issues"):
             parts = path.strip("/").split("/")
-            if len(parts) >= 5:
+            if len(parts) == 6:
                 owner = parts[3]
                 repo = parts[4]
+                if len(owner) > 100 or len(repo) > 100:
+                    self._send_json(400, {"error": "Invalid owner/repo"})
+                    return
                 auth = db.get_github_auth()
                 token = auth.get("token") if auth else os.getenv("GITHUB_TOKEN")
-                issues = GitHubPRTool.get_repo_issues(owner, repo, token=token)
+                try:
+                    issues = GitHubPRTool.get_repo_issues(owner, repo, token=token)
+                except ValueError as e:
+                    self._send_json(400, {"error": str(e)})
+                    return
+                except Exception:
+                    self._send_json(502, {"error": "Issue fetch failed"})
+                    return
 
                 # If no issues returned from remote (e.g. rate limit or offline), provide curated test issues
                 if not issues and f"{owner}/{repo}".lower() == "quantum-ark/patchai":
@@ -279,6 +357,8 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
                     ]
                 self._send_json(200, {"issues": issues})
                 return
+            self._send_json(404, {"error": "Not found"})
+            return
 
         # 7. List Repair Runs (/api/runs) — bounded, validated pagination.
         if path == "/api/runs":
@@ -382,6 +462,11 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
             }
             self._send_json(200, payload)
             return
+
+        # 12. Dashboard page routing (/dashboard -> /dashboard.html)
+        if path in ("/dashboard", "/dashboard/"):
+            self.path = "/dashboard.html"
+            return super().do_GET()
 
         # Fallback to static web files
         return super().do_GET()
@@ -781,6 +866,73 @@ class PatchPilotRequestHandler(SimpleHTTPRequestHandler):
             except Exception:
                 logger.error("Failed to fetch GitHub issue")
                 self._send_json(400, {"error": "Failed to fetch GitHub issue"})
+            return
+
+        # ----------------------------------------------------------------------
+        # H. Autonomous Workspace & Repo Scanner (/api/scan-workspace)
+        # ----------------------------------------------------------------------
+        if path == "/api/scan-workspace":
+            repo_root = Path(__file__).resolve().parent.parent.parent
+            target_path = repo_root
+            scan_res = WorkspaceScanner.scan_directory(target_path)
+            self._send_json(200, scan_res)
+            return
+
+        # ----------------------------------------------------------------------
+        # I. Dynamic LLM API Key Configuration (/api/settings/llm)
+        # ----------------------------------------------------------------------
+        if path == "/api/settings/llm":
+            provider = data.get("provider", "openai").lower()
+            key_val = data.get("api_key", "").strip()
+            
+            env_map = {
+                "openai": "OPENAI_API_KEY",
+                "gemini": "GEMINI_API_KEY",
+                "anthropic": "ANTHROPIC_API_KEY",
+                "groq": "GROQ_API_KEY",
+                "ollama": "OLLAMA_BASE_URL"
+            }
+            env_var = env_map.get(provider)
+            if not env_var:
+                self._send_json(400, {"error": f"Unsupported provider: {provider}"})
+                return
+            
+            if key_val:
+                os.environ[env_var] = key_val
+            
+            self._send_json(200, {
+                "success": True,
+                "provider": provider,
+                "configured": bool(key_val),
+                "message": f"Successfully updated API credentials for {provider}"
+            })
+            return
+
+        # ----------------------------------------------------------------------
+        # J. User Account / Profile Update (/api/auth/profile)
+        # ----------------------------------------------------------------------
+        if path == "/api/auth/profile":
+            name = data.get("name", "Abhishek Kumar")
+            username = data.get("username", "abhishek-dev")
+            avatar = data.get("avatar_url", "")
+            
+            auth = db.get_github_auth()
+            token = auth.get("token", "") if auth else os.getenv("GITHUB_TOKEN", "")
+            db.save_github_auth(
+                username=username,
+                name=name,
+                avatar_url=avatar,
+                token=token,
+                scopes="repo, pull_requests:write"
+            )
+            self._send_json(200, {
+                "success": True,
+                "profile": {
+                    "name": name,
+                    "username": username,
+                    "avatar_url": avatar
+                }
+            })
             return
 
         self.send_response(404)
