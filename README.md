@@ -224,24 +224,12 @@ entire status
 
 ---
 
-## 💼 Business Model & Pitch Materials
-
-- **Business Plan & Unit Economics:** [BUSINESS_PLAN.md](BUSINESS_PLAN.md) / [docs/business-plan.md](docs/business-plan.md)
-- **3-Minute Hackathon Demo Script:** [DEMO_SCRIPT.md](DEMO_SCRIPT.md) / [demo/demo-script.md](demo/demo-script.md)
-- **Submission Evidence & Trace Verification:** [SUBMISSION_EVIDENCE.md](SUBMISSION_EVIDENCE.md)
-- **Architecture Documentation:** [docs/architecture.md](docs/architecture.md)
-- **Security Policy & Threat Model:** [docs/security.md](docs/security.md)
-
----
-
 ## 🔒 Security & Reliability Guardrails
 
 - **Zero Untrusted Execution:** Tests run with strict configurable timeouts (`execution_timeout_seconds=60`).
 - **Path Traversal Protection:** All file operations are checked with `.is_relative_to(repo_dir)`.
 - **Credential Protection:** Secrets (`.env`, private keys) are never sent as trace metadata and are strictly ignored in `.gitignore`.
 - **Human-in-the-Loop:** PatchPilot exports audited diffs and PR summaries. It **never merges or deploys code automatically**.
-
----
 
 ---
 
@@ -253,7 +241,6 @@ PatchPilot AI is containerized and ready for production deployment on **AWS App 
 - **Health Probes:** `/health` and `/healthz` endpoints responding with HTTP 200 for ALB and App Runner health checkers.
 - **Automated CI/CD:** Continuous deployment via [`.github/workflows/deploy-aws.yml`](.github/workflows/deploy-aws.yml) on push to `main`.
 - **Infrastructure as Code:** Ready-to-use CloudFormation template in [`aws/cloudformation.yaml`](aws/cloudformation.yaml) and task definition in [`aws/ecs-task-definition.json`](aws/ecs-task-definition.json).
-- **Deployment Guide:** Comprehensive step-by-step instructions in [docs/AWS_DEPLOYMENT.md](docs/AWS_DEPLOYMENT.md).
 
 ```bash
 # Run locally with Docker Compose:
