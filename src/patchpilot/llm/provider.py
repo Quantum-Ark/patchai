@@ -152,7 +152,7 @@ class GroqProvider(BaseLLMProvider):
         self.api_key = api_key or os.getenv("GROQ_API_KEY", "")
         self.model_name = model or os.getenv("GROQ_MODEL") or "llama-3.3-70b-versatile"
 
-        if not self.api_key or self.api_key.startswith("gsk_test") or self.api_key.startswith("gsk_live_c8a40020051b700712151833534e629c5c511e76373091876061517810"):
+        if not self.api_key or not self.api_key.startswith("gsk_"):
             raise ValueError(
                 "GROQ_API_KEY is not configured or invalid. Please configure a valid GROQ_API_KEY from console.groq.com/keys in your local .env file."
             )
