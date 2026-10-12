@@ -5,14 +5,52 @@ fine-grained execution events, patch attempts, and Pull Request records.
 """
 
 import json
-import sqlite3
 import logging
+import os
+import sqlite3
 from pathlib import Path
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Optional, List, Dict, Any, Tuple
 
 logger = logging.getLogger("patchpilot.db")
+
+
+def _get_fernet():
+    """Return a Fernet instance if PATCHPILOT_TOKEN_KEY is set, else None."""
+    key = os.getenv("PATCHPILOT_TOKEN_KEY", "")
+    if not key:
+        return None
+    try:
+        from cryptography.fernet import Fernet
+        return Fernet(key.encode("utf-8"))
+    except Exception as e:
+        logger.warning(f"PATCHPILOT_TOKEN_KEY invalid, storing tokens plaintext: {e}")
+        return None
+
+
+def _encrypt_token(token: str) -> Tuple[str, bool]:
+    f = _get_fernet()
+    if f is None:
+        return token, False
+    try:
+        return f.encrypt(token.encode("utf-8")).decode("utf-8"), True
+    except Exception:
+        return token, False
+
+
+def _decrypt_token(stored: str, encrypted: bool) -> str:
+    if not encrypted:
+        return stored
+    f = _get_fernet()
+    if f is None:
+        logger.error("Token stored encrypted but PATCHPILOT_TOKEN_KEY is now missing.")
+        return ""
+    try:
+        return f.decrypt(stored.encode("utf-8")).decode("utf-8")
+    except Exception:
+        logger.error("Failed to decrypt stored GitHub token.")
+        return ""
 
 
 class PatchPilotDB:
@@ -43,10 +81,19 @@ class PatchPilotDB:
                     name TEXT,
                     avatar_url TEXT,
                     token TEXT NOT NULL,
+                    token_encrypted INTEGER DEFAULT 0,
                     scopes TEXT,
                     connected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
+            # Migration for DBs created before token_encrypted existed.
+            try:
+                cursor.execute("SELECT token_encrypted FROM github_auth LIMIT 1")
+            except Exception:
+                try:
+                    cursor.execute("ALTER TABLE github_auth ADD COLUMN token_encrypted INTEGER DEFAULT 0")
+                except Exception:
+                    pass
 
             # 2. Repair Runs Table
             cursor.execute("""
