@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initKineticTypography();
   initTiltEffect();
   initScrollReveal();
+  initDeveloperDashboard();
 });
 
 /* ==========================================================================
@@ -1088,3 +1089,1003 @@ function initScrollReveal() {
     observer.observe(card);
   });
 }
+
+/* ==========================================================================
+   13 — DEVELOPER DASHBOARD CONTROLLER (REAL AUTH, REPAIRS & GITHUB PR WORKFLOW)
+   ========================================================================== */
+function initDeveloperDashboard() {
+  let activeRunId = localStorage.getItem('patchpilot_active_run_id') || null;
+  let pollingTimer = null;
+  let elapsedSeconds = 0;
+  let elapsedTimer = null;
+  let lastEventId = 0;
+  let currentRunData = null;
+
+  // 1. Setup Tab Switching
+  const navTabs = document.querySelectorAll('.dash-nav-item');
+  const views = document.querySelectorAll('.dash-view');
+
+  function switchTab(targetTab) {
+    navTabs.forEach((btn) => {
+      const match = btn.getAttribute('data-tab') === targetTab;
+      btn.classList.toggle('active', match);
+      btn.setAttribute('aria-selected', match ? 'true' : 'false');
+    });
+
+    views.forEach((view) => {
+      const match = view.id === `view-${targetTab}`;
+      view.classList.toggle('active', match);
+    });
+
+    if (targetTab === 'overview') {
+      loadDashboardStats();
+      loadRecentActivity();
+    } else if (targetTab === 'repos') {
+      loadRepositories();
+    } else if (targetTab === 'history') {
+      loadHistory();
+    } else if (targetTab === 'settings') {
+      loadSettings();
+    }
+  }
+
+  navTabs.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const tab = btn.getAttribute('data-tab');
+      if (tab) switchTab(tab);
+    });
+  });
+
+  const btnGotoWizard = document.getElementById('btn-goto-wizard');
+  if (btnGotoWizard) {
+    btnGotoWizard.addEventListener('click', () => switchTab('wizard'));
+  }
+
+  const btnSeeAllRuns = document.getElementById('btn-see-all-runs');
+  if (btnSeeAllRuns) {
+    btnSeeAllRuns.addEventListener('click', () => switchTab('history'));
+  }
+
+  // 2. Auth State Management
+  async function checkAuth() {
+    try {
+      const res = await fetch('/api/github/auth');
+      const data = await res.json();
+      const banner = document.getElementById('dash-banner-auth');
+      const avatar = document.getElementById('dash-user-avatar');
+      const name = document.getElementById('dash-user-name');
+      const token = document.getElementById('dash-user-token');
+      const disconnectBtn = document.getElementById('btn-dash-disconnect');
+      const statusLabel = document.getElementById('dash-conn-status');
+
+      if (data.authenticated) {
+        if (banner) banner.style.display = 'none';
+        if (avatar && data.avatar_url) avatar.src = data.avatar_url;
+        if (name) name.textContent = data.name || data.username;
+        if (token) token.textContent = data.masked_token || 'Token Active';
+        if (disconnectBtn) disconnectBtn.style.display = 'block';
+        if (statusLabel) statusLabel.textContent = `Connected (@${data.username})`;
+      } else {
+        if (banner) banner.style.display = 'flex';
+        if (avatar) avatar.src = 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png';
+        if (name) name.textContent = 'Not connected';
+        if (token) token.textContent = 'Public Demo Mode';
+        if (disconnectBtn) disconnectBtn.style.display = 'none';
+        if (statusLabel) statusLabel.textContent = 'Public Mode';
+      }
+    } catch (e) {
+      console.warn('Failed to check GitHub auth:', e);
+    }
+  }
+
+  const btnQuickConnect = document.getElementById('btn-quick-connect');
+  if (btnQuickConnect) {
+    btnQuickConnect.addEventListener('click', async () => {
+      const input = document.getElementById('input-quick-token');
+      const val = input ? input.value.trim() : '';
+      if (!val) {
+        alert('Please enter a GitHub Personal Access Token');
+        return;
+      }
+      btnQuickConnect.disabled = true;
+      btnQuickConnect.textContent = 'Connecting...';
+      try {
+        const res = await fetch('/api/github/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: val })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          if (input) input.value = '';
+          await checkAuth();
+          await loadRepositories();
+          await loadDashboardStats();
+        } else {
+          alert(data.error || 'Connection failed');
+        }
+      } catch (e) {
+        alert('Error connecting: ' + e.message);
+      } finally {
+        btnQuickConnect.disabled = false;
+        btnQuickConnect.textContent = 'Connect';
+      }
+    });
+  }
+
+  const btnDashDisconnect = document.getElementById('btn-dash-disconnect');
+  const btnSettingsDisconnect = document.getElementById('btn-settings-disconnect');
+  async function disconnectAccount() {
+    if (!confirm('Are you sure you want to disconnect your GitHub credentials?')) return;
+    try {
+      await fetch('/api/github/disconnect', { method: 'POST' });
+      await checkAuth();
+      await loadRepositories();
+      await loadDashboardStats();
+    } catch (e) {
+      alert('Error disconnecting: ' + e.message);
+    }
+  }
+  if (btnDashDisconnect) btnDashDisconnect.addEventListener('click', disconnectAccount);
+  if (btnSettingsDisconnect) btnSettingsDisconnect.addEventListener('click', disconnectAccount);
+
+  // 3. Load Dashboard Stats from Real SQLite Store
+  async function loadDashboardStats() {
+    try {
+      const res = await fetch('/api/dashboard/stats');
+      if (!res.ok) return;
+      const stats = await res.json();
+
+      const elTotal = document.getElementById('kpi-total-runs');
+      const elRunning = document.getElementById('kpi-running-jobs');
+      const elVerified = document.getElementById('kpi-verified-repairs');
+      const elFailed = document.getElementById('kpi-failed-repairs');
+      const elPrs = document.getElementById('kpi-total-prs');
+      const elRepos = document.getElementById('kpi-active-repos');
+
+      if (elTotal) elTotal.textContent = stats.total_runs ?? 0;
+      if (elRunning) elRunning.textContent = stats.running_jobs ?? 0;
+      if (elVerified) elVerified.textContent = stats.verified_repairs ?? 0;
+      if (elFailed) elFailed.textContent = stats.failed_repairs ?? 0;
+      if (elPrs) elPrs.textContent = stats.total_prs ?? 0;
+      if (elRepos) elRepos.textContent = Math.max(stats.active_repos ?? 1, 1);
+    } catch (e) {
+      console.warn('Failed to load stats:', e);
+    }
+  }
+
+  // 4. Load Recent Activity
+  async function loadRecentActivity() {
+    try {
+      const [runsRes, prsRes] = await Promise.all([
+        fetch('/api/runs?limit=5'),
+        fetch('/api/prs?limit=5')
+      ]);
+
+      const runsData = await runsRes.json();
+      const prsData = await prsRes.json();
+
+      const recentContainer = document.getElementById('overview-recent-runs');
+      if (recentContainer) {
+        if (runsData.runs && runsData.runs.length > 0) {
+          recentContainer.innerHTML = `
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>RUN</th>
+                  <th>REPO</th>
+                  <th>OUTCOME</th>
+                  <th>DURATION</th>
+                  <th>ACTION</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${runsData.runs.map(r => `
+                  <tr>
+                    <td><code class="font-mono">${r.run_id}</code></td>
+                    <td>${r.repo_owner}/${r.repo_name}</td>
+                    <td>
+                      <span class="status-badge ${r.status === 'VERIFIED' ? 'status-verified' : r.status === 'RUNNING' ? 'status-running' : 'status-failed'}">
+                        ${r.status}
+                      </span>
+                    </td>
+                    <td>${Number(r.total_duration || 0).toFixed(2)}s</td>
+                    <td>
+                      <button type="button" class="btn-link-sm btn-inspect-run" data-run-id="${r.run_id}">Inspect ↗</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          `;
+          recentContainer.querySelectorAll('.btn-inspect-run').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const rid = btn.getAttribute('data-run-id');
+              if (rid) inspectRun(rid);
+            });
+          });
+        } else {
+          recentContainer.innerHTML = `
+            <div class="dash-empty-state">
+              <span class="empty-icon">📂</span>
+              <p class="font-medium">No repair runs recorded yet</p>
+              <p class="text-sm text-secondary">Launch a repair wizard or benchmark to populate empirical history.</p>
+            </div>
+          `;
+        }
+      }
+
+      const prsContainer = document.getElementById('overview-prs-list');
+      const prsCountLabel = document.getElementById('overview-prs-count');
+      if (prsContainer && prsData.pull_requests) {
+        if (prsCountLabel) prsCountLabel.textContent = `${prsData.pull_requests.length} Opened`;
+        if (prsData.pull_requests.length > 0) {
+          prsContainer.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${prsData.pull_requests.map(pr => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--surface-base); border:1px solid var(--border-subtle); border-radius:6px;">
+                  <div>
+                    <span class="font-mono text-accent" style="font-weight:600;">#${pr.pr_number}</span>
+                    <strong style="margin-left:6px; font-size:12px;">${pr.title}</strong>
+                    <div style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                      ${pr.repo_owner}/${pr.repo_name} · <code>${pr.branch}</code>
+                    </div>
+                  </div>
+                  <a href="${pr.pr_url}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="font-size:11px;">
+                    Open PR ↗
+                  </a>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        } else {
+          prsContainer.innerHTML = `
+            <div class="dash-empty-state">
+              <span class="empty-icon">🔀</span>
+              <p class="font-medium">No Pull Requests created yet</p>
+              <p class="text-sm text-secondary">Verified repairs can be published as real GitHub PRs with 1 click.</p>
+            </div>
+          `;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load recent activity:', e);
+    }
+  }
+
+  // 5. Load Repositories Browser
+  async function loadRepositories(query = '') {
+    const reposGrid = document.getElementById('repos-grid');
+    const badgeRepoCount = document.getElementById('badge-repo-count');
+    const wizardRepoSelect = document.getElementById('wizard-repo-select');
+
+    try {
+      const url = query ? `/api/github/repos?q=${encodeURIComponent(query)}` : '/api/github/repos';
+      const res = await fetch(url);
+      const data = await res.json();
+      const repos = data.repositories || [];
+
+      if (badgeRepoCount) badgeRepoCount.textContent = repos.length;
+
+      if (wizardRepoSelect) {
+        wizardRepoSelect.innerHTML = repos.map(r => `
+          <option value="${r.full_name}">${r.full_name} (${r.default_branch})</option>
+        `).join('');
+      }
+
+      if (!reposGrid) return;
+
+      if (repos.length === 0) {
+        reposGrid.innerHTML = `
+          <div class="dash-empty-state" style="grid-column: 1 / -1;">
+            <p>No accessible repositories found. Check your GitHub PAT permissions.</p>
+          </div>
+        `;
+        return;
+      }
+
+      reposGrid.innerHTML = repos.map(r => `
+        <div class="repo-card" data-repo-owner="${r.owner}" data-repo-name="${r.name}">
+          <div class="repo-card-header">
+            <span class="repo-card-name">${r.full_name}</span>
+            <span class="status-badge ${r.private ? 'status-failed' : 'status-idle'}">
+              ${r.private ? 'Private' : 'Public'}
+            </span>
+          </div>
+          <p class="repo-card-desc">${r.description || 'No description provided.'}</p>
+          <div class="repo-card-meta">
+            <span>🌿 ${r.default_branch}</span>
+            <span>⚠️ ${r.open_issues_count || 0} Issues</span>
+            <button type="button" class="btn-link-sm btn-browse-issues" style="margin-left:auto;">Browse Issues ↗</button>
+          </div>
+        </div>
+      `).join('');
+
+      reposGrid.querySelectorAll('.repo-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const owner = card.getAttribute('data-repo-owner');
+          const name = card.getAttribute('data-repo-name');
+          if (owner && name) openRepoIssues(owner, name);
+        });
+      });
+    } catch (e) {
+      console.warn('Failed to load repos:', e);
+    }
+  }
+
+  // Repository search input handler
+  const repoSearchInput = document.getElementById('repo-search-input');
+  if (repoSearchInput) {
+    let debounce = null;
+    repoSearchInput.addEventListener('input', () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        loadRepositories(repoSearchInput.value.trim());
+      }, 300);
+    });
+  }
+
+  const btnRefreshRepos = document.getElementById('btn-refresh-repos');
+  if (btnRefreshRepos) {
+    btnRefreshRepos.addEventListener('click', () => loadRepositories());
+  }
+
+  // Browse Repository Issues Drawer
+  async function openRepoIssues(owner, repo) {
+    const panel = document.getElementById('repo-issues-panel');
+    const title = document.getElementById('selected-repo-title');
+    const list = document.getElementById('selected-repo-issues-list');
+
+    if (!panel || !list) return;
+
+    panel.style.display = 'block';
+    if (title) title.textContent = `${owner}/${repo}`;
+    list.innerHTML = '<div class="dash-loading-card">Fetching open issues from GitHub API...</div>';
+    panel.scrollIntoView({ behavior: 'smooth' });
+
+    try {
+      const res = await fetch(`/api/github/repos/${owner}/${repo}/issues`);
+      const data = await res.json();
+      const issues = data.issues || [];
+
+      if (issues.length === 0) {
+        list.innerHTML = '<p class="text-secondary py-4">No open issues found for this repository.</p>';
+        return;
+      }
+
+      list.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          ${issues.map(iss => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--surface-base); border:1px solid var(--border-subtle); border-radius:6px;">
+              <div>
+                <span class="font-mono text-accent" style="font-weight:600;">#${iss.number}</span>
+                <strong style="margin-left:6px; font-size:13px;">${iss.title}</strong>
+                <p style="font-size:11px; color:var(--text-secondary); margin-top:2px;">
+                  Created by ${iss.user || 'author'} · ${iss.comments_count || 0} comments
+                  ${(iss.labels || []).map(l => `<span class="badge-proof badge-neutral" style="margin-left:4px;">${l}</span>`).join('')}
+                </p>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm btn-repair-this-issue" 
+                data-repo="${owner}/${repo}" 
+                data-id="${iss.id}" 
+                data-title="${iss.title.replace(/"/g, '&quot;')}"
+                data-body="${(iss.body || '').replace(/"/g, '&quot;')}">
+                ⚡ Repair Issue
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      list.querySelectorAll('.btn-repair-this-issue').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const r = btn.getAttribute('data-repo');
+          const id = btn.getAttribute('data-id');
+          const t = btn.getAttribute('data-title');
+          const b = btn.getAttribute('data-body');
+
+          // Pre-fill Wizard
+          const wizRepo = document.getElementById('wizard-repo-select');
+          const wizTitle = document.getElementById('wizard-issue-title');
+          const wizBody = document.getElementById('wizard-issue-body');
+          const wizUrl = document.getElementById('wizard-issue-url');
+
+          if (wizRepo) wizRepo.value = r;
+          if (wizTitle) wizTitle.value = t;
+          if (wizBody) wizBody.value = b;
+          if (wizUrl) wizUrl.value = `https://github.com/${r}/issues/${id}`;
+
+          switchTab('wizard');
+        });
+      });
+    } catch (e) {
+      list.innerHTML = `<p class="text-secondary py-4">Error fetching issues: ${e.message}</p>`;
+    }
+  }
+
+  const btnCloseIssues = document.getElementById('btn-close-issues');
+  if (btnCloseIssues) {
+    btnCloseIssues.addEventListener('click', () => {
+      const panel = document.getElementById('repo-issues-panel');
+      if (panel) panel.style.display = 'none';
+    });
+  }
+
+  // 6. Wizard Presets & Launch Handlers
+  const wizardPresets = {
+    case_1: {
+      title: 'ZeroDivisionError in calculate_ratio when denominator is zero',
+      body: 'Target file: calc.py. Defect: ZeroDivisionError occurs when y=0.',
+      cmd: 'pytest tests/test_calc.py -v',
+      reg: 'pytest tests/ -v'
+    },
+    case_2: {
+      title: 'Off-by-one boundary defect in paginator slice calculation',
+      body: 'Target file: paginator.py. Empty dataset returns single-element slice instead of empty list.',
+      cmd: 'pytest tests/test_paginator.py -v',
+      reg: 'pytest tests/ -v'
+    },
+    case_3: {
+      title: 'Pricing engine volume discount regression on zero quantity',
+      body: 'Target file: pricing.py. Boundary validation allows non-positive quantities and fails regression.',
+      cmd: 'pytest tests/test_pricing.py -v',
+      reg: 'pytest tests/ -v'
+    }
+  };
+
+  let selectedBenchmark = 'case_1';
+  document.querySelectorAll('[id^="btn-wizard-case-"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[id^="btn-wizard-case-"]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const presetKey = btn.getAttribute('data-preset');
+      selectedBenchmark = presetKey;
+      const data = wizardPresets[presetKey];
+      if (data) {
+        const wizTitle = document.getElementById('wizard-issue-title');
+        const wizBody = document.getElementById('wizard-issue-body');
+        const wizRepro = document.getElementById('wizard-repro-cmd');
+        const wizReg = document.getElementById('wizard-regression-cmd');
+        if (wizTitle) wizTitle.value = data.title;
+        if (wizBody) wizBody.value = data.body;
+        if (wizRepro) wizRepro.value = data.cmd;
+        if (wizReg) wizReg.value = data.reg;
+      }
+    });
+  });
+
+  const btnFetchWizardIssue = document.getElementById('btn-fetch-wizard-issue');
+  if (btnFetchWizardIssue) {
+    btnFetchWizardIssue.addEventListener('click', async () => {
+      const urlInput = document.getElementById('wizard-issue-url');
+      const urlVal = urlInput ? urlInput.value.trim() : '';
+      if (!urlVal) {
+        alert('Please enter a GitHub Issue URL');
+        return;
+      }
+      btnFetchWizardIssue.disabled = true;
+      btnFetchWizardIssue.textContent = 'Fetching...';
+      try {
+        const res = await fetch('/api/github/fetch-issue', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: urlVal })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          const wizTitle = document.getElementById('wizard-issue-title');
+          const wizBody = document.getElementById('wizard-issue-body');
+          const wizRepro = document.getElementById('wizard-repro-cmd');
+          if (wizTitle) wizTitle.value = data.title || '';
+          if (wizBody) wizBody.value = data.body || '';
+          if (wizRepro && data.reproduction_command) wizRepro.value = data.reproduction_command;
+          selectedBenchmark = null; // cleared since using live URL
+        } else {
+          alert(data.error || 'Failed to fetch issue');
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      } finally {
+        btnFetchWizardIssue.disabled = false;
+        btnFetchWizardIssue.textContent = 'Fetch';
+      }
+    });
+  }
+
+  // Launch Repair from Wizard
+  const btnStartWizardRepair = document.getElementById('btn-start-wizard-repair');
+  if (btnStartWizardRepair) {
+    btnStartWizardRepair.addEventListener('click', async () => {
+      const repoVal = document.getElementById('wizard-repo-select')?.value || 'Quantum-Ark/patchai';
+      const [repoOwner, repoName] = repoVal.split('/');
+      const targetBranch = document.getElementById('wizard-target-branch')?.value || 'main';
+      const issueUrl = document.getElementById('wizard-issue-url')?.value.trim() || '';
+      const title = document.getElementById('wizard-issue-title')?.value || 'Autonomous Defect';
+      const body = document.getElementById('wizard-issue-body')?.value || '';
+      const reproCmd = document.getElementById('wizard-repro-cmd')?.value || '';
+      const regCmd = document.getElementById('wizard-regression-cmd')?.value || '';
+
+      const payload = {
+        repo_owner: repoOwner,
+        repo_name: repoName,
+        target_branch: targetBranch,
+        issue_title: title,
+        issue_body: body,
+        reproduction_command: reproCmd,
+        regression_command: regCmd,
+        benchmark_id: issueUrl ? null : selectedBenchmark,
+        issue_url: issueUrl || null
+      };
+
+      btnStartWizardRepair.disabled = true;
+      btnStartWizardRepair.textContent = 'Dispatching repair job...';
+
+      try {
+        const res = await fetch('/api/runs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          activeRunId = data.run_id;
+          localStorage.setItem('patchpilot_active_run_id', activeRunId);
+          startLiveRunMonitoring(activeRunId, title, repoVal);
+          switchTab('workspace');
+        } else {
+          alert(data.error || 'Failed to launch repair');
+        }
+      } catch (e) {
+        alert('Error dispatching repair: ' + e.message);
+      } finally {
+        btnStartWizardRepair.disabled = false;
+        btnStartWizardRepair.textContent = '⚡ Start Autonomous Repair';
+      }
+    });
+  }
+
+  // 7. Live Workspace & Event Streaming Engine
+  function startLiveRunMonitoring(runId, issueTitle = 'Repair in progress', repoName = 'Quantum-Ark/patchai') {
+    // Reset workspace UI
+    const runIdPill = document.getElementById('ws-run-id-pill');
+    const repoTag = document.getElementById('ws-repo-tag');
+    const issueTitleEl = document.getElementById('ws-issue-title');
+    const statusBadge = document.getElementById('ws-status-badge');
+    const terminalLogs = document.getElementById('cockpit-terminal-logs');
+    const diffBody = document.getElementById('cockpit-diff-body');
+    const pulseDot = document.getElementById('live-pulse-dot');
+    const timerTicker = document.getElementById('ws-timer-ticker');
+
+    if (runIdPill) runIdPill.textContent = runId;
+    if (repoTag) repoTag.textContent = repoName;
+    if (issueTitleEl) issueTitleEl.textContent = issueTitle;
+    if (statusBadge) {
+      statusBadge.textContent = 'RUNNING';
+      statusBadge.className = 'status-badge status-running';
+    }
+    if (pulseDot) pulseDot.style.display = 'inline-block';
+    if (terminalLogs) {
+      terminalLogs.innerHTML = `
+        <div class="term-line"><span class="term-dim">[DISPATCH] Autonomous worker assigned to ${runId}.</span></div>
+        <div class="term-line"><span class="term-highlight">&gt; Initializing subprocess execution sandbox...</span></div>
+      `;
+    }
+    if (diffBody) {
+      diffBody.innerHTML = `
+        <div class="diff-placeholder">
+          <span class="diff-placeholder-icon">⏳</span>
+          <p>Generating verified unified diff...</p>
+          <p class="text-xs text-secondary">Repair agent executing bounded patch attempts in isolation.</p>
+        </div>
+      `;
+    }
+
+    // Reset stages
+    document.querySelectorAll('#ws-pipeline-tracker .pipeline-step').forEach(step => {
+      step.classList.remove('active', 'passed');
+    });
+
+    // Reset PR station
+    const btnOpenPr = document.getElementById('btn-open-pr-external');
+    if (btnOpenPr) btnOpenPr.style.display = 'none';
+    const safetyWarning = document.getElementById('safety-gate-warning');
+    if (safetyWarning) safetyWarning.style.display = 'none';
+
+    // Start Timer
+    if (elapsedTimer) clearInterval(elapsedTimer);
+    elapsedSeconds = 0;
+    elapsedTimer = setInterval(() => {
+      elapsedSeconds++;
+      const mins = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+      const secs = String(elapsedSeconds % 60).padStart(2, '0');
+      if (timerTicker) timerTicker.textContent = `${mins}:${secs}s`;
+    }, 1000);
+
+    // Start Polling Events
+    lastEventId = 0;
+    if (pollingTimer) clearInterval(pollingTimer);
+    pollingTimer = setInterval(() => pollRunEvents(runId), 1000);
+    pollRunEvents(runId);
+  }
+
+  async function pollRunEvents(runId) {
+    try {
+      const res = await fetch(`/api/runs/${runId}/events?after=${lastEventId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const events = data.events || [];
+      const terminalLogs = document.getElementById('cockpit-terminal-logs');
+
+      events.forEach(ev => {
+        lastEventId = Math.max(lastEventId, ev.id);
+        if (terminalLogs) {
+          const div = document.createElement('div');
+          div.className = 'term-line';
+          const isErr = ev.event_type === 'ERROR' || ev.state === 'FAILED';
+          const isSuccess = ev.state === 'VERIFIED';
+          div.innerHTML = `<span class="${isErr ? 'term-error' : isSuccess ? 'term-success' : 'term-dim'}">[${ev.state}]</span> ${escapeHtml(ev.message)}`;
+          terminalLogs.appendChild(div);
+          terminalLogs.scrollTop = terminalLogs.scrollHeight;
+        }
+
+        // Advance pipeline steps
+        const stepName = ev.state.toLowerCase();
+        const stepEl = document.querySelector(`#ws-pipeline-tracker [data-step="${ev.state}"]`);
+        if (stepEl) {
+          stepEl.classList.add('active');
+        }
+      });
+
+      // Check if job completed
+      if (!data.is_running && data.status !== 'RUNNING') {
+        if (pollingTimer) clearInterval(pollingTimer);
+        if (elapsedTimer) clearInterval(elapsedTimer);
+        const pulseDot = document.getElementById('live-pulse-dot');
+        if (pulseDot) pulseDot.style.display = 'none';
+
+        // Load complete run details to render diff and PR station
+        await inspectRun(runId, false);
+      }
+    } catch (e) {
+      console.warn('Polling error:', e);
+    }
+  }
+
+  // 8. Inspect Run Details & Populate Evidence Diff + PR Station
+  async function inspectRun(runId, doSwitchTab = true) {
+    try {
+      const res = await fetch(`/api/runs/${runId}`);
+      if (!res.ok) return;
+      const run = await res.json();
+      currentRunData = run;
+
+      if (doSwitchTab) {
+        switchTab('workspace');
+      }
+
+      // Metadata
+      const runIdPill = document.getElementById('ws-run-id-pill');
+      const repoTag = document.getElementById('ws-repo-tag');
+      const branchTag = document.getElementById('ws-branch-tag');
+      const issueTitleEl = document.getElementById('ws-issue-title');
+      const statusBadge = document.getElementById('ws-status-badge');
+      const timerTicker = document.getElementById('ws-timer-ticker');
+
+      if (runIdPill) runIdPill.textContent = run.run_id;
+      if (repoTag) repoTag.textContent = `${run.repo_owner}/${run.repo_name}`;
+      if (branchTag) branchTag.textContent = run.target_branch || 'main';
+      if (issueTitleEl) issueTitleEl.textContent = run.issue_title;
+      if (timerTicker) timerTicker.textContent = `${Number(run.total_duration || 0).toFixed(2)}s`;
+
+      if (statusBadge) {
+        statusBadge.textContent = run.status;
+        statusBadge.className = `status-badge ${run.status === 'VERIFIED' ? 'status-verified' : run.status === 'RUNNING' ? 'status-running' : 'status-failed'}`;
+      }
+
+      // Trace ID
+      const traceVal = document.getElementById('pr-trace-val');
+      if (traceVal) traceVal.textContent = run.neatlogs_trace_id || 'Local Trace Recorded';
+
+      // Unified Diff Rendering
+      const diffBody = document.getElementById('cockpit-diff-body');
+      const badgeAcceptance = document.getElementById('badge-acceptance');
+      const badgeRegression = document.getElementById('badge-regression');
+
+      if (run.status === 'VERIFIED') {
+        if (badgeAcceptance) { badgeAcceptance.textContent = 'Acceptance: Passed'; badgeAcceptance.className = 'badge-proof badge-pass'; }
+        if (badgeRegression) { badgeRegression.textContent = 'Regression: Passed'; badgeRegression.className = 'badge-proof badge-pass'; }
+      } else {
+        if (badgeAcceptance) { badgeAcceptance.textContent = 'Acceptance: Failed'; badgeAcceptance.className = 'badge-proof badge-fail'; }
+        if (badgeRegression) { badgeRegression.textContent = 'Regression: Blocked'; badgeRegression.className = 'badge-proof badge-fail'; }
+      }
+
+      if (diffBody) {
+        const rawDiff = run.diff_text || '';
+        if (rawDiff.trim()) {
+          const lines = rawDiff.split('\n');
+          diffBody.innerHTML = `
+            <pre style="margin:0; font-family:var(--font-mono); font-size:11px;">
+              ${lines.map(line => {
+                if (line.startsWith('+') && !line.startsWith('+++')) {
+                  return `<span class="diff-line-add">${escapeHtml(line)}</span>`;
+                } else if (line.startsWith('-') && !line.startsWith('---')) {
+                  return `<span class="diff-line-del">${escapeHtml(line)}</span>`;
+                }
+                return `<span>${escapeHtml(line)}</span>`;
+              }).join('\n')}
+            </pre>
+          `;
+        } else {
+          diffBody.innerHTML = `
+            <div class="diff-placeholder">
+              <span class="diff-placeholder-icon">${run.status === 'VERIFIED' ? '✅' : '❌'}</span>
+              <p>${run.status === 'VERIFIED' ? 'Fix confirmed. No residual diff required.' : 'No patch satisfied test constraints.'}</p>
+            </div>
+          `;
+        }
+      }
+
+      // PR Station Setup
+      const prRepo = document.getElementById('pr-repo-val');
+      const prBase = document.getElementById('pr-base-val');
+      const prBranch = document.getElementById('pr-branch-val');
+      const prTitleInput = document.getElementById('pr-title-input');
+      const btnRaisePr = document.getElementById('btn-raise-github-pr');
+      const btnOpenExternal = document.getElementById('btn-open-pr-external');
+      const safetyWarning = document.getElementById('safety-gate-warning');
+
+      const headBranch = `patchpilot/fix-${run.issue_id}-${run.run_id.slice(-6)}`;
+      if (prRepo) prRepo.textContent = `${run.repo_owner}/${run.repo_name}`;
+      if (prBase) prBase.textContent = run.target_branch || 'main';
+      if (prBranch) prBranch.textContent = headBranch;
+      if (prTitleInput) prTitleInput.value = `fix(${run.issue_id}): ${run.issue_title}`;
+
+      // Safety Gate Enforcement
+      if (run.status !== 'VERIFIED') {
+        if (safetyWarning) safetyWarning.style.display = 'flex';
+      } else {
+        if (safetyWarning) safetyWarning.style.display = 'none';
+      }
+
+      // Check if PR already created
+      if (run.pull_request) {
+        if (btnOpenExternal) {
+          btnOpenExternal.href = run.pull_request.pr_url;
+          btnOpenExternal.style.display = 'inline-flex';
+        }
+        if (btnRaisePr) {
+          btnRaisePr.textContent = `✅ PR #${run.pull_request.pr_number} Active`;
+          btnRaisePr.disabled = true;
+        }
+      } else {
+        if (btnOpenExternal) btnOpenExternal.style.display = 'none';
+        if (btnRaisePr) {
+          btnRaisePr.textContent = '🚀 Raise Pull Request on GitHub';
+          btnRaisePr.disabled = false;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to inspect run:', e);
+    }
+  }
+
+  // 9. Raise Pull Request Action
+  const btnRaiseGithubPr = document.getElementById('btn-raise-github-pr');
+  if (btnRaiseGithubPr) {
+    btnRaiseGithubPr.addEventListener('click', async () => {
+      if (!currentRunData) {
+        alert('No active run selected');
+        return;
+      }
+
+      const isVerified = currentRunData.status === 'VERIFIED';
+      const checkOverride = document.getElementById('check-override-unverified');
+      if (!isVerified && (!checkOverride || !checkOverride.checked)) {
+        alert('Safety Gate Violation: This repair is UNVERIFIED. You must check the override acknowledgment before publishing.');
+        return;
+      }
+
+      const checkDraft = document.getElementById('check-pr-draft');
+      const titleInput = document.getElementById('pr-title-input');
+      const feedbackText = document.getElementById('pr-feedback-text');
+
+      btnRaiseGithubPr.disabled = true;
+      btnRaiseGithubPr.textContent = 'Creating PR on GitHub...';
+      if (feedbackText) feedbackText.textContent = 'Pushing source branch and opening Pull Request...';
+
+      try {
+        const payload = {
+          override_unverified: !isVerified,
+          draft: Boolean(checkDraft && checkDraft.checked),
+          title: titleInput ? titleInput.value.trim() : `fix: Autonomous patch for ${currentRunData.issue_id}`,
+          repo_owner: currentRunData.repo_owner,
+          repo_name: currentRunData.repo_name,
+          base_branch: currentRunData.target_branch || 'main'
+        };
+
+        const res = await fetch(`/api/runs/${currentRunData.run_id}/pr`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          const pr = data.pull_request;
+          const btnOpenExternal = document.getElementById('btn-open-pr-external');
+          if (btnOpenExternal) {
+            btnOpenExternal.href = pr.pr_url;
+            btnOpenExternal.style.display = 'inline-flex';
+          }
+          btnRaiseGithubPr.textContent = `✅ PR #${pr.pr_number} Created`;
+          if (feedbackText) {
+            feedbackText.textContent = `Dispatched successfully! Branch: ${pr.branch}. URL: ${pr.pr_url}`;
+          }
+          await loadDashboardStats();
+        } else {
+          alert(data.error || 'Failed to create Pull Request');
+          btnRaiseGithubPr.disabled = false;
+          btnRaiseGithubPr.textContent = '🚀 Raise Pull Request on GitHub';
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+        btnRaiseGithubPr.disabled = false;
+        btnRaiseGithubPr.textContent = '🚀 Raise Pull Request on GitHub';
+      }
+    });
+  }
+
+  // 10. Download Report JSON
+  const btnDownloadReport = document.getElementById('btn-download-report');
+  if (btnDownloadReport) {
+    btnDownloadReport.addEventListener('click', () => {
+      if (!currentRunData) return;
+      const blob = new Blob([JSON.stringify(currentRunData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `patchpilot-report-${currentRunData.run_id}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }
+
+  // 11. Load Searchable History Table
+  async function loadHistory() {
+    const tbody = document.getElementById('history-runs-tbody');
+    const searchInput = document.getElementById('history-search-input');
+    const statusFilter = document.getElementById('history-status-filter');
+
+    if (!tbody) return;
+
+    try {
+      const q = searchInput ? searchInput.value.trim() : '';
+      const status = statusFilter ? statusFilter.value : '';
+
+      let url = '/api/runs?limit=50';
+      if (q) url += `&q=${encodeURIComponent(q)}`;
+      if (status) url += `&status=${encodeURIComponent(status)}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      const runs = data.runs || [];
+
+      if (runs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-secondary py-8">No repair runs matching filters found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = runs.map(r => `
+        <tr>
+          <td><code class="font-mono text-accent">${r.run_id}</code></td>
+          <td>${r.repo_owner}/${r.repo_name}</td>
+          <td>${escapeHtml(r.issue_title)}</td>
+          <td>
+            <span class="status-badge ${r.status === 'VERIFIED' ? 'status-verified' : r.status === 'RUNNING' ? 'status-running' : 'status-failed'}">
+              ${r.status}
+            </span>
+          </td>
+          <td>${r.attempts ? r.attempts.length : 1}</td>
+          <td>${Number(r.total_duration || 0).toFixed(2)}s</td>
+          <td>
+            ${r.pull_request ? `<a href="${r.pull_request.pr_url}" target="_blank" class="btn-link-sm">#${r.pull_request.pr_number} ↗</a>` : '<span class="text-secondary">—</span>'}
+          </td>
+          <td>
+            <button type="button" class="btn btn-secondary btn-sm btn-history-inspect" data-run-id="${r.run_id}">Inspect</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('.btn-history-inspect').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const rid = btn.getAttribute('data-run-id');
+          if (rid) inspectRun(rid);
+        });
+      });
+    } catch (e) {
+      console.warn('Failed to load history:', e);
+    }
+  }
+
+  const historySearch = document.getElementById('history-search-input');
+  if (historySearch) {
+    historySearch.addEventListener('input', () => loadHistory());
+  }
+  const historyFilter = document.getElementById('history-status-filter');
+  if (historyFilter) {
+    historyFilter.addEventListener('change', () => loadHistory());
+  }
+  const btnRefreshHistory = document.getElementById('btn-refresh-history');
+  if (btnRefreshHistory) {
+    btnRefreshHistory.addEventListener('click', () => loadHistory());
+  }
+
+  // 12. Load Settings & Integrations
+  async function loadSettings() {
+    try {
+      const res = await fetch('/api/settings');
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const ghStatus = document.getElementById('settings-gh-status');
+      const ghUser = document.getElementById('settings-gh-username');
+      const ghToken = document.getElementById('settings-gh-token');
+
+      if (data.github.connected) {
+        if (ghStatus) { ghStatus.textContent = 'Connected'; ghStatus.className = 'status-chip chip-green'; }
+        if (ghUser) ghUser.textContent = data.github.username;
+        if (ghToken) ghToken.textContent = data.github.masked_token || '***';
+      } else {
+        if (ghStatus) { ghStatus.textContent = 'Disconnected'; ghStatus.className = 'status-chip'; }
+        if (ghUser) ghUser.textContent = 'Not connected';
+        if (ghToken) ghToken.textContent = '***';
+      }
+
+      // Providers
+      const provs = data.llm.providers || {};
+      const provOpenai = document.getElementById('prov-openai');
+      const provGemini = document.getElementById('prov-gemini');
+      const provAnthropic = document.getElementById('prov-anthropic');
+      const provGroq = document.getElementById('prov-groq');
+
+      function updateProvBadge(el, info) {
+        if (!el || !info) return;
+        if (info.configured) {
+          el.textContent = 'Ready';
+          el.className = 'badge-proof badge-pass';
+        } else {
+          el.textContent = 'Not Configured';
+          el.className = 'badge-proof badge-neutral';
+        }
+      }
+
+      updateProvBadge(provOpenai, provs.openai);
+      updateProvBadge(provGemini, provs.gemini);
+      updateProvBadge(provAnthropic, provs.anthropic);
+      updateProvBadge(provGroq, provs.groq);
+    } catch (e) {
+      console.warn('Failed to load settings:', e);
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // Initial Load Sequence
+  checkAuth();
+  loadDashboardStats();
+  loadRepositories();
+
+  // If previous active run persisted, inspect it automatically
+  if (activeRunId) {
+    inspectRun(activeRunId, false);
+  }
+}
+

@@ -2,7 +2,10 @@
 Loads settings from environment variables and provides structured runtime config.
 """
 
+import hashlib
+import hmac
 import os
+import secrets
 from pathlib import Path
 from pydantic import BaseModel, Field, field_validator
 from dotenv import load_dotenv
