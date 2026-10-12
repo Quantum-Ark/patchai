@@ -82,7 +82,12 @@ def test_api_token_helpers():
 
 
 def test_db_encrypts_token_when_key_set(tmp_path, monkeypatch):
-    from cryptography.fernet import Fernet
+    # Optional feature: cryptography is an optional dependency for token
+    # encryption at rest. Skip this test when the package is unavailable.
+    try:
+        from cryptography.fernet import Fernet
+    except ImportError:
+        pytest.skip("cryptography not installed; token encryption is optional")
     key = Fernet.generate_key().decode()
     monkeypatch.setenv("PATCHPILOT_TOKEN_KEY", key)
     from patchpilot.db import PatchPilotDB

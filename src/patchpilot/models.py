@@ -48,6 +48,12 @@ class Issue(BaseModel):
     reproduction_command: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.now)
 
+    def model_dump_json(self, **kwargs) -> str:
+        return self.json(**kwargs)
+
+    def model_dump(self, **kwargs) -> dict:
+        return self.dict(**kwargs)
+
 
 class TestExecutionResult(BaseModel):
     __test__ = False
@@ -66,12 +72,24 @@ class ReproductionResult(BaseModel):
     baseline_result: TestExecutionResult
     failure_details: str
 
+    def model_dump_json(self, **kwargs) -> str:
+        return self.json(**kwargs)
+
+    def model_dump(self, **kwargs) -> dict:
+        return self.dict(**kwargs)
+
 
 class InvestigationPlan(BaseModel):
     root_cause_hypothesis: str
     relevant_files: List[str]
     proposed_solution: str
     test_strategy: str
+
+    def model_dump_json(self, **kwargs) -> str:
+        return self.json(**kwargs)
+
+    def model_dump(self, **kwargs) -> dict:
+        return self.dict(**kwargs)
 
 
 class PatchAttempt(BaseModel):
@@ -88,6 +106,12 @@ class PatchAttempt(BaseModel):
     recovery_notes: Optional[str] = None
     timestamp: datetime = Field(default_factory=datetime.now)
 
+    def model_dump_json(self, **kwargs) -> str:
+        return self.json(**kwargs)
+
+    def model_dump(self, **kwargs) -> dict:
+        return self.dict(**kwargs)
+
 
 class VerificationReport(BaseModel):
     acceptance_passed: bool
@@ -97,6 +121,12 @@ class VerificationReport(BaseModel):
     regression_summary: str
     evidence_diff: str
     verified_at: datetime = Field(default_factory=datetime.now)
+
+    def model_dump_json(self, **kwargs) -> str:
+        return self.json(**kwargs)
+
+    def model_dump(self, **kwargs) -> dict:
+        return self.dict(**kwargs)
 
 
 class RunReport(BaseModel):
@@ -112,3 +142,9 @@ class RunReport(BaseModel):
     total_duration_seconds: float = 0.0
     success: bool = False
     summary: str = ""
+
+    def model_dump_json(self, **kwargs) -> str:
+        return self.json(**kwargs)
+
+    def model_dump(self, **kwargs) -> dict:
+        return self.dict(**kwargs)

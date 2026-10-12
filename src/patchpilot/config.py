@@ -6,8 +6,11 @@ import hashlib
 import hmac
 import os
 import secrets
+import time
+import threading
 from pathlib import Path
-from pydantic import BaseModel, Field, field_validator
+from typing import Dict, List, Optional, Tuple
+from pydantic import BaseModel, Field, validator
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -90,8 +93,12 @@ class PatchPilotConfig(BaseModel):
     # API security hardening
     api_token: str = Field(
         default_factory=lambda: os.getenv("PATCHPILOT_API_TOKEN", ""),
-        description="Bearer token required for mutating API routes (POST/DELETE). "
-        "If empty, server auto-generates one per process and prints it to stdout.",
+        description="Legacy single bearer token (back-compat). Prefer PATCHPILOT_API_TOKENS.",
+    )
+    api_tokens: str = Field(
+        default_factory=lambda: os.getenv("PATCHPILOT_API_TOKENS", ""),
+        description="Comma-separated 'tenant_id:token' pairs for per-tenant isolation. "
+        "When set, every /api/* request is scoped to its tenant.",
     )
     token_encryption_key: str = Field(
         default_factory=lambda: os.getenv("PATCHPILOT_TOKEN_KEY", ""),
@@ -106,8 +113,20 @@ class PatchPilotConfig(BaseModel):
         default_factory=lambda: os.getenv("PATCHPILOT_CORS_ORIGIN", ""),
         description="Value for Access-Control-Allow-Origin. Empty = same-origin only.",
     )
+    rate_limit_per_minute: int = Field(
+        default_factory=lambda: _env_int("PATCHPILOT_RATE_LIMIT", 120),
+        description="Max requests per minute per client IP (API routes)",
+    )
+    require_tls: bool = Field(
+        default_factory=lambda: os.getenv("PATCHPILOT_REQUIRE_TLS", "").lower() in ("1", "true", "yes"),
+        description="Reject plain-HTTP /api/* requests unless X-Forwarded-Proto: https",
+    )
+    trust_proxy_headers: bool = Field(
+        default_factory=lambda: os.getenv("PATCHPILOT_TRUST_PROXY", "").lower() in ("1", "true", "yes"),
+        description="Honor X-Forwarded-For/Proto from reverse proxy (set only behind one)",
+    )
 
-    @field_validator("max_attempts")
+    @validator("max_attempts")
     @classmethod
     def _validate_attempts(cls, v: int) -> int:
         if v < 1:
@@ -116,7 +135,7 @@ class PatchPilotConfig(BaseModel):
             raise ValueError("max_attempts must be <= 10")
         return v
 
-    @field_validator("execution_timeout_seconds")
+    @validator("execution_timeout_seconds")
     @classmethod
     def _validate_timeout(cls, v: int) -> int:
         if v < 5:
@@ -125,7 +144,7 @@ class PatchPilotConfig(BaseModel):
             raise ValueError("execution_timeout_seconds must be <= 600")
         return v
 
-    @field_validator("max_concurrent_repairs")
+    @validator("max_concurrent_repairs")
     @classmethod
     def _validate_repairs(cls, v: int) -> int:
         if v < 1:
@@ -138,6 +157,19 @@ class PatchPilotConfig(BaseModel):
 # ---------------------------------------------------------------------------
 # API bearer-token helpers (timing-safe compare, hashed storage)
 # ---------------------------------------------------------------------------
+
+# tenant_id -> bearer token, parsed from PATCHPILOT_API_TOKENS="t1:tok1,t2:tok2"
+def parse_api_tokens(raw: str) -> Dict[str, str]:
+    tenants: Dict[str, str] = {}
+    for pair in (raw or "").split(","):
+        pair = pair.strip()
+        if not pair or ":" not in pair:
+            continue
+        tid, _, tok = pair.partition(":")
+        tid, tok = tid.strip(), tok.strip()
+        if tid and tok and len(tid) <= 64 and len(tok) <= 256:
+            tenants[tid] = tok
+    return tenants
 
 def hash_api_token(token: str) -> str:
     """SHA-256 hex digest of an API token (for logging/comparison)."""
@@ -158,6 +190,44 @@ def ensure_api_token(config_obj: "PatchPilotConfig") -> str:
     generated = secrets.token_urlsafe(32)
     config_obj.api_token = generated
     return generated
+
+
+def resolve_tenant(provided: str, config_obj: "PatchPilotConfig") -> Optional[str]:
+    """Map a bearer token to its tenant id (constant-time). None if invalid."""
+    tenants = parse_api_tokens(config_obj.api_tokens)
+    if tenants:
+        for tid, tok in tenants.items():
+            if hmac.compare_digest(provided.encode("utf-8"), tok.encode("utf-8")):
+                return tid
+        return None
+    # Back-compat single-token mode: one implicit tenant "default".
+    if config_obj.api_token and hmac.compare_digest(
+        provided.encode("utf-8"), config_obj.api_token.encode("utf-8")
+    ):
+        return "default"
+    return None
+
+
+class SlidingWindowRateLimiter:
+    """Thread-safe per-key sliding-window limiter (in-memory)."""
+
+    def __init__(self, max_requests: int, window_seconds: int = 60):
+        self.max_requests = max(1, max_requests)
+        self.window = max(1, window_seconds)
+        self._lock = threading.Lock()
+        self._hits: Dict[str, List[float]] = {}
+
+    def allow(self, key: str, now: Optional[float] = None) -> bool:
+        now = time.time() if now is None else now
+        cutoff = now - self.window
+        with self._lock:
+            hits = [t for t in self._hits.get(key, []) if t > cutoff]
+            if len(hits) >= self.max_requests:
+                self._hits[key] = hits
+                return False
+            hits.append(now)
+            self._hits[key] = hits
+            return True
 
 
 # Global default configuration instance

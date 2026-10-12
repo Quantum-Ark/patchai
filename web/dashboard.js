@@ -274,6 +274,11 @@
       
       const select = document.getElementById('wiz-repo-select');
       const grid = document.getElementById('repos-card-grid');
+      const countBadge = document.getElementById('repos-count-badge');
+
+      if (countBadge) {
+        countBadge.textContent = `${repos.length} Repositories`;
+      }
 
       if (select && repos.length) {
         select.innerHTML = repos.map(r => `
@@ -283,29 +288,60 @@
 
       if (grid && repos.length) {
         grid.innerHTML = repos.map(r => `
-          <div class="repo-card-box">
+          <div class="repo-card-box" data-name="${escapeHtml(r.full_name.toLowerCase())}">
             <div class="repo-card-head">
-              <strong class="repo-card-title">${escapeHtml(r.full_name)}</strong>
+              <div class="repo-title-group">
+                <div class="repo-gh-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                </div>
+                <strong class="repo-card-title">${escapeHtml(r.full_name)}</strong>
+              </div>
               <span class="badge badge-verified">Connected</span>
             </div>
-            <p class="repo-card-desc">${escapeHtml(r.description || 'Autonomous software repair agent with empirical proof.')}</p>
+            <p class="repo-card-desc">${escapeHtml(r.description || 'Autonomous software repair agent with empirical proof and regression shields.')}</p>
             <div class="repo-card-footer">
-              <span>🌿 ${escapeHtml(r.default_branch)}</span>
-              <button type="button" class="btn-sm-action btn-open-repo-scan" data-repo="${escapeHtml(r.full_name)}">Scan for Bugs</button>
+              <span class="repo-branch-pill">🌿 ${escapeHtml(r.default_branch || 'main')}</span>
+              <button type="button" class="btn-sm-action btn-open-repo-scan" data-repo="${escapeHtml(r.full_name)}">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span>Scan for Bugs</span>
+              </button>
             </div>
           </div>
         `).join('');
 
         grid.querySelectorAll('.btn-open-repo-scan').forEach(btn => {
           btn.addEventListener('click', () => {
+            const rName = btn.getAttribute('data-repo') || 'Quantum-Ark/patchai';
+            const scanInput = document.getElementById('scanner-repo-input');
+            if (scanInput) scanInput.value = rName;
             switchView('scanner');
             runWorkspaceScan();
           });
         });
       }
 
+      // Setup Live Search Filter on Repositories
+      const filterInput = document.getElementById('repo-filter-input');
+      if (filterInput && !filterInput.dataset.bound) {
+        filterInput.dataset.bound = 'true';
+        filterInput.addEventListener('input', (e) => {
+          const q = e.target.value.toLowerCase().trim();
+          const cards = document.querySelectorAll('.repo-card-box');
+          let matched = 0;
+          cards.forEach(c => {
+            const name = c.getAttribute('data-name') || '';
+            const isMatch = name.includes(q);
+            c.style.display = isMatch ? 'flex' : 'none';
+            if (isMatch) matched++;
+          });
+          if (countBadge) {
+            countBadge.textContent = `${matched} of ${cards.length} Repositories`;
+          }
+        });
+      }
+
     } catch (err) {
-      console.warn('Repos load error');
+      console.warn('Repos load error', err);
     }
   }
 
@@ -344,6 +380,14 @@
           if (dInput) dInput.value = conf.desc;
           if (cInput) cInput.value = conf.cmd;
         }
+      });
+    });
+
+    // Wizard Step Nav Clickers
+    document.querySelectorAll('.wiz-step').forEach(s => {
+      s.addEventListener('click', () => {
+        document.querySelectorAll('.wiz-step').forEach(x => x.classList.remove('active'));
+        s.classList.add('active');
       });
     });
   }
@@ -386,19 +430,20 @@
           return `
             <tr>
               <td><span class="badge ${sevClass}">${iss.severity}</span></td>
-              <td>${escapeHtml(iss.category)}</td>
+              <td><strong>${escapeHtml(iss.category)}</strong></td>
               <td><code>${escapeHtml(iss.file)}:${iss.line}</code></td>
               <td>
-                <strong>${escapeHtml(iss.title)}</strong>
-                <p style="font-size:12px;color:#4B5563;margin-top:2px;">${escapeHtml(iss.description)}</p>
+                <strong style="color:var(--text-primary);display:block;margin-bottom:2px;">${escapeHtml(iss.title)}</strong>
+                <p style="font-size:12px;color:var(--text-secondary);margin:0;line-height:1.4;">${escapeHtml(iss.description)}</p>
               </td>
               <td><code>${escapeHtml(iss.snippet || '')}</code></td>
-              <td>
-                <button type="button" class="btn-sm-action btn-scan-fix-row" 
+              <td style="text-align: right;">
+                <button type="button" class="btn-action-fix btn-scan-fix-row" 
                         data-benchmark="${iss.benchmark_id || 'case_1'}"
                         data-title="${escapeHtml(iss.title)}"
                         data-file="${escapeHtml(iss.file)}">
-                  ⚡ Fix with AI
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  <span>Fix with AI</span>
                 </button>
               </td>
             </tr>

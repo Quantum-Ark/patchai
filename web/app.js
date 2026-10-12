@@ -1171,7 +1171,7 @@ function initDeveloperDashboard() {
   // 2. Auth State Management
   async function checkAuth() {
     try {
-      const res = await fetch('/api/github/auth');
+      const res = await fetch('/api/github/auth', { headers: authHeaders() });
       const data = await res.json();
       const banner = document.getElementById('dash-banner-auth');
       const avatar = document.getElementById('dash-user-avatar');
@@ -1254,7 +1254,7 @@ function initDeveloperDashboard() {
   // 3. Load Dashboard Stats from Real SQLite Store
   async function loadDashboardStats() {
     try {
-      const res = await fetch('/api/dashboard/stats');
+      const res = await fetch('/api/dashboard/stats', { headers: authHeaders() });
       if (!res.ok) return;
       const stats = await res.json();
 
@@ -1280,8 +1280,8 @@ function initDeveloperDashboard() {
   async function loadRecentActivity() {
     try {
       const [runsRes, prsRes] = await Promise.all([
-        fetch('/api/runs?limit=5'),
-        fetch('/api/prs?limit=5')
+        fetch('/api/runs?limit=5', { headers: authHeaders() }),
+        fetch('/api/prs?limit=5', { headers: authHeaders() })
       ]);
 
       const runsData = await runsRes.json();
@@ -1383,7 +1383,7 @@ function initDeveloperDashboard() {
 
     try {
       const url = query ? `/api/github/repos?q=${encodeURIComponent(query)}` : '/api/github/repos';
-      const res = await fetch(url);
+      const res = await fetch(url, { headers: authHeaders() });
       const data = await res.json();
       const repos = data.repositories || [];
 
@@ -1466,7 +1466,7 @@ function initDeveloperDashboard() {
     panel.scrollIntoView({ behavior: 'smooth' });
 
     try {
-      const res = await fetch(`/api/github/repos/${owner}/${repo}/issues`);
+      const res = await fetch(`/api/github/repos/${owner}/${repo}/issues`, { headers: authHeaders() });
       const data = await res.json();
       const issues = data.issues || [];
 
@@ -1732,7 +1732,7 @@ function initDeveloperDashboard() {
 
   async function pollRunEvents(runId) {
     try {
-      const res = await fetch(`/api/runs/${runId}/events?after=${lastEventId}`);
+      const res = await fetch(`/api/runs/${runId}/events?after=${lastEventId}`, { headers: authHeaders() });
       if (!res.ok) return;
       const data = await res.json();
       const events = data.events || [];
@@ -1776,7 +1776,7 @@ function initDeveloperDashboard() {
   // 8. Inspect Run Details & Populate Evidence Diff + PR Station
   async function inspectRun(runId, doSwitchTab = true) {
     try {
-      const res = await fetch(`/api/runs/${runId}`);
+      const res = await fetch(`/api/runs/${runId}`, { headers: authHeaders() });
       if (!res.ok) return;
       const run = await res.json();
       currentRunData = run;
@@ -1988,7 +1988,7 @@ function initDeveloperDashboard() {
       if (q) url += `&q=${encodeURIComponent(q)}`;
       if (status) url += `&status=${encodeURIComponent(status)}`;
 
-      const res = await fetch(url);
+      const res = await fetch(url, { headers: authHeaders() });
       const data = await res.json();
       const runs = data.runs || [];
 
@@ -2045,7 +2045,7 @@ function initDeveloperDashboard() {
   // 12. Load Settings & Integrations
   async function loadSettings() {
     try {
-      const res = await fetch('/api/settings');
+      const res = await fetch('/api/settings', { headers: authHeaders() });
       if (!res.ok) return;
       const data = await res.json();
 

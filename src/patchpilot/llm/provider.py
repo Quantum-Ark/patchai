@@ -152,9 +152,9 @@ class GroqProvider(BaseLLMProvider):
         self.api_key = api_key or os.getenv("GROQ_API_KEY", "")
         self.model_name = model or os.getenv("GROQ_MODEL") or "llama-3.3-70b-versatile"
 
-        if not self.api_key or self.api_key in ("your_groq_api_key_here", "<your-key>"):
+        if not self.api_key or self.api_key in ("your_groq_api_key_here", "<your-key>", "gsk_test_placeholder_replace_with_real_key"):
             raise ValueError(
-                "GROQ_API_KEY is not configured. Please configure GROQ_API_KEY in your local .env file."
+                "GROQ_API_KEY is not configured or contains placeholder. Please configure GROQ_API_KEY in your local .env file."
             )
 
     def generate(self, prompt: str, system_prompt: str = "") -> str:

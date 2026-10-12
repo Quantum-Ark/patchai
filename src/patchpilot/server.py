@@ -14,7 +14,7 @@ import tempfile
 import urllib.parse
 from pathlib import Path
 from http.server import HTTPServer, ThreadingHTTPServer, SimpleHTTPRequestHandler
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 
 # Ensure src directory is in sys.path
 _src_dir = Path(__file__).resolve().parent.parent

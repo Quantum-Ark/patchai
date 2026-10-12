@@ -737,18 +737,50 @@
           </div>
 
           <div class="repair-wizard-container">
+            <!-- Sleek Horizontal Wizard Stepper -->
             <div class="wizard-steps-nav">
-              <div class="wiz-step active" data-step="1"><span>1</span> Target Repo</div>
-              <div class="wiz-step" data-step="2"><span>2</span> Issue Details</div>
-              <div class="wiz-step" data-step="3"><span>3</span> Test Command</div>
-              <div class="wiz-step" data-step="4"><span>4</span> Safety &amp; Constraints</div>
+              <div class="wiz-step active" data-step="1">
+                <span class="wiz-step-num">1</span>
+                <div class="wiz-step-text">
+                  <strong>Target Repo</strong>
+                  <small>Repository &amp; Branch</small>
+                </div>
+              </div>
+              <div class="wiz-step-divider"></div>
+              <div class="wiz-step" data-step="2">
+                <span class="wiz-step-num">2</span>
+                <div class="wiz-step-text">
+                  <strong>Issue Details</strong>
+                  <small>Bug Description</small>
+                </div>
+              </div>
+              <div class="wiz-step-divider"></div>
+              <div class="wiz-step" data-step="3">
+                <span class="wiz-step-num">3</span>
+                <div class="wiz-step-text">
+                  <strong>Test Command</strong>
+                  <small>Reproduction Suite</small>
+                </div>
+              </div>
+              <div class="wiz-step-divider"></div>
+              <div class="wiz-step" data-step="4">
+                <span class="wiz-step-num">4</span>
+                <div class="wiz-step-text">
+                  <strong>Safety Shield</strong>
+                  <small>Rollback &amp; Security</small>
+                </div>
+              </div>
             </div>
 
-            <div class="wizard-step-content" id="wiz-step-content">
+            <!-- Wizard Card Container -->
+            <div class="panel-card wizard-panel-card" id="wiz-step-content">
               
-              <!-- Quick Benchmark Presets -->
+              <!-- Quick Benchmark Presets Banner -->
               <div class="presets-banner">
-                <span class="presets-title">&#x26A1; Quick Evaluation Presets:</span>
+                <div class="presets-header-line">
+                  <span class="presets-title">&#x26A1; Quick Evaluation Presets:</span>
+                  <span class="presets-subtitle">Instant 1-click test configurations for hackathon evaluation</span>
+                </div>
                 <div class="presets-group">
                   <button type="button" class="preset-pill active" data-preset="case_1">Case 1: ZeroDivision (calc.py)</button>
                   <button type="button" class="preset-pill" data-preset="case_2">Case 2: Boundary Bug (parser.py)</button>
@@ -756,17 +788,22 @@
                 </div>
               </div>
 
+              <!-- Step 1 & 2 Inputs -->
               <div class="form-grid-2">
                 <div class="form-group">
                   <label class="form-label" for="wiz-repo-select">Target Repository</label>
-                  <select id="wiz-repo-select" class="form-control">
-                    <option value="Quantum-Ark/patchai">Quantum-Ark/patchai (main)</option>
-                  </select>
+                  <div class="select-wrapper">
+                    <select id="wiz-repo-select" class="form-control">
+                      <option value="Quantum-Ark/patchai">Quantum-Ark/patchai (main)</option>
+                    </select>
+                  </div>
+                  <span class="field-hint">Authorized GitHub repository with write permissions</span>
                 </div>
 
                 <div class="form-group">
                   <label class="form-label" for="wiz-branch-input">Target Branch</label>
                   <input type="text" id="wiz-branch-input" class="form-control" value="main">
+                  <span class="field-hint">Base branch for reproduction and pull request baseline</span>
                 </div>
               </div>
 
@@ -774,25 +811,51 @@
                 <label class="form-label" for="wiz-issue-url">GitHub Issue URL or Issue #</label>
                 <div class="input-btn-combo">
                   <input type="text" id="wiz-issue-url" class="form-control" placeholder="https://github.com/Quantum-Ark/patchai/issues/1">
-                  <button type="button" class="btn btn-outline-action" id="btn-fetch-wiz-issue">Fetch Issue</button>
+                  <button type="button" class="btn btn-outline-action" id="btn-fetch-wiz-issue">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Fetch Issue
+                  </button>
                 </div>
               </div>
 
               <div class="form-group">
                 <label class="form-label" for="wiz-issue-title">Issue Title &amp; Description</label>
                 <input type="text" id="wiz-issue-title" class="form-control" value="ZeroDivisionError in calculate_ratio when denominator is zero">
-                <textarea id="wiz-issue-desc" class="form-control" rows="3" style="margin-top:8px;">When calculate_ratio is invoked with y=0, it raises unhandled ZeroDivisionError instead of ValueError('Division by zero').</textarea>
+                <textarea id="wiz-issue-desc" class="form-control" rows="3" style="margin-top:10px;">When calculate_ratio is invoked with y=0, it raises unhandled ZeroDivisionError instead of ValueError('Division by zero').</textarea>
               </div>
 
               <div class="form-group">
                 <label class="form-label" for="wiz-test-cmd">Reproduction Test Command</label>
-                <input type="text" id="wiz-test-cmd" class="form-control" value="pytest tests/test_calc.py -v">
-                <span class="field-hint">Command executed in isolated subprocess with secret scrub &amp; timeout guard.</span>
+                <div class="code-input-wrap">
+                  <span class="code-prefix">$</span>
+                  <input type="text" id="wiz-test-cmd" class="form-control form-control-mono" value="pytest tests/test_calc.py -v">
+                </div>
+                <span class="field-hint">Executed in an isolated sandbox subprocess with timeout and secret scrubbing shields.</span>
+              </div>
+
+              <!-- Safety Guards Grid -->
+              <div class="safety-guards-grid">
+                <div class="safety-guard-card">
+                  <div class="safety-guard-info">
+                    <strong>Regression Shield</strong>
+                    <span>Automatically rolls back candidate patches if regression tests fail</span>
+                  </div>
+                  <span class="badge badge-verified">&#x2713; Enabled</span>
+                </div>
+
+                <div class="safety-guard-card">
+                  <div class="safety-guard-info">
+                    <strong>Secret Scrubbing</strong>
+                    <span>Scrubs API keys, passwords, and tokens from all logs and telemetry</span>
+                  </div>
+                  <span class="badge badge-verified">&#x2713; Enabled</span>
+                </div>
               </div>
 
               <div class="wizard-actions-row">
                 <button type="button" class="btn btn-dark-action btn-lg" id="btn-dispatch-repair">
-                  <span>&#x1F680; Dispatch Autonomous Repair</span>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  <span>Dispatch Autonomous Repair</span>
                 </button>
               </div>
 
@@ -810,20 +873,42 @@
           </div>
 
           <div class="repos-toolbar">
-            <input type="text" id="repo-filter-input" class="form-control" placeholder="Search repositories...">
-            <button type="button" class="btn btn-dark-action" id="btn-refresh-all-repos">&#x21bb; Sync with GitHub</button>
+            <div class="repos-search-wrap">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" id="repo-filter-input" class="form-control" placeholder="Search repositories by name...">
+            </div>
+            <div class="repos-actions-wrap">
+              <span class="repos-count-badge" id="repos-count-badge">6 Repositories</span>
+              <button type="button" class="btn btn-dark-action" id="btn-refresh-all-repos">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <polyline points="1 20 1 14 7 14"/>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                <span>Sync with GitHub</span>
+              </button>
+            </div>
           </div>
 
           <div class="repos-card-grid" id="repos-card-grid">
             <div class="repo-card-box">
               <div class="repo-card-head">
-                <strong class="repo-card-title">Quantum-Ark/patchai</strong>
+                <strong class="repo-card-title">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                  <span>Quantum-Ark/patchai</span>
+                </strong>
                 <span class="badge badge-verified">Connected</span>
               </div>
               <p class="repo-card-desc">Autonomous software repair agent with empirical proof and regression shields.</p>
               <div class="repo-card-footer">
-                <span>🌿 main</span>
-                <button type="button" class="btn-sm-action btn-open-repo-scan">Scan for Bugs</button>
+                <span class="repo-branch-pill">🌿 main</span>
+                <button type="button" class="btn-sm-action btn-open-repo-scan" data-repo="Quantum-Ark/patchai">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <span>Scan for Bugs</span>
+                </button>
               </div>
             </div>
           </div>
